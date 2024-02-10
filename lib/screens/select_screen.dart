@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:audiovision/screens/map_screen.dart';
+import 'package:audiovision/services/location_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_place/google_place.dart';
 
 class SelectScreen extends StatefulWidget {
@@ -25,6 +27,10 @@ class _SelectScreenState extends State<SelectScreen> {
   late GooglePlace googlePlace;
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
+  static double latitude = 0;
+  static double longtitude = 0;
+
+  static LocationService locationService = LocationService();
 
   @override
   void initState() {
@@ -36,7 +42,23 @@ class _SelectScreenState extends State<SelectScreen> {
     startFocusNode = FocusNode();
     endFocusNode = FocusNode();
 
-    _getCurrentLocation();
+    locationService.locationStream.listen((userLocation) {
+      setState(() {
+        latitude = userLocation.latitude;
+        longtitude = userLocation.longtitude;
+        startPosition = DetailsResult(
+          // Assign latitude and longitude values
+          geometry: Geometry(
+            location: Location(
+              lat: userLocation.latitude,
+              lng: userLocation.longtitude,
+            ),
+          ),
+        );
+      });
+    });
+
+    // _getCurrentLocation();
   }
 
   @override
@@ -45,6 +67,8 @@ class _SelectScreenState extends State<SelectScreen> {
     super.dispose();
     startFocusNode.dispose();
     endFocusNode.dispose();
+
+    locationService.dispose();
   }
 
   void _getCurrentLocation() async {
@@ -53,7 +77,7 @@ class _SelectScreenState extends State<SelectScreen> {
     if (mounted) {
       setState(() {
         _startSearchFieldController.text =
-        '(${position.latitude}, ${position.longitude})';
+            '(${position.latitude}, ${position.longitude})';
       });
     }
   }
@@ -88,66 +112,70 @@ class _SelectScreenState extends State<SelectScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              TextField(
-                controller: _startSearchFieldController,
-                autofocus: false,
-                focusNode: startFocusNode,
-                style: const TextStyle(fontSize: 24),
-                decoration: InputDecoration(
-                    hintText: "Starting point",
-                    hintStyle:
-                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: const BorderSide(
-                        width: 0,
-                        style: BorderStyle.none,
-                      ),
-                    ),
-                    isDense: true, // Added this
-                    contentPadding: const EdgeInsets.all(15),
-                    suffixIcon: _startSearchFieldController.text.isNotEmpty
-                        ? IconButton(
-                      onPressed: () {
-                        setState(() {
-                          predictions = [];
-                          _startSearchFieldController.clear();
-                        });
-                      },
-                      icon: const Icon(Icons.clear_outlined),
-                    )
-                        : null),
-                onChanged: (value) {
-                  if (_debounce?.isActive ?? false) _debounce!.cancel();
-                  _debounce = Timer(const Duration(milliseconds: 1000), () {
-                    if (value.isNotEmpty) {
-                      //places api
-                      autoCompleteSearch(value);
-                    } else {
-                      //clear out the results
-                      setState(() {
-                        predictions = [];
-                        startPosition = null;
-                      });
-                    }
-                  });
-                },
-              ),
+              // TextField(
+              //   controller: _startSearchFieldController,
+              //   autofocus: false,
+              //   focusNode: startFocusNode,
+              //   style: const TextStyle(fontSize: 24),
+              //   decoration: InputDecoration(
+              //     hintText: "Starting point",
+              //     hintStyle: const TextStyle(
+              //         fontWeight: FontWeight.w500, fontSize: 24),
+              //     filled: true,
+              //     fillColor: Colors.grey[200],
+              //     border: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(40),
+              //       borderSide: const BorderSide(
+              //         width: 0,
+              //         style: BorderStyle.none,
+              //       ),
+              //     ),
+              //     isDense: true, // Added this
+              //     contentPadding: const EdgeInsets.all(15),
+              //     suffixIcon: _startSearchFieldController.text.isNotEmpty
+              //         ? IconButton(
+              //             onPressed: () {
+              //               setState(() {
+              //                 predictions = [];
+              //                 _startSearchFieldController.clear();
+              //               });
+              //             },
+              //             icon: const Icon(Icons.clear_outlined),
+              //           )
+              //         : null,
+              //   ),
+              //   onChanged: (value) {
+              //     if (_debounce?.isActive ?? false) _debounce!.cancel();
+              //     _debounce = Timer(const Duration(milliseconds: 1000), () {
+              //       if (value.isNotEmpty) {
+              //         //places api
+              //         autoCompleteSearch(value);
+              //       } else {
+              //         //clear out the results
+              //         setState(() {
+              //           predictions = [];
+              //           startPosition = null;
+              //         });
+              //       }
+              //     });
+              //   },
+              // ),
+              Text("YOUR CURRENT LOCATION "),
+              Text("latitude $latitude"),
+              Text("long $longtitude"),
               const SizedBox(
-                height: 15,
+                height: 55,
               ),
               TextField(
                 controller: _endSearchFieldController,
                 autofocus: false,
                 focusNode: endFocusNode,
-                enabled: _startSearchFieldController.text.isNotEmpty,
+                // enabled: _startSearchFieldController.text.isNotEmpty,
                 style: const TextStyle(fontSize: 24),
                 decoration: InputDecoration(
                     hintText: "End point",
-                    hintStyle:
-                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
+                    hintStyle: const TextStyle(
+                        fontWeight: FontWeight.w500, fontSize: 24),
                     filled: true,
                     fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
@@ -161,14 +189,14 @@ class _SelectScreenState extends State<SelectScreen> {
                     contentPadding: const EdgeInsets.all(15),
                     suffixIcon: _endSearchFieldController.text.isNotEmpty
                         ? IconButton(
-                      onPressed: () {
-                        setState(() {
-                          predictions = [];
-                          _endSearchFieldController.clear();
-                        });
-                      },
-                      icon: const Icon(Icons.clear_outlined),
-                    )
+                            onPressed: () {
+                              setState(() {
+                                predictions = [];
+                                _endSearchFieldController.clear();
+                              });
+                            },
+                            icon: const Icon(Icons.clear_outlined),
+                          )
                         : null),
                 onChanged: (value) {
                   if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -244,14 +272,14 @@ class _SelectScreenState extends State<SelectScreen> {
                             setState(() {
                               startPosition = details.result;
                               _startSearchFieldController.text =
-                              details.result!.name!;
+                                  details.result!.name!;
                               predictions = [];
                             });
                           } else {
                             setState(() {
                               endPosition = details.result;
                               _endSearchFieldController.text =
-                              details.result!.name!;
+                                  details.result!.name!;
                               predictions = [];
                             });
                           }
@@ -275,10 +303,8 @@ class _SelectScreenState extends State<SelectScreen> {
                           }
                         }
                       },
-
-
                     );
-                  })
+                  }),
             ],
           ),
         ),

@@ -6,7 +6,6 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:vibration/vibration.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
