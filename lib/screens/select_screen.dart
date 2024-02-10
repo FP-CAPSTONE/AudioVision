@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:audiovision/screens/map_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_place/google_place.dart';
 
 class SelectScreen extends StatefulWidget {
@@ -31,7 +30,7 @@ class _SelectScreenState extends State<SelectScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    String apiKey = 'AIzaSyAybdbxkw5RNXO9Yg0O7FWFe31M8MwFllM';
+    String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
     googlePlace = GooglePlace(apiKey);
 
     startFocusNode = FocusNode();

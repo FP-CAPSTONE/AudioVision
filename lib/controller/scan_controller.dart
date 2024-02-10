@@ -3,6 +3,7 @@ import 'package:flutter_vision/flutter_vision.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:vibration/vibration.dart';
 
 class ScanController extends GetxController {
@@ -10,6 +11,7 @@ class ScanController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
+    _checkDeviceOrientation();
     initCamera();
     initTFLite();
   }
@@ -53,6 +55,13 @@ class ScanController extends GetxController {
     await flutterTts.setPitch(1);
     await flutterTts.setSpeechRate(0.5);
     await flutterTts.speak(text);
+  }
+
+  void _checkDeviceOrientation() {
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      // Check accelerometer data to determine orientation
+      print(event);
+    });
   }
 
   initCamera() async {

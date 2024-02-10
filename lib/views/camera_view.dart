@@ -1,5 +1,5 @@
 import 'package:audiovision/controller/scan_controller.dart';
-import 'package:audiovision/views/object_detected.dart';
+import 'package:audiovision/widget/object_detected.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
