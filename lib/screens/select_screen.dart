@@ -36,7 +36,8 @@ class _SelectScreenState extends State<SelectScreen> {
 
     startFocusNode = FocusNode();
     endFocusNode = FocusNode();
-    //_getCurrentLocation();
+
+    _getCurrentLocation();
   }
 
   @override
@@ -47,30 +48,16 @@ class _SelectScreenState extends State<SelectScreen> {
     endFocusNode.dispose();
   }
 
-  // Future<void> _getCurrentLocation() async {
-  //   try {
-  //     Position position = await Geolocator.getCurrentPosition(
-  //       desiredAccuracy: LocationAccuracy.high,
-  //     );
-  //     List<Placemark> placemarks = await placemarkFromCoordinates(
-  //       position.latitude,
-  //       position.longitude,
-  //     );
-  //     if (placemarks.isNotEmpty) {
-  //       String currentAddress = "${placemarks.first.name ?? ''}, "
-  //           "${placemarks.first.locality ?? ''}, "
-  //           "${placemarks.first.administrativeArea ?? ''}";
-
-  //       setState(() {
-  //         _startSearchFieldController.text = currentAddress;
-  //       });
-  //     } else {
-  //       // Handle the case where placemarks list is empty
-  //     }
-  //   } catch (e) {
-  //     // Handle location permissions denied or other exceptions
-  //   }
-  // }
+  void _getCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    if (mounted) {
+      setState(() {
+        _startSearchFieldController.text =
+        '(${position.latitude}, ${position.longitude})';
+      });
+    }
+  }
 
   void autoCompleteSearch(String value) async {
     var result = await googlePlace.autocomplete.get(value);
@@ -87,7 +74,7 @@ class _SelectScreenState extends State<SelectScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("Audio Vision"),
@@ -106,32 +93,32 @@ class _SelectScreenState extends State<SelectScreen> {
                 controller: _startSearchFieldController,
                 autofocus: false,
                 focusNode: startFocusNode,
-                style: TextStyle(fontSize: 24),
+                style: const TextStyle(fontSize: 24),
                 decoration: InputDecoration(
                     hintText: "Starting point",
                     hintStyle:
-                        TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
+                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
                     filled: true,
                     fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         width: 0,
                         style: BorderStyle.none,
                       ),
                     ),
                     isDense: true, // Added this
-                    contentPadding: EdgeInsets.all(15),
+                    contentPadding: const EdgeInsets.all(15),
                     suffixIcon: _startSearchFieldController.text.isNotEmpty
                         ? IconButton(
-                            onPressed: () {
-                              setState(() {
-                                predictions = [];
-                                _startSearchFieldController.clear();
-                              });
-                            },
-                            icon: Icon(Icons.clear_outlined),
-                          )
+                      onPressed: () {
+                        setState(() {
+                          predictions = [];
+                          _startSearchFieldController.clear();
+                        });
+                      },
+                      icon: const Icon(Icons.clear_outlined),
+                    )
                         : null),
                 onChanged: (value) {
                   if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -149,41 +136,40 @@ class _SelectScreenState extends State<SelectScreen> {
                   });
                 },
               ),
-              SizedBox(
+              const SizedBox(
                 height: 15,
               ),
               TextField(
                 controller: _endSearchFieldController,
                 autofocus: false,
                 focusNode: endFocusNode,
-                enabled: _startSearchFieldController.text.isNotEmpty &&
-                    startPosition != null,
-                style: TextStyle(fontSize: 24),
+                enabled: _startSearchFieldController.text.isNotEmpty,
+                style: const TextStyle(fontSize: 24),
                 decoration: InputDecoration(
                     hintText: "End point",
                     hintStyle:
-                        TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
+                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
                     filled: true,
                     fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         width: 0,
                         style: BorderStyle.none,
                       ),
                     ),
                     isDense: true, // Added this
-                    contentPadding: EdgeInsets.all(15),
+                    contentPadding: const EdgeInsets.all(15),
                     suffixIcon: _endSearchFieldController.text.isNotEmpty
                         ? IconButton(
-                            onPressed: () {
-                              setState(() {
-                                predictions = [];
-                                _endSearchFieldController.clear();
-                              });
-                            },
-                            icon: Icon(Icons.clear_outlined),
-                          )
+                      onPressed: () {
+                        setState(() {
+                          predictions = [];
+                          _endSearchFieldController.clear();
+                        });
+                      },
+                      icon: const Icon(Icons.clear_outlined),
+                    )
                         : null),
                 onChanged: (value) {
                   if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -206,7 +192,7 @@ class _SelectScreenState extends State<SelectScreen> {
                   itemCount: predictions.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      leading: CircleAvatar(
+                      leading: const CircleAvatar(
                         child: Icon(
                           Icons.pin_drop,
                           color: Colors.white,
@@ -215,6 +201,40 @@ class _SelectScreenState extends State<SelectScreen> {
                       title: Text(
                         predictions[index].description.toString(),
                       ),
+                      // onTap: () async {
+                      //   final placeId = predictions[index].placeId!;
+                      //   final details = await googlePlace.details.get(placeId);
+                      //   if (details != null &&
+                      //       details.result != null &&
+                      //       mounted) {
+                      //     if (startFocusNode.hasFocus) {
+                      //       setState(() {
+                      //         startPosition = details.result;
+                      //         _startSearchFieldController.text =
+                      //             details.result!.name!;
+                      //         predictions = [];
+                      //       });
+                      //     } else {
+                      //       setState(() {
+                      //         endPosition = details.result;
+                      //         _endSearchFieldController.text =
+                      //             details.result!.name!;
+                      //         predictions = [];
+                      //       });
+                      //     }
+                      //     if (startPosition != null && endPosition != null) {
+                      //       print("Navigate");
+                      //       Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //           builder: (context) => MapScreen(
+                      //               startPosition: startPosition,
+                      //               endPosition: endPosition),
+                      //         ),
+                      //       );
+                      //     }
+                      //   }
+                      // },
                       onTap: () async {
                         final placeId = predictions[index].placeId!;
                         final details = await googlePlace.details.get(placeId);
@@ -225,17 +245,22 @@ class _SelectScreenState extends State<SelectScreen> {
                             setState(() {
                               startPosition = details.result;
                               _startSearchFieldController.text =
-                                  details.result!.name!;
+                              details.result!.name!;
                               predictions = [];
                             });
                           } else {
                             setState(() {
                               endPosition = details.result;
                               _endSearchFieldController.text =
-                                  details.result!.name!;
+                              details.result!.name!;
                               predictions = [];
                             });
                           }
+
+                          print("Start Position: $startPosition");
+                          print("End Position: $endPosition");
+
+                          // Check if both start and end positions are set
                           if (startPosition != null && endPosition != null) {
                             print("Navigate");
                             Navigator.push(
@@ -246,9 +271,13 @@ class _SelectScreenState extends State<SelectScreen> {
                                     endPosition: endPosition),
                               ),
                             );
+                          } else {
+                            print("Both positions are not set yet");
                           }
                         }
                       },
+
+
                     );
                   })
             ],
