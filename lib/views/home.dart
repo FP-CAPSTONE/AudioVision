@@ -1,3 +1,4 @@
+import 'package:audiovision/screens/select_screen.dart';
 import 'package:audiovision/views/camera_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -58,6 +59,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 _text,
                 style: TextStyle(fontSize: 16),
               ),
+              GestureDetector(
+                onTap: () {
+                  _isListening = false;
+                  _text = "";
+                  Vibration.vibrate();
+                  // speak("say something");
+                  Get.to(SelectScreen());
+                  _listen();
+                },
+                child: Icon(
+                  _isListening ? Icons.mic : Icons.mic_none,
+                  size: 50,
+                  color: _isListening ? Colors.red : Colors.blue,
+                ),
+              ),
             ],
           ),
         ),
@@ -83,6 +99,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Duration(seconds: 2)); // Adjust the duration as needed
 
               Get.to(CameraView());
+              _isListening = false;
+              _text = "";
+            } else if (_text.contains("map")) {
+              speak("navigate to CAMERA VIEW");
+              Future.delayed(
+                  Duration(seconds: 2)); // Adjust the duration as needed
+
+              Get.to(SelectScreen());
               _isListening = false;
               _text = "";
             }
