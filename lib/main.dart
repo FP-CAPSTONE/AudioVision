@@ -1,8 +1,11 @@
 import 'package:audiovision/views/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  // Load .env file
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
