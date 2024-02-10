@@ -27,7 +27,7 @@ class _SelectScreenState extends State<SelectScreen> {
   Timer? _debounce;
 
   @override
-  void initState() async {
+  void initState() {
     // TODO: implement initState
     super.initState();
     String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();

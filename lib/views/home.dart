@@ -40,6 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Text(
+                "Say:\n"
+                "\"Go to Camera View\",\n"
+                "\"Go to Map View\",\n"
+                "\"Go to Audio Guide\",\n"
+                "to navigate to another page",
+                style: TextStyle(fontSize: 16),
+              ),
               GestureDetector(
                 onTap: () {
                   _isListening = false;
@@ -60,26 +68,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 _text,
                 style: TextStyle(fontSize: 16),
               ),
-              GestureDetector(
-                onTap: () {
-                  _isListening = false;
-                  _text = "";
-                  Vibration.vibrate();
-                  // speak("say something");
-                  Get.to(SelectScreen());
-                  _listen();
-                },
-                child: Icon(
-                  _isListening ? Icons.mic : Icons.mic_none,
-                  size: 50,
-                  color: _isListening ? Colors.red : Colors.blue,
-                ),
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    Get.to(MyAudioGuide());
-                  },
-                  child: Container(child:Text('AudioGuide'),))
+              // ElevatedButton(
+              //   onPressed: () {
+              //     Get.to(MyAudioGuide());
+              //   },
+              //   child: Container(
+              //     child: Text('AudioGuide'),
+              //   ),
+              // )
             ],
           ),
         ),
@@ -101,18 +97,17 @@ class _HomeScreenState extends State<HomeScreen> {
             print(_text);
             if (_text.contains("camera view")) {
               speak("navigate to CAMERA VIEW");
-              Future.delayed(
-                  Duration(seconds: 2)); // Adjust the duration as needed
-
               Get.to(CameraView());
               _isListening = false;
               _text = "";
-            } else if (_text.contains("map")) {
-              speak("navigate to CAMERA VIEW");
-              Future.delayed(
-                  Duration(seconds: 2)); // Adjust the duration as needed
-
+            } else if (_text.contains("map view")) {
+              speak("navigate to MAP SCREEN");
               Get.to(SelectScreen());
+              _isListening = false;
+              _text = "";
+            } else if (_text.contains("guide")) {
+              speak("navigate to AUDIO GUIDE SCREEN");
+              Get.to(MyAudioGuide());
               _isListening = false;
               _text = "";
             }
