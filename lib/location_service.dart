@@ -7,8 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 
 class LocationService {
-  // maps config
-  final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
   final String region = 'ID';
   final String language = 'id';
   final String travelMode = 'walking';
@@ -16,7 +14,8 @@ class LocationService {
   // Text-to-Speech config
   final String ttsLanguage = 'id';
   FlutterTts flutterTts = FlutterTts();
-
+  // maps config
+  final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
   LocationService() {
     // Initialize FlutterTts with the specified language
     flutterTts.setLanguage(ttsLanguage);

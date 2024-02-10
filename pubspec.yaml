@@ -52,7 +52,7 @@ dependencies:
   flutter_config: ^2.0.2
   http: ^0.13.6
   convert: ^3.1.1
-  flutter_dotenv:
+  flutter_dotenv :
 
 dev_dependencies:
   flutter_test:
@@ -81,6 +81,7 @@ flutter:
     - assets/model/mylabels.txt
     - assets/model/mymodel_last_yv8s.tflite
     - assets/model/my_7yv8n.tflite
+    - .env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

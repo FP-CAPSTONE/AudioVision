@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:audiovision/screens/map_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_place/google_place.dart';
 
 class SelectScreen extends StatefulWidget {
@@ -29,7 +27,7 @@ class _SelectScreenState extends State<SelectScreen> {
   Timer? _debounce;
 
   @override
-  void initState() {
+  void initState() async {
     // TODO: implement initState
     super.initState();
     String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
@@ -88,7 +86,7 @@ class _SelectScreenState extends State<SelectScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("Audio Vision"),
