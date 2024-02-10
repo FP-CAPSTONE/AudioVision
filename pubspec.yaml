@@ -44,9 +44,15 @@ dependencies:
   permission_handler: ^11.2.0
   image: ^3.3.0
   flutter_vision:
-  flutter_tts: ^3.0.0
   vibration: ^1.8.4
   speech_to_text:
+  flutter_tts: ^3.8.5
+  html: ^0.15.4
+  location: ^5.0.3
+  flutter_config: ^2.0.2
+  http: ^0.13.6
+  convert: ^3.1.1
+  flutter_dotenv:
 
 dev_dependencies:
   flutter_test:

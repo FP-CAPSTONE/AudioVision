@@ -1,3 +1,4 @@
+import 'package:audiovision/mainAudio.dart';
 import 'package:audiovision/screens/select_screen.dart';
 import 'package:audiovision/views/camera_view.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +75,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: _isListening ? Colors.red : Colors.blue,
                 ),
               ),
+              ElevatedButton(
+                  onPressed: () {
+                    Get.to(MyAudioGuide());
+                  },
+                  child: Container(child:Text('AudioGuide'),))
             ],
           ),
         ),
