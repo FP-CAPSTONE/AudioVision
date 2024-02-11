@@ -41,29 +41,36 @@ class ScanController extends GetxController {
       // "polygons": List<Map<String, double>>: [{x:coordx, y:coordy}]
     }
   ];
+  var accelerometerEventX, accelerometerEventY, accelerometerEventZ = 0.0;
   var cameraCount = 0;
 
-  var x, y, w, h = 0.0;
-  var label = "";
+  // var x, y, w, h = 0.0;
+  // var label = "";
 
   var isCameraInitialized = false.obs;
 
   final FlutterTts flutterTts = FlutterTts();
 
+  // function text to speach
   Future<void> speak(String text) async {
-    await flutterTts.setLanguage("en-US");
+    // await flutterTts.setLanguage("en-US");
+    await flutterTts.setLanguage("id-ID"); // Set language to Indonesian
     await flutterTts.setPitch(1);
     await flutterTts.setSpeechRate(0.5);
     await flutterTts.speak(text);
   }
 
+  // Check accelerometer data to determine device orientation
   void _checkDeviceOrientation() {
     accelerometerEvents.listen((AccelerometerEvent event) {
-      // Check accelerometer data to determine orientation
       print(event);
+      accelerometerEventX = event.x;
+      accelerometerEventY = event.y;
+      accelerometerEventZ = event.z;
     });
   }
 
+  // camera init to sending each frame to the model (set 10fps)
   initCamera() async {
     if (await Permission.camera.request().isGranted) {
       cameras = await availableCameras();
@@ -73,9 +80,17 @@ class ScanController extends GetxController {
       await cameraController.initialize().then((value) {
         cameraController.startImageStream((image) {
           cameraCount++;
+          // run object detection each 10 fps
           if (cameraCount % 10 == 0) {
-            cameraCount = 0;
-            objectDetector(image);
+            if (accelerometerEventY > 0) {
+              cameraCount = 0;
+              objectDetector(image);
+            } else {
+              Vibration.vibrate();
+              cameraCount -= 1000;
+              speak("tolong kamera lu yang benar lah wooooy!");
+              print("tolong kamera lu yang benar lah wooooy!");
+            }
           }
           update();
         });
@@ -87,6 +102,7 @@ class ScanController extends GetxController {
     }
   }
 
+  // load the model
   initTFLite() async {
     print("LOAD THE MODEL !");
 
@@ -102,8 +118,9 @@ class ScanController extends GetxController {
     print("MODEL LOAD SUCCESSFULLY");
   }
 
+  // do the object detection each frame got from the camera
   objectDetector(CameraImage image) async {
-    // flutter vision
+    // using flutter vision
     var result = await vision.yoloOnFrame(
       bytesList: image.planes.map((plane) => plane.bytes).toList(),
       imageHeight: image.height,
@@ -113,7 +130,6 @@ class ScanController extends GetxController {
       classThreshold: 0.5,
     );
     if (result.isNotEmpty) {
-      var box = detectionResult[0]['box'];
       print("RESULTTTTTTTTTTTTTTTT:");
       print(result);
 
@@ -125,13 +141,14 @@ class ScanController extends GetxController {
       speak(detectionResult[0]['tag']);
       Vibration.vibrate();
 
-      label = detectionResult[0]['tag'];
-      x = box[0];
-      y = box[1];
-      w = box[2] - x;
-      h = box[3] - y;
-      update();
+      // var box = detectionResult[0]['box'];
+      // label = detectionResult[0]['tag'];
+      // x = box[0];
+      // y = box[1];
+      // w = box[2] - x;
+      // h = box[3] - y;
+      // update();
     }
-    update();
+    // update();
   }
 }

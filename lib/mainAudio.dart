@@ -96,7 +96,7 @@ class MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text('Maps Guide'),
       ),
@@ -168,7 +168,6 @@ class MapSampleState extends State<MapSample> {
     double lng,
     Map<String, dynamic> boundsNe,
     Map<String, dynamic> boundsSw,
-    
   ) async {
     final GoogleMapController controller = await _controller.future;
     await controller.animateCamera(
