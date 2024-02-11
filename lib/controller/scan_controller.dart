@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:get/get.dart';
@@ -7,6 +9,8 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:vibration/vibration.dart';
 
 class ScanController extends GetxController {
+  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
+  late CameraController cameraController;
   @override
   void onInit() {
     // TODO: implement onInit
@@ -17,7 +21,16 @@ class ScanController extends GetxController {
   }
 
   @override
+  void onClose() {
+    // Cancel the accelerometer subscription when the controller is closed
+    _accelerometerSubscription?.cancel();
+    isCameraInitialized(false);
+    Get.delete<CameraController>();
+  }
+
+  @override
   void dispose() {
+    // TODO : STOP CAMERA WHEN MOVING TO ANOTHER SCREEN
     // TODO: implement dispose
     super.dispose();
     cameraController.dispose();
@@ -25,7 +38,6 @@ class ScanController extends GetxController {
 
   FlutterVision vision = FlutterVision();
 
-  late CameraController cameraController;
   late List<CameraDescription> cameras;
   var detectedObject = "".obs;
   List<Map<String, dynamic>> detectionResult = [
@@ -62,7 +74,9 @@ class ScanController extends GetxController {
 
   // Check accelerometer data to determine device orientation
   void _checkDeviceOrientation() {
-    accelerometerEvents.listen((AccelerometerEvent event) {
+    // Store the subscription returned by accelerometerEvents.listen()
+    _accelerometerSubscription =
+        accelerometerEvents.listen((AccelerometerEvent event) {
       print(event);
       accelerometerEventX = event.x;
       accelerometerEventY = event.y;

@@ -28,7 +28,7 @@ class _SelectScreenState extends State<SelectScreen> {
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
   static double latitude = 0;
-  static double longtitude = 0;
+  static double longitude = 0;
 
   static LocationService locationService = LocationService();
 
@@ -45,20 +45,18 @@ class _SelectScreenState extends State<SelectScreen> {
     locationService.locationStream.listen((userLocation) {
       setState(() {
         latitude = userLocation.latitude;
-        longtitude = userLocation.longtitude;
+        longitude = userLocation.longitude;
         startPosition = DetailsResult(
           // Assign latitude and longitude values
           geometry: Geometry(
             location: Location(
               lat: userLocation.latitude,
-              lng: userLocation.longtitude,
+              lng: userLocation.longitude,
             ),
           ),
         );
       });
     });
-
-    // _getCurrentLocation();
   }
 
   @override
@@ -162,7 +160,7 @@ class _SelectScreenState extends State<SelectScreen> {
               // ),
               Text("YOUR CURRENT LOCATION "),
               Text("latitude $latitude"),
-              Text("long $longtitude"),
+              Text("long $longitude"),
               const SizedBox(
                 height: 55,
               ),

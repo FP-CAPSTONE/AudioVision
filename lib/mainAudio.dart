@@ -4,6 +4,7 @@ import 'package:audiovision/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() async {
@@ -98,6 +99,12 @@ class MapSampleState extends State<MapSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.back(); // Navigate back when the back button is pressed
+          },
+        ),
         title: Text('Maps Guide'),
       ),
       body: Column(

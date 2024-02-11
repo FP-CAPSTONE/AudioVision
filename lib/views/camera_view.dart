@@ -17,6 +17,7 @@ class CameraView extends StatelessWidget {
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             Get.back(); // Navigate back when the back button is pressed
+            ScanController().onClose();
           },
         ),
       ),

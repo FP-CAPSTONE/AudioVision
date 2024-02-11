@@ -16,7 +16,7 @@ class LocationService {
           if (locationData != null) {
             _locationStreamController.add(UserLocation(
                 latitude: locationData.latitude!,
-                longtitude: locationData.longitude!));
+                longitude: locationData.longitude!));
           }
         });
       }
