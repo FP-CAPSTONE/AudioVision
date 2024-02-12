@@ -80,7 +80,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/model/mylabels.txt
-    - assets/model/mymodel_last_yv8s.tflite
+    # - assets/model/mymodel_last_yv8s.tflite
     - assets/model/my_7yv8n.tflite
     - .env
   #   - images/a_dot_burr.jpeg
