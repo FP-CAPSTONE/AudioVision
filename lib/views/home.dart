@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:audiovision/mainAudio.dart';
 import 'package:audiovision/screens/select_screen.dart';
@@ -46,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  Get.to(() => MyMap());
+                  Get.to(() => const MyMap());
                 },
                 child: const Text(
                   "DOULBE TAP ANYWHERE ON THE SCREEN\n"
