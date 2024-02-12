@@ -95,50 +95,6 @@ class _MyMapState extends State<MyMap> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 100),
-          TextField(
-            controller: _endSearchFieldController,
-            autofocus: false,
-            focusNode: endFocusNode,
-            style: const TextStyle(fontSize: 24),
-            decoration: InputDecoration(
-              hintText: "Search Here",
-              hintStyle:
-                  const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
-              filled: true,
-              fillColor: Colors.grey[200],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(40),
-                borderSide: const BorderSide(width: 0, style: BorderStyle.none),
-              ),
-              isDense: true,
-              contentPadding: const EdgeInsets.all(15),
-              suffixIcon: _endSearchFieldController.text.isNotEmpty
-                  ? IconButton(
-                      onPressed: () {
-                        setState(() {
-                          predictions = [];
-                          _endSearchFieldController.clear();
-                        });
-                      },
-                      icon: const Icon(Icons.clear_outlined),
-                    )
-                  : null,
-            ),
-            onChanged: (value) {
-              if (_debounce?.isActive ?? false) _debounce!.cancel();
-              _debounce = Timer(const Duration(milliseconds: 1000), () {
-                if (value.isNotEmpty) {
-                  autoCompleteSearch(value);
-                } else {
-                  setState(() {
-                    predictions = [];
-                    endPosition = null;
-                  });
-                }
-              });
-            },
-          ),
           Expanded(
             child: Stack(
               children: [
@@ -157,8 +113,57 @@ class _MyMapState extends State<MyMap> {
                     setState(() {});
                   },
                 ),
-                predictions.isNotEmpty
-                    ? ListView.builder(
+                Column(
+                  children: [
+                    SizedBox(height: 100),
+                    TextField(
+                      controller: _endSearchFieldController,
+                      autofocus: false,
+                      focusNode: endFocusNode,
+                      style: const TextStyle(fontSize: 24),
+                      decoration: InputDecoration(
+                        hintText: "Search Here",
+                        hintStyle: const TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 24),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(40),
+                          borderSide: const BorderSide(
+                              width: 0, style: BorderStyle.none),
+                        ),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.all(15),
+                        suffixIcon: _endSearchFieldController.text.isNotEmpty
+                            ? IconButton(
+                          onPressed: () {
+                            setState(() {
+                              predictions = [];
+                              _endSearchFieldController.clear();
+                            });
+                          },
+                          icon: const Icon(Icons.clear_outlined),
+                        )
+                            : null,
+                      ),
+                      onChanged: (value) {
+                        if (_debounce?.isActive ?? false) _debounce!.cancel();
+                        _debounce =
+                            Timer(const Duration(milliseconds: 1000), () {
+                              if (value.isNotEmpty) {
+                                autoCompleteSearch(value);
+                              } else {
+                                setState(() {
+                                  predictions = [];
+                                  endPosition = null;
+                                });
+                              }
+                            });
+                      },
+                    ),
+                    predictions.isNotEmpty
+                        ? Expanded(
+                      child: ListView.builder(
                         itemCount: predictions.length,
                         itemBuilder: (context, index) {
                           return ListTile(
@@ -174,7 +179,7 @@ class _MyMapState extends State<MyMap> {
                             onTap: () async {
                               final placeId = predictions[index].placeId!;
                               final details =
-                                  await googlePlace.details.get(placeId);
+                              await googlePlace.details.get(placeId);
                               if (details != null &&
                                   details.result != null &&
                                   mounted) {
@@ -182,20 +187,29 @@ class _MyMapState extends State<MyMap> {
                                   setState(() {
                                     endPosition = details.result;
                                     _endSearchFieldController.text =
-                                        details.result!.name!;
+                                    details.result!.name!;
                                     predictions = [];
+                                    _clearPolyline();
+
+                                    markers.removeWhere((marker) =>
+                                    marker.markerId.value ==
+                                        "planceName");
                                     markers.add(
                                       Marker(
                                         markerId: MarkerId("planceName"),
                                         position: LatLng(
-                                          endPosition!.geometry!.location!.lat!,
-                                          endPosition!.geometry!.location!.lng!,
+                                          endPosition!
+                                              .geometry!.location!.lat!,
+                                          endPosition!
+                                              .geometry!.location!.lng!,
                                         ),
                                       ),
                                     );
                                     _getPolyline(
-                                        endPosition!.geometry!.location!.lat!,
-                                        endPosition!.geometry!.location!.lng!);
+                                        endPosition!
+                                            .geometry!.location!.lat!,
+                                        endPosition!
+                                            .geometry!.location!.lng!);
                                   });
                                 }
                                 print("Start Position: $startPosition");
@@ -204,8 +218,11 @@ class _MyMapState extends State<MyMap> {
                             },
                           );
                         },
-                      )
-                    : Container(),
+                      ),
+                    )
+                        : Container(),
+                  ],
+                ),
               ],
             ),
           ),
@@ -238,6 +255,12 @@ class _MyMapState extends State<MyMap> {
       width: 5,
     );
     polylines[id] = polyline;
+    setState(() {});
+  }
+
+  void _clearPolyline() {
+    polylineCoordinates.clear();
+    polylines.clear();
     setState(() {});
   }
 
