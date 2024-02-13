@@ -6,6 +6,8 @@ import 'package:flutter_config/flutter_config.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'utils/text_utils.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
   await FlutterConfig.loadEnvVariables();
@@ -45,6 +47,17 @@ class MapSampleState extends State<MapSample> {
 
   int _polygonsIdCounter = 1;
   int _polylineIdCounter = 1;
+
+  bool isFirstRowVisible = true;
+  bool isSecondsRowVisible = false;
+
+  String _getCurrentTime() {
+  DateTime now = DateTime.now();
+  String formattedTime = "${now.hour}:${now.minute}";
+  return formattedTime;
+}
+
+  // Tambahkan variabel ini
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
@@ -102,32 +115,36 @@ class MapSampleState extends State<MapSample> {
       ),
       body: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _originController,
-                      decoration: InputDecoration(hintText: 'Origin'),
-                      onChanged: (value) {
-                        print(value);
-                      },
-                    ),
-                    TextFormField(
-                      controller: _destinationController,
-                      decoration: InputDecoration(hintText: 'Destination'),
-                      onChanged: (value) {
-                        print(value);
-                      },
-                    ),
-                  ],
+          Visibility(
+            visible: isFirstRowVisible,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _originController,
+                        decoration: InputDecoration(hintText: 'Origin'),
+                        onChanged: (value) {
+                          print(value);
+                        },
+                      ),
+                      TextFormField(
+                        controller: _destinationController,
+                        decoration: InputDecoration(hintText: 'Destination'),
+                        onChanged: (value) {
+                          print(value);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              IconButton(
+                IconButton(
                   onPressed: () async {
                     var directions = await LocationService().getDirections(
-                        _originController.text, _destinationController.text);
+                      _originController.text,
+                      _destinationController.text,
+                    );
                     _goToPlace(
                       directions['start_location']['lat'],
                       directions['start_location']['lng'],
@@ -136,9 +153,89 @@ class MapSampleState extends State<MapSample> {
                     );
 
                     _setPolylines(directions['polyline_decoded']);
+
+                    // Setelah tombol diklik, sembunyikan bagian Row
+                    setState(() {
+                      isFirstRowVisible = false;
+                      isSecondsRowVisible = true;
+                    });
                   },
-                  icon: Icon(Icons.search))
-            ],
+                  icon: Icon(Icons.search),
+                ),
+              ],
+            ),
+          ),
+          Visibility(
+            visible: isSecondsRowVisible,
+            child: Container(
+              margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+              padding: EdgeInsets.all(12.0), // Adjust the padding as needed
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10.0),
+                  topRight: Radius.circular(10.0),
+                  bottomRight: Radius.circular(
+                      10.0), // Setting this to 0.0 makes the bottom-right corner square
+                  bottomLeft: Radius.circular(
+                      0.0), // Setting this to 0.0 makes the bottom-left corner square
+                ),
+                color: Color.fromARGB(255, 50, 116, 45),
+              ),
+              child: Row(
+                children: [
+                  buildArrowDirectionContainer('arrow_upward'),
+                  Expanded(
+                    child: NowNavigationTextWidget(
+                        text: "Head North", fontSize: 18.0),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(Icons.mic, color: Colors.blue[400]),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Visibility(
+            visible: isSecondsRowVisible,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 5.0),
+                width: 100.0, // Set the desired width
+                padding: EdgeInsets.all(6.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(0.0),
+                    topRight: Radius.circular(0.0),
+                    bottomRight: Radius.circular(10.0),
+                    bottomLeft: Radius.circular(10.0),
+                  ),
+                  color: Color.fromARGB(255, 28, 71, 26),
+                ),
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(left: 8.0), // Add left margin
+                          child: NowNavigationTextWidget(
+                            text: "Then",
+                            fontSize: 14.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    buildArrowDirectionContainer('arrow_forward'),
+                  ],
+                ),
+              ),
+            ),
           ),
           Expanded(
             child: GoogleMap(
@@ -158,6 +255,61 @@ class MapSampleState extends State<MapSample> {
               },
             ),
           ),
+          Visibility(
+            visible: isSecondsRowVisible,
+            child: Container(
+              margin: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+              padding: EdgeInsets.all(12.0), // Adjust the padding as needed
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10.0),
+                  topRight: Radius.circular(10.0),
+                  bottomRight: Radius.circular(
+                      10.0), // Setting this to 0.0 makes the bottom-right corner square
+                  bottomLeft: Radius.circular(
+                      0.0), // Setting this to 0.0 makes the bottom-left corner square
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(left: 10.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black.withOpacity(0.4)),
+                    ),
+                    child: Icon(Icons.close, size: 30.0, color: Colors.black),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        NowNavigationTextWidget(
+                          text: "17 min",
+                          fontSize: 18.0,
+                          color: Colors.black,
+                        ),
+                        NowNavigationTextWidget(
+                          text: "12 km | ${_getCurrentTime()}",
+                          fontSize: 12.0,
+                          color: Colors.black.withOpacity(0.4),
+                          bold: false,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(right: 10.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black.withOpacity(0.4)),
+                    ),
+                    child: buildArrowDirectionContainer('call_split',
+                        color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -168,7 +320,6 @@ class MapSampleState extends State<MapSample> {
     double lng,
     Map<String, dynamic> boundsNe,
     Map<String, dynamic> boundsSw,
-    
   ) async {
     final GoogleMapController controller = await _controller.future;
     await controller.animateCamera(
