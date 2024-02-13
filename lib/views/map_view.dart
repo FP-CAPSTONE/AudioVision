@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audiovision/services/location_services.dart';
+import 'package:audiovision/views/cameraa_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -128,7 +129,11 @@ class _MyMapState extends State<MyMap> {
                         filled: true,
                         fillColor: Colors.grey[200],
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(40),
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(40),
+                              topRight: Radius.circular(40),
+                              bottomLeft: Radius.circular(10),
+                              bottomRight: Radius.circular(10)),
                           borderSide: const BorderSide(
                               width: 0, style: BorderStyle.none),
                         ),
@@ -164,58 +169,64 @@ class _MyMapState extends State<MyMap> {
                     predictions.isNotEmpty
                         ? Expanded(
                             child: ListView.builder(
+                              padding: EdgeInsets.zero,
                               itemCount: predictions.length,
                               itemBuilder: (context, index) {
-                                return ListTile(
-                                  leading: const CircleAvatar(
-                                    child: Icon(
-                                      Icons.pin_drop,
-                                      color: Colors.white,
+                                return Container(
+                                  color: Colors.white,
+                                  child: ListTile(
+                                    leading: const CircleAvatar(
+                                      child: Icon(
+                                        Icons.pin_drop,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                  title: Text(
-                                    predictions[index].description.toString(),
-                                  ),
-                                  onTap: () async {
-                                    final placeId = predictions[index].placeId!;
-                                    final details =
-                                        await googlePlace.details.get(placeId);
-                                    if (details != null &&
-                                        details.result != null &&
-                                        mounted) {
-                                      if (endFocusNode.hasFocus) {
-                                        setState(() {
-                                          endPosition = details.result;
-                                          _endSearchFieldController.text =
-                                              details.result!.name!;
-                                          predictions = [];
-                                          _clearPolyline();
+                                    title: Text(
+                                      predictions[index].description.toString(),
+                                    ),
+                                    onTap: () async {
+                                      final placeId =
+                                          predictions[index].placeId!;
+                                      final details = await googlePlace.details
+                                          .get(placeId);
+                                      if (details != null &&
+                                          details.result != null &&
+                                          mounted) {
+                                        if (endFocusNode.hasFocus) {
+                                          setState(() {
+                                            endPosition = details.result;
+                                            _endSearchFieldController.text =
+                                                details.result!.name!;
+                                            predictions = [];
+                                            _clearPolyline();
 
-                                          markers.removeWhere((marker) =>
-                                              marker.markerId.value ==
-                                              "planceName");
-                                          markers.add(
-                                            Marker(
-                                              markerId: MarkerId("planceName"),
-                                              position: LatLng(
+                                            markers.removeWhere((marker) =>
+                                                marker.markerId.value ==
+                                                "planceName");
+                                            markers.add(
+                                              Marker(
+                                                markerId:
+                                                    MarkerId("planceName"),
+                                                position: LatLng(
+                                                  endPosition!
+                                                      .geometry!.location!.lat!,
+                                                  endPosition!
+                                                      .geometry!.location!.lng!,
+                                                ),
+                                              ),
+                                            );
+                                            _getPolyline(
                                                 endPosition!
                                                     .geometry!.location!.lat!,
                                                 endPosition!
-                                                    .geometry!.location!.lng!,
-                                              ),
-                                            ),
-                                          );
-                                          _getPolyline(
-                                              endPosition!
-                                                  .geometry!.location!.lat!,
-                                              endPosition!
-                                                  .geometry!.location!.lng!);
-                                        });
+                                                    .geometry!.location!.lng!);
+                                          });
+                                        }
+                                        print("Start Position: $startPosition");
+                                        print("End Position: $endPosition");
                                       }
-                                      print("Start Position: $startPosition");
-                                      print("End Position: $endPosition");
-                                    }
-                                  },
+                                    },
+                                  ),
                                 );
                               },
                             ),
@@ -223,6 +234,42 @@ class _MyMapState extends State<MyMap> {
                         : Container(),
                   ],
                 ),
+                Positioned(
+                  bottom: 30.0,
+                  right: MediaQuery.of(context).size.width / 2 -
+                      120.0, // Adjusted to center horizontally
+                  child: SizedBox(
+                    width: 240.0, // Set the width of the button
+                    height: 60.0, // Set the height of the button
+                    child: Material(
+                      elevation: 8.0, // Set the elevation (shadow) value
+                      borderRadius:
+                          BorderRadius.circular(30.0), // Set border radius
+                      color: Colors.blue, // Set background color
+                      child: InkWell(
+                        onTap: () {
+                          // Add your button functionality here
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CameraaView()),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(
+                            30.0), // Set border radius for the InkWell
+                        child: Center(
+                          child: Text(
+                            'Open Camera',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w500), // Set text size
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
