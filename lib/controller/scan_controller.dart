@@ -122,7 +122,7 @@ class ScanController extends GetxController {
 
     //flutter vision
     await vision.loadYoloModel(
-      modelPath: 'assets/model/my_7yv8n.tflite',
+      modelPath: 'assets/model/L_1kyv8n_float32.tflite',
       labels: 'assets/model/mylabels.txt',
       modelVersion: "yolov8",
       quantization: false,

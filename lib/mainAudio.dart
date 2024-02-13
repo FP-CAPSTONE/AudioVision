@@ -53,10 +53,10 @@ class MapSampleState extends State<MapSample> {
   bool isSecondsRowVisible = false;
 
   String _getCurrentTime() {
-  DateTime now = DateTime.now();
-  String formattedTime = "${now.hour}:${now.minute}";
-  return formattedTime;
-}
+    DateTime now = DateTime.now();
+    String formattedTime = "${now.hour}:${now.minute}";
+    return formattedTime;
+  }
 
   // Tambahkan variabel ini
 
@@ -112,12 +112,6 @@ class MapSampleState extends State<MapSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.back(); // Navigate back when the back button is pressed
-          },
-        ),
         title: Text('Maps Guide'),
       ),
       body: Column(
