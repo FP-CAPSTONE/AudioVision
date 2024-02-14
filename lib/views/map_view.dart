@@ -125,15 +125,15 @@ class _MyMapState extends State<MyMap> {
       markers: markers,
       onCameraIdle: () {
         setState(() {
-          _mapController.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: LatLng(userLatitude, userLongitude),
-                zoom: 17,
-                // bearing: _heading,
-              ),
-            ),
-          );
+          // _mapController.animateCamera(
+          //   CameraUpdate.newCameraPosition(
+          //     CameraPosition(
+          //       target: LatLng(userLatitude, userLongitude),
+          //       zoom: 17,
+          //       bearing: _heading,
+          //     ),
+          //   ),
+          // );
         });
       },
     );
