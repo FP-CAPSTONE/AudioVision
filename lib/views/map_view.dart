@@ -70,7 +70,7 @@ class _MyMapState extends State<MyMap> {
       });
     });
 
-    _checkDeviceOrientation();
+    // _checkDeviceOrientation();
   }
 
   @override
@@ -119,8 +119,8 @@ class _MyMapState extends State<MyMap> {
       initialCameraPosition: cameraPosition,
       onMapCreated: (controller) {
         _mapController = controller;
-        _mapController
-            .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+        // _mapController
+        //     .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
       },
       markers: markers,
       onCameraIdle: () {
