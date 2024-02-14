@@ -1,13 +1,16 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:async';
 
 import 'package:audiovision/services/location_services.dart';
-import 'package:audiovision/views/cameraa_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
+// ned to change the class name, there are two location service
+import 'package:audiovision/direction_service.dart';
+import 'dart:math' as math;
 
 class MyMap extends StatefulWidget {
   const MyMap({super.key});
@@ -20,7 +23,9 @@ class _MyMapState extends State<MyMap> {
   final _endSearchFieldController = TextEditingController();
 
   DetailsResult? startPosition;
-  DetailsResult? endPosition;
+  DetailsResult? destination;
+
+  late LatLng destinationCoordinate;
 
   late FocusNode startFocusNode;
   late FocusNode endFocusNode;
@@ -28,23 +33,22 @@ class _MyMapState extends State<MyMap> {
   late GooglePlace googlePlace;
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
-  static double latitude = 0;
-  static double longitude = 0;
+  static double userLatitude = 0;
+  static double userLongitude = 0;
 
   static LocationService locationService = LocationService();
-  late GoogleMapController _controller;
+  late GoogleMapController _mapController;
 
   Set<Marker> markers = {};
   CameraPosition cameraPosition = CameraPosition(
     target: LatLng(
-      latitude,
-      longitude,
+      userLatitude,
+      userLongitude,
     ),
   );
   Map<PolylineId, Polyline> polylines = {};
   List<LatLng> polylineCoordinates = [];
   PolylinePoints polylinePoints = PolylinePoints();
-  Set<Polyline> _polylines = Set<Polyline>();
 
   @override
   void initState() {
@@ -57,8 +61,8 @@ class _MyMapState extends State<MyMap> {
 
     locationService.locationStream.listen((userLocation) {
       setState(() {
-        latitude = userLocation.latitude;
-        longitude = userLocation.longitude;
+        userLatitude = userLocation.latitude;
+        userLongitude = userLocation.longitude;
         startPosition = DetailsResult(
           // Assign latitude and longitude values
           geometry: Geometry(
@@ -68,7 +72,7 @@ class _MyMapState extends State<MyMap> {
             ),
           ),
         );
-        updateUserLocation(LatLng(latitude, longitude));
+        updateUserLocation(LatLng(userLatitude, userLongitude));
       });
     });
   }
@@ -82,7 +86,7 @@ class _MyMapState extends State<MyMap> {
   void autoCompleteSearch(String value) async {
     var result = await googlePlace.autocomplete.get(value);
     if (result != null && result.predictions != null && mounted) {
-      print(result.predictions!.first.description);
+      // print(result.predictions!.first.description);
       setState(() {
         predictions = result.predictions!;
       });
@@ -99,177 +103,9 @@ class _MyMapState extends State<MyMap> {
           Expanded(
             child: Stack(
               children: [
-                GoogleMap(
-                  polylines: Set<Polyline>.of(polylines.values),
-                  mapType: MapType.normal,
-                  initialCameraPosition: cameraPosition,
-                  onMapCreated: (controller) {
-                    _controller = controller;
-                  },
-                  onTap: (points) {
-                    print("object");
-                  },
-                  markers: markers,
-                  onCameraIdle: () {
-                    setState(() {});
-                  },
-                ),
-                Column(
-                  children: [
-                    SizedBox(height: 100),
-                    TextField(
-                      controller: _endSearchFieldController,
-                      autofocus: false,
-                      focusNode: endFocusNode,
-                      style: const TextStyle(fontSize: 24),
-                      decoration: InputDecoration(
-                        hintText: "Search Here",
-                        hintStyle: const TextStyle(
-                            fontWeight: FontWeight.w500, fontSize: 24),
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(40),
-                              topRight: Radius.circular(40),
-                              bottomLeft: Radius.circular(10),
-                              bottomRight: Radius.circular(10)),
-                          borderSide: const BorderSide(
-                              width: 0, style: BorderStyle.none),
-                        ),
-                        isDense: true,
-                        contentPadding: const EdgeInsets.all(15),
-                        suffixIcon: _endSearchFieldController.text.isNotEmpty
-                            ? IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    predictions = [];
-                                    _endSearchFieldController.clear();
-                                  });
-                                },
-                                icon: const Icon(Icons.clear_outlined),
-                              )
-                            : null,
-                      ),
-                      onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce!.cancel();
-                        _debounce =
-                            Timer(const Duration(milliseconds: 1000), () {
-                          if (value.isNotEmpty) {
-                            autoCompleteSearch(value);
-                          } else {
-                            setState(() {
-                              predictions = [];
-                              endPosition = null;
-                            });
-                          }
-                        });
-                      },
-                    ),
-                    predictions.isNotEmpty
-                        ? Expanded(
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: predictions.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  color: Colors.white,
-                                  child: ListTile(
-                                    leading: const CircleAvatar(
-                                      child: Icon(
-                                        Icons.pin_drop,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    title: Text(
-                                      predictions[index].description.toString(),
-                                    ),
-                                    onTap: () async {
-                                      final placeId =
-                                          predictions[index].placeId!;
-                                      final details = await googlePlace.details
-                                          .get(placeId);
-                                      if (details != null &&
-                                          details.result != null &&
-                                          mounted) {
-                                        if (endFocusNode.hasFocus) {
-                                          setState(() {
-                                            endPosition = details.result;
-                                            _endSearchFieldController.text =
-                                                details.result!.name!;
-                                            predictions = [];
-                                            _clearPolyline();
-
-                                            markers.removeWhere((marker) =>
-                                                marker.markerId.value ==
-                                                "planceName");
-                                            markers.add(
-                                              Marker(
-                                                markerId:
-                                                    MarkerId("planceName"),
-                                                position: LatLng(
-                                                  endPosition!
-                                                      .geometry!.location!.lat!,
-                                                  endPosition!
-                                                      .geometry!.location!.lng!,
-                                                ),
-                                              ),
-                                            );
-                                            _getPolyline(
-                                                endPosition!
-                                                    .geometry!.location!.lat!,
-                                                endPosition!
-                                                    .geometry!.location!.lng!);
-                                          });
-                                        }
-                                        print("Start Position: $startPosition");
-                                        print("End Position: $endPosition");
-                                      }
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
-                          )
-                        : Container(),
-                  ],
-                ),
-                Positioned(
-                  bottom: 30.0,
-                  right: MediaQuery.of(context).size.width / 2 -
-                      120.0, // Adjusted to center horizontally
-                  child: SizedBox(
-                    width: 240.0, // Set the width of the button
-                    height: 60.0, // Set the height of the button
-                    child: Material(
-                      elevation: 8.0, // Set the elevation (shadow) value
-                      borderRadius:
-                          BorderRadius.circular(30.0), // Set border radius
-                      color: Colors.blue, // Set background color
-                      child: InkWell(
-                        onTap: () {
-                          // Add your button functionality here
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CameraaView()),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(
-                            30.0), // Set border radius for the InkWell
-                        child: Center(
-                          child: Text(
-                            'Open Camera',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.w500), // Set text size
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
+                build_GoogleMap(context),
+                build_SearchBar(context),
+                build_ButtonStart(context)
               ],
             ),
           ),
@@ -278,6 +114,157 @@ class _MyMapState extends State<MyMap> {
     );
   }
 
+  //Google Map Widget
+  Widget build_GoogleMap(BuildContext context) {
+    return GoogleMap(
+      polylines: Set<Polyline>.of(polylines.values),
+      mapType: MapType.normal,
+      initialCameraPosition: cameraPosition,
+      onMapCreated: (controller) {
+        _mapController = controller;
+        _mapController
+            .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      },
+      markers: markers,
+      onCameraIdle: () {
+        setState(() {});
+      },
+    );
+  }
+
+  //Search Bar Widget
+  Widget build_SearchBar(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 100),
+        TextField(
+          controller: _endSearchFieldController,
+          autofocus: false,
+          focusNode: endFocusNode,
+          style: const TextStyle(fontSize: 24),
+          decoration: InputDecoration(
+            hintText: "Search Here",
+            hintStyle:
+                const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
+            filled: true,
+            fillColor: Colors.grey[200],
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10)),
+              borderSide: BorderSide(width: 0, style: BorderStyle.none),
+            ),
+            isDense: true,
+            contentPadding: const EdgeInsets.all(15),
+            suffixIcon: _endSearchFieldController.text.isNotEmpty
+                ? IconButton(
+                    onPressed: () {
+                      setState(() {
+                        predictions = [];
+                        _endSearchFieldController.clear();
+                      });
+                    },
+                    icon: const Icon(Icons.clear_outlined),
+                  )
+                : null,
+          ),
+          onChanged: (value) {
+            if (_debounce?.isActive ?? false) _debounce!.cancel();
+            _debounce = Timer(const Duration(milliseconds: 1000), () {
+              if (value.isNotEmpty) {
+                autoCompleteSearch(value);
+              } else {
+                setState(() {
+                  predictions = [];
+                  destination = null;
+                });
+              }
+            });
+          },
+        ),
+        predictions.isNotEmpty
+            ? Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: predictions.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      color: Colors.white,
+                      child: ListTile(
+                        leading: const CircleAvatar(
+                          child: Icon(
+                            Icons.pin_drop,
+                            color: Colors.white,
+                          ),
+                        ),
+                        title: Text(
+                          predictions[index].description.toString(),
+                        ),
+                        onTap: () {
+                          add_destination(index);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              )
+            : Container(),
+      ],
+    );
+  }
+
+  //Start Button Widget
+  Widget build_ButtonStart(BuildContext context) {
+    return Positioned(
+      bottom: 30.0,
+      right: MediaQuery.of(context).size.width / 2 -
+          120.0, // Adjusted to center horizontally
+      child: destination != null
+          ? SizedBox(
+              width: 240.0, // Set the width of the button
+              height: 60.0, // Set the height of the button
+              child: Material(
+                elevation: 8.0, // Set the elevation (shadow) value
+                borderRadius: BorderRadius.circular(30.0), // Set border radius
+                color: Colors.blue, // Set background color
+                child: InkWell(
+                  onTap: () {
+                    // Add your button functionality here
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //       builder: (context) => CameraaView()),
+                    // );
+                    DirectionServcie().get_direction(
+                      LatLng(userLatitude, userLongitude),
+                      LatLng(
+                        destination!.geometry!.location!.lat!,
+                        destination!.geometry!.location!.lng!,
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(
+                    30.0,
+                  ), // Set border radius for the InkWell
+                  child: const Center(
+                    child: Text(
+                      'Start Navigation',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w500), // Set text size
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : Container(),
+    );
+  }
+
+// always update the user position
   void updateUserLocation(LatLng newPosition) {
     setState(() {
       cameraPosition = CameraPosition(target: newPosition, zoom: 16.5);
@@ -290,10 +277,122 @@ class _MyMapState extends State<MyMap> {
         ),
       );
     });
-    _controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+    if (destination != null) {
+      // _mapController.animateCamera(CameraUpdate.newCameraPosition(
+      //   LatLngBounds(
+      //     southwest: newPosition,
+      //     northeast: LatLng(
+      //       destination!.geometry!.location!.lat!,
+      //       destination!.geometry!.location!.lng!,
+      //     ),
+      //   ),
+      //   50, // Padding
+      // ));
+      _getPolyline(destinationCoordinate);
+    }
   }
 
-  _addPolyLine() {
+// add destination when user clck the listview
+  void add_destination(int index) async {
+    final placeId = predictions[index].placeId!;
+    final details = await googlePlace.details.get(placeId);
+    if (details != null && details.result != null && mounted) {
+      if (endFocusNode.hasFocus) {
+        setState(
+          () {
+            destination = details.result;
+            _endSearchFieldController.text = details.result!.name!;
+            predictions = [];
+            _clearPolyline();
+            markers
+                .removeWhere((marker) => marker.markerId.value == "planceName");
+            //asgin destinationCoordinate variable
+            destinationCoordinate = LatLng(
+              destination!.geometry!.location!.lat!,
+              destination!.geometry!.location!.lng!,
+            );
+            markers.add(
+              Marker(
+                markerId: const MarkerId("planceName"),
+                position: destinationCoordinate,
+              ),
+            );
+
+            // find the north and south to animate the camera
+            double minLat = userLatitude < destinationCoordinate.latitude
+                ? userLatitude
+                : destinationCoordinate.latitude;
+            double minLng = userLongitude < destinationCoordinate.longitude
+                ? userLongitude
+                : destinationCoordinate.longitude;
+            double maxLat = userLatitude > destinationCoordinate.latitude
+                ? userLatitude
+                : destinationCoordinate.latitude;
+            double maxLng = userLongitude > destinationCoordinate.longitude
+                ? userLongitude
+                : destinationCoordinate.longitude;
+
+            _mapController.animateCamera(
+              CameraUpdate.newLatLngBounds(
+                LatLngBounds(
+                  southwest: LatLng(minLat, minLng),
+                  northeast: LatLng(maxLat, maxLng),
+                ),
+                100, // Padding
+              ),
+            );
+
+            _getPolyline(destinationCoordinate);
+          },
+        );
+      }
+    }
+  }
+
+  double calculateZoomLevel(double userLatitude, double userLongitude,
+      double destinationLatitude, double destinationLongitude) {
+    const double GLOBE_WIDTH = 256; // Width of the 256px Google Map
+    const double ZOOM_MAX = 21;
+
+    double lat1 = math.pi * userLatitude / 180;
+    double lat2 = math.pi * destinationLatitude / 180;
+    double lon1 = math.pi * userLongitude / 180;
+    double lon2 = math.pi * destinationLongitude / 180;
+
+    double x = (lon2 - lon1) * math.cos((lat1 + lat2) / 2);
+    double y = (lat2 - lat1);
+    double distance =
+        math.sqrt(x * x + y * y) * 6371000; // Earth radius in meters
+
+    double zoom = (ZOOM_MAX -
+        math.log(distance * 2 * math.pi * GLOBE_WIDTH / 256) / math.ln2);
+    return zoom;
+  }
+
+  void _getPolyline(LatLng destinationCoordinate) async {
+    final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+        key,
+        PointLatLng(
+          userLatitude,
+          userLongitude,
+        ),
+        PointLatLng(
+          destinationCoordinate.latitude,
+          destinationCoordinate.longitude,
+        ),
+        travelMode: TravelMode.walking);
+    _clearPolyline();
+    if (result.points.isNotEmpty) {
+      for (var point in result.points) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      }
+    }
+    _addPolyLine();
+  }
+
+  void _addPolyLine() {
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
@@ -309,27 +408,5 @@ class _MyMapState extends State<MyMap> {
     polylineCoordinates.clear();
     polylines.clear();
     setState(() {});
-  }
-
-  _getPolyline(end_latitude, end_longitude) async {
-    final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        key,
-        PointLatLng(
-          latitude,
-          longitude,
-        ),
-        PointLatLng(
-          end_latitude,
-          end_longitude,
-        ),
-        travelMode: TravelMode.walking);
-
-    if (result.points.isNotEmpty) {
-      for (var point in result.points) {
-        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      }
-    }
-    _addPolyLine();
   }
 }
