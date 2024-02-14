@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:audiovision/services/location_services.dart';
+import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -197,21 +198,27 @@ class _MyMapState extends State<MyMap> {
                   padding: EdgeInsets.zero,
                   itemCount: predictions.length,
                   itemBuilder: (context, index) {
-                    return Container(
-                      color: Colors.white,
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(
-                            Icons.pin_drop,
-                            color: Colors.white,
+                    return GestureDetector(
+                      onLongPress: () {
+                        TextToSpeech.speak(
+                            predictions[index].description.toString());
+                      },
+                      child: Container(
+                        color: Colors.white,
+                        child: ListTile(
+                          leading: const CircleAvatar(
+                            child: Icon(
+                              Icons.pin_drop,
+                              color: Colors.white,
+                            ),
                           ),
+                          title: Text(
+                            predictions[index].description.toString(),
+                          ),
+                          onTap: () {
+                            add_destination(index);
+                          },
                         ),
-                        title: Text(
-                          predictions[index].description.toString(),
-                        ),
-                        onTap: () {
-                          add_destination(index);
-                        },
                       ),
                     );
                   },
@@ -229,34 +236,38 @@ class _MyMapState extends State<MyMap> {
       right: MediaQuery.of(context).size.width / 2 -
           120.0, // Adjusted to center horizontally
       child: destination != null
-          ? SizedBox(
-              width: 240.0, // Set the width of the button
-              height: 60.0, // Set the height of the button
-              child: Material(
-                elevation: 8.0, // Set the elevation (shadow) value
-                borderRadius: BorderRadius.circular(30.0), // Set border radius
-                color: Colors.blue, // Set background color
-                child: InkWell(
-                  onTap: () {
-                    // Add your button functionality here
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => CameraaView()),
-                    // );
+          ? GestureDetector(
+              onLongPress: () => TextToSpeech.speak("Start Navigation Button"),
+              child: SizedBox(
+                width: 240.0, // Set the width of the button
+                height: 60.0, // Set the height of the button
+                child: Material(
+                  elevation: 8.0, // Set the elevation (shadow) value
+                  borderRadius:
+                      BorderRadius.circular(30.0), // Set border radius
+                  color: Colors.blue, // Set background color
+                  child: InkWell(
+                    onTap: () {
+                      // Add your button functionality here
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //       builder: (context) => CameraaView()),
+                      // );
 
-                    _startNavigate();
-                  },
-                  borderRadius: BorderRadius.circular(
-                    30.0,
-                  ), // Set border radius for the InkWell
-                  child: const Center(
-                    child: Text(
-                      'Start Navigation',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w500), // Set text size
+                      _startNavigate();
+                    },
+                    borderRadius: BorderRadius.circular(
+                      30.0,
+                    ), // Set border radius for the InkWell
+                    child: const Center(
+                      child: Text(
+                        'Start Navigation',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w500), // Set text size
+                      ),
                     ),
                   ),
                 ),
