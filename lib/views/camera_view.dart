@@ -27,7 +27,7 @@ class CameraView extends StatelessWidget {
           return controller.isCameraInitialized.value
               ? Stack(
                   children: [
-                    CameraPreview(controller.cameraController),
+                    CameraPreview(controller.cameraController!),
                     CustomPaint(
                       // Use CustomPaint to draw the bounding box
                       painter: BoundingBoxPainter(
@@ -38,7 +38,9 @@ class CameraView extends StatelessWidget {
                     Text("data"),
                   ],
                 )
-              : const Center(child: CircularProgressIndicator());
+              : const Center(
+                  child: CircularProgressIndicator(),
+                );
         },
       ),
     );

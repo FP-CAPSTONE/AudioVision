@@ -10,7 +10,7 @@ import 'package:vibration/vibration.dart';
 
 class ScanController extends GetxController {
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
-  late CameraController cameraController;
+  CameraController? cameraController;
   @override
   void onInit() {
     // TODO: implement onInit
@@ -24,7 +24,7 @@ class ScanController extends GetxController {
   void onClose() {
     // Cancel the accelerometer subscription when the controller is closed
     _accelerometerSubscription?.cancel();
-    isCameraInitialized(false);
+    cameraController?.dispose();
     Get.delete<CameraController>();
   }
 
@@ -33,7 +33,7 @@ class ScanController extends GetxController {
     // TODO : STOP CAMERA WHEN MOVING TO ANOTHER SCREEN
     // TODO: implement dispose
     super.dispose();
-    cameraController.dispose();
+    cameraController!.dispose();
   }
 
   FlutterVision vision = FlutterVision();
@@ -91,8 +91,8 @@ class ScanController extends GetxController {
 
       cameraController = CameraController(cameras[0], ResolutionPreset.max);
       // await cameraController.initialize();
-      await cameraController.initialize().then((value) {
-        cameraController.startImageStream((image) {
+      await cameraController!.initialize().then((value) {
+        cameraController!.startImageStream((image) {
           cameraCount++;
           // run object detection each 10 fps
           if (cameraCount % 10 == 0) {

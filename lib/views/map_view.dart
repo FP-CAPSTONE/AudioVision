@@ -10,7 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 // ned to change the class name, there are two location service
 import 'package:audiovision/direction_service.dart';
-import 'dart:math' as math;
+import 'package:sensors_plus/sensors_plus.dart';
 
 class MyMap extends StatefulWidget {
   const MyMap({super.key});
@@ -22,7 +22,6 @@ class MyMap extends StatefulWidget {
 class _MyMapState extends State<MyMap> {
   final _endSearchFieldController = TextEditingController();
 
-  DetailsResult? startPosition;
   DetailsResult? destination;
 
   late LatLng destinationCoordinate;
@@ -50,6 +49,9 @@ class _MyMapState extends State<MyMap> {
   List<LatLng> polylineCoordinates = [];
   PolylinePoints polylinePoints = PolylinePoints();
 
+  late StreamSubscription _gyroscopeStreamSubscription;
+  double _heading = 0.0;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -59,27 +61,22 @@ class _MyMapState extends State<MyMap> {
 
     endFocusNode = FocusNode();
 
+    // always listen to the user position and update it
     locationService.locationStream.listen((userLocation) {
       setState(() {
         userLatitude = userLocation.latitude;
         userLongitude = userLocation.longitude;
-        startPosition = DetailsResult(
-          // Assign latitude and longitude values
-          geometry: Geometry(
-            location: Location(
-              lat: userLocation.latitude,
-              lng: userLocation.longitude,
-            ),
-          ),
-        );
         updateUserLocation(LatLng(userLatitude, userLongitude));
       });
     });
+
+    _checkDeviceOrientation();
   }
 
   @override
   void dispose() {
     locationService.dispose();
+    _gyroscopeStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -127,7 +124,17 @@ class _MyMapState extends State<MyMap> {
       },
       markers: markers,
       onCameraIdle: () {
-        setState(() {});
+        setState(() {
+          _mapController.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: LatLng(userLatitude, userLongitude),
+                zoom: 17,
+                bearing: _heading,
+              ),
+            ),
+          );
+        });
       },
     );
   }
@@ -237,13 +244,8 @@ class _MyMapState extends State<MyMap> {
                     //   MaterialPageRoute(
                     //       builder: (context) => CameraaView()),
                     // );
-                    DirectionServcie().get_direction(
-                      LatLng(userLatitude, userLongitude),
-                      LatLng(
-                        destination!.geometry!.location!.lat!,
-                        destination!.geometry!.location!.lng!,
-                      ),
-                    );
+
+                    _startNavigate();
                   },
                   borderRadius: BorderRadius.circular(
                     30.0,
@@ -350,26 +352,6 @@ class _MyMapState extends State<MyMap> {
     }
   }
 
-  double calculateZoomLevel(double userLatitude, double userLongitude,
-      double destinationLatitude, double destinationLongitude) {
-    const double GLOBE_WIDTH = 256; // Width of the 256px Google Map
-    const double ZOOM_MAX = 21;
-
-    double lat1 = math.pi * userLatitude / 180;
-    double lat2 = math.pi * destinationLatitude / 180;
-    double lon1 = math.pi * userLongitude / 180;
-    double lon2 = math.pi * destinationLongitude / 180;
-
-    double x = (lon2 - lon1) * math.cos((lat1 + lat2) / 2);
-    double y = (lat2 - lat1);
-    double distance =
-        math.sqrt(x * x + y * y) * 6371000; // Earth radius in meters
-
-    double zoom = (ZOOM_MAX -
-        math.log(distance * 2 * math.pi * GLOBE_WIDTH / 256) / math.ln2);
-    return zoom;
-  }
-
   void _getPolyline(LatLng destinationCoordinate) async {
     final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
@@ -383,6 +365,7 @@ class _MyMapState extends State<MyMap> {
           destinationCoordinate.longitude,
         ),
         travelMode: TravelMode.walking);
+    // clear polyline first before update the polyline
     _clearPolyline();
     if (result.points.isNotEmpty) {
       for (var point in result.points) {
@@ -408,5 +391,40 @@ class _MyMapState extends State<MyMap> {
     polylineCoordinates.clear();
     polylines.clear();
     setState(() {});
+  }
+
+  void _startNavigate() {
+    _mapController.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+            target: LatLng(userLatitude, userLongitude),
+            zoom: 17,
+            bearing: _heading),
+      ),
+    );
+    DirectionServcie().get_direction(
+      LatLng(userLatitude, userLongitude),
+      LatLng(
+        destination!.geometry!.location!.lat!,
+        destination!.geometry!.location!.lng!,
+      ),
+    );
+  }
+
+  void _checkDeviceOrientation() {
+    // Store the subscription returned by accelerometerEvents.listen()
+    _gyroscopeStreamSubscription =
+        gyroscopeEvents.listen((GyroscopeEvent event) {
+      setState(() {
+        print("x");
+        print(event.x * 10.0);
+        print("y");
+        print(event.y * 10.0);
+        print("z");
+        print(event.z * 10.0);
+        _heading = event.z * 10.0;
+        // print(_heading);
+      });
+    });
   }
 }

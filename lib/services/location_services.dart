@@ -10,17 +10,22 @@ class LocationService {
   Stream<UserLocation> get locationStream => _locationStreamController.stream;
 
   LocationService() {
-    location.requestPermission().then((permissionStatus) {
-      if (permissionStatus == PermissionStatus.granted) {
-        location.onLocationChanged.listen((locationData) {
-          if (locationData != null) {
-            _locationStreamController.add(UserLocation(
-                latitude: locationData.latitude!,
-                longitude: locationData.longitude!));
-          }
-        });
-      }
-    });
+    location.requestPermission().then(
+      (permissionStatus) {
+        if (permissionStatus == PermissionStatus.granted) {
+          location.onLocationChanged.listen(
+            (locationData) {
+              _locationStreamController.add(
+                UserLocation(
+                  latitude: locationData.latitude!,
+                  longitude: locationData.longitude!,
+                ),
+              );
+            },
+          );
+        }
+      },
+    );
   }
 
   ///aasd
