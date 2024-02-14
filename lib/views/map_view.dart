@@ -2,10 +2,14 @@
 
 import 'dart:async';
 
+import 'package:audiovision/controller/scan_controller.dart';
 import 'package:audiovision/services/location_services.dart';
+import 'package:audiovision/widget/object_detected.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 // ned to change the class name, there are two location service
@@ -51,6 +55,8 @@ class _MyMapState extends State<MyMap> {
 
   late StreamSubscription _gyroscopeStreamSubscription;
   double _heading = 0.0;
+
+  bool isStartNavigate = false;
 
   @override
   void initState() {
@@ -102,7 +108,8 @@ class _MyMapState extends State<MyMap> {
               children: [
                 build_GoogleMap(context),
                 build_SearchBar(context),
-                build_ButtonStart(context)
+                build_ButtonStart(context),
+                isStartNavigate ? cameraView() : Container()
               ],
             ),
           ),
@@ -246,6 +253,7 @@ class _MyMapState extends State<MyMap> {
                     // );
 
                     _startNavigate();
+                    isStartNavigate = true;
                   },
                   borderRadius: BorderRadius.circular(
                     30.0,
@@ -426,5 +434,33 @@ class _MyMapState extends State<MyMap> {
         // print(_heading);
       });
     });
+  }
+
+  cameraView() {
+    return Container(
+      height: 200,
+      child: GetBuilder<ScanController>(
+        init: ScanController(),
+        builder: (controller) {
+          return controller.isCameraInitialized.value
+              ? Stack(
+                  children: [
+                    CameraPreview(controller.cameraController!),
+                    CustomPaint(
+                      // Use CustomPaint to draw the bounding box
+                      painter: BoundingBoxPainter(
+                          controller.detectionResult, context),
+                    ),
+                    DetectedObjectWidget(controller
+                        .detectionResult), // Display detected object info
+                    Text("data"),
+                  ],
+                )
+              : const Center(
+                  child: CircularProgressIndicator(),
+                );
+        },
+      ),
+    );
   }
 }
