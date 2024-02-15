@@ -68,14 +68,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 _text,
                 style: TextStyle(fontSize: 16),
               ),
-              // ElevatedButton(
-              //   onPressed: () {
-              //     Get.to(MyAudioGuide());
-              //   },
-              //   child: Container(
-              //     child: Text('AudioGuide'),
-              //   ),
-              // )
+              ElevatedButton(
+                onPressed: () {
+                  Get.to(MyAudioGuide());
+                },
+                child: Container(
+                  child: Text('AudioGuide'),
+                ),
+              )
             ],
           ),
         ),
