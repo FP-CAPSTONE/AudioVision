@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:audiovision/controller/scan_controller.dart';
 import 'package:audiovision/services/location_services.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
+import 'package:audiovision/utils/text_utils.dart';
 import 'package:audiovision/widget/object_detected.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +84,7 @@ class _MyMapState extends State<MyMap> {
   @override
   void dispose() {
     locationService.dispose();
-    _gyroscopeStreamSubscription?.cancel();
+    _gyroscopeStreamSubscription.cancel();
     super.dispose();
   }
 
@@ -109,8 +110,9 @@ class _MyMapState extends State<MyMap> {
               children: [
                 build_GoogleMap(context),
                 build_SearchBar(context),
-                build_ButtonStart(context),
-                isStartNavigate ? cameraView() : Container()
+                destination != null ? build_ButtonStart(context) : Container(),
+
+                // isStartNavigate ? cameraView() : Container()
               ],
             ),
           ),
@@ -131,19 +133,6 @@ class _MyMapState extends State<MyMap> {
             .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
       },
       markers: markers,
-      onCameraIdle: () {
-        setState(() {
-          // _mapController.animateCamera(
-          //   CameraUpdate.newCameraPosition(
-          //     CameraPosition(
-          //       target: LatLng(userLatitude, userLongitude),
-          //       zoom: 17,
-          //       bearing: _heading,
-          //     ),
-          //   ),
-          // );
-        });
-      },
     );
   }
 
@@ -242,46 +231,69 @@ class _MyMapState extends State<MyMap> {
       bottom: 30.0,
       right: MediaQuery.of(context).size.width / 2 -
           120.0, // Adjusted to center horizontally
-      child: destination != null
-          ? GestureDetector(
-              onLongPress: () => TextToSpeech.speak("Start Navigation Button"),
-              child: SizedBox(
-                width: 240.0, // Set the width of the button
-                height: 60.0, // Set the height of the button
-                child: Material(
-                  elevation: 8.0, // Set the elevation (shadow) value
-                  borderRadius:
-                      BorderRadius.circular(30.0), // Set border radius
-                  color: Colors.blue, // Set background color
-                  child: InkWell(
-                    onTap: () {
-                      // Add your button functionality here
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //       builder: (context) => CameraaView()),
-                      // );
+      child: GestureDetector(
+        onLongPress: () => TextToSpeech.speak("Start Navigation Button"),
+        child: SizedBox(
+          width: 240.0, // Set the width of the button
+          height: 60.0, // Set the height of the button
+          child: Material(
+            elevation: 8.0, // Set the elevation (shadow) value
+            borderRadius: BorderRadius.circular(30.0), // Set border radius
+            color: Colors.blue, // Set background color
+            child: InkWell(
+              onTap: () {
+                // Add your button functionality here
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //       builder: (context) => CameraaView()),
+                // );
 
-                      _startNavigate();
-                      isStartNavigate = true;
-                    },
-                    borderRadius: BorderRadius.circular(
-                      30.0,
-                    ), // Set border radius for the InkWell
-                    child: const Center(
-                      child: Text(
-                        'Start Navigation',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w500), // Set text size
-                      ),
-                    ),
-                  ),
+                _startNavigate();
+              },
+              borderRadius: BorderRadius.circular(
+                30.0,
+              ), // Set border radius for the InkWell
+              child: const Center(
+                child: Text(
+                  'Start Navigation',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w500), // Set text size
                 ),
               ),
-            )
-          : Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _build_NavigateBar(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
+      padding: EdgeInsets.all(12.0), // Adjust the padding as needed
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        color: Color.fromARGB(255, 50, 116, 45),
+      ),
+      child: Row(
+        children: [
+          buildArrowDirectionContainer('arrow_upward'),
+          Expanded(
+            child: NowNavigationTextWidget(text: "Head North", fontSize: 18.0),
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color.fromARGB(255, 255, 255, 255),
+            ),
+            padding: EdgeInsets.all(8.0),
+            child: Icon(Icons.mic, color: Colors.blue[400]),
+          ),
+        ],
+      ),
     );
   }
 
@@ -416,18 +428,21 @@ class _MyMapState extends State<MyMap> {
     _mapController.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: LatLng(userLatitude, userLongitude),
-            zoom: 17,
-            bearing: _heading),
+          target: LatLng(userLatitude, userLongitude),
+          zoom: 17,
+          bearing: _heading,
+        ),
       ),
     );
-    DirectionServcie().get_direction(
-      LatLng(userLatitude, userLongitude),
-      LatLng(
-        destination!.geometry!.location!.lat!,
-        destination!.geometry!.location!.lng!,
-      ),
-    );
+
+    // DirectionServcie().get_direction(
+    //   LatLng(userLatitude, userLongitude),
+    //   LatLng(
+    //     destination!.geometry!.location!.lat!,
+    //     destination!.geometry!.location!.lng!,
+    //   ),
+    // );
+    isStartNavigate = true;
   }
 
   void _checkDeviceOrientation() {
@@ -435,12 +450,12 @@ class _MyMapState extends State<MyMap> {
     _gyroscopeStreamSubscription =
         gyroscopeEvents.listen((GyroscopeEvent event) {
       setState(() {
-        print("x");
-        print(event.x * 10.0);
-        print("y");
-        print(event.y * 10.0);
-        print("z");
-        print(event.z * 10.0);
+        // print("x");
+        // print(event.x * 10.0);
+        // print("y");
+        // print(event.y * 10.0);
+        // print("z");
+        // print(event.z * 10.0);
         _heading = event.z * 10.0;
         // print(_heading);
       });
