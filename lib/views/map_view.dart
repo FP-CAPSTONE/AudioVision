@@ -10,6 +10,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
@@ -58,6 +59,9 @@ class _MyMapState extends State<MyMap> {
   double _heading = 0.0;
 
   bool isStartNavigate = false;
+
+  double cameraViewX = 0; // Persistent X position
+  double cameraViewY = 0; // Persistent Y position
 
   @override
   void initState() {
@@ -110,7 +114,12 @@ class _MyMapState extends State<MyMap> {
                 build_GoogleMap(context),
                 build_SearchBar(context),
                 build_ButtonStart(context),
-                isStartNavigate ? cameraView() : Container()
+                //isStartNavigate ? cameraView() : Container()
+                isStartNavigate ?
+                Align(
+                    alignment: Alignment.centerRight,
+                    child: cameraView())
+                    : Container()
               ],
             ),
           ),
@@ -447,31 +456,78 @@ class _MyMapState extends State<MyMap> {
     });
   }
 
-  cameraView() {
-    return Container(
-      height: 200,
-      child: GetBuilder<ScanController>(
-        init: ScanController(),
-        builder: (controller) {
-          return controller.isCameraInitialized.value
-              ? Stack(
-                  children: [
-                    CameraPreview(controller.cameraController!),
-                    CustomPaint(
-                      // Use CustomPaint to draw the bounding box
-                      painter: BoundingBoxPainter(
-                          controller.detectionResult, context),
-                    ),
-                    DetectedObjectWidget(controller
-                        .detectionResult), // Display detected object info
-                    Text("data"),
-                  ],
-                )
-              : const Center(
-                  child: CircularProgressIndicator(),
-                );
-        },
-      ),
+  // cameraView() {
+  //   return Container(
+  //     height: 200,
+  //     child: GetBuilder<ScanController>(
+  //       init: ScanController(),
+  //       builder: (controller) {
+  //         return controller.isCameraInitialized.value
+  //             ? Stack(
+  //                 children: [
+  //                   CameraPreview(controller.cameraController!),
+  //                   CustomPaint(
+  //                     // Use CustomPaint to draw the bounding box
+  //                     painter: BoundingBoxPainter(
+  //                         controller.detectionResult, context),
+  //                   ),
+  //                   DetectedObjectWidget(controller
+  //                       .detectionResult), // Display detected object info
+  //                   Text("data"),
+  //                 ],
+  //               )
+  //             : const Center(
+  //                 child: CircularProgressIndicator(),
+  //               );
+  //       },
+  //     ),
+  //   );
+  // }
+
+  Widget cameraView() {
+    return Stack(
+      children: [
+        Positioned(
+          left: cameraViewX,
+          top: cameraViewY,
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                // Update the position of the camera view based on user drag
+                cameraViewX += details.delta.dx;
+                cameraViewY += details.delta.dy;
+              });
+            },
+            child: Container(
+              height: 200,
+              width: 150, // Example width of the camera view
+              child: GetBuilder<ScanController>(
+                init: ScanController(),
+                builder: (controller) {
+                  return controller.isCameraInitialized.value
+                      ? Stack(
+                    children: [
+                      CameraPreview(controller.cameraController!),
+                      CustomPaint(
+                        // Use CustomPaint to draw the bounding box
+                        painter: BoundingBoxPainter(
+                            controller.detectionResult, context),
+                      ),
+                      DetectedObjectWidget(controller
+                          .detectionResult), // Display detected object info
+                      Text("data"),
+                    ],
+                  )
+                      : Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
+
 }
