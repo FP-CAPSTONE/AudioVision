@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  Get.to(() => const MyMap());
+                  Get.to(() => const MapPage());
                 },
                 child: const Text(
                   "DOULBE TAP ANYWHERE ON THE SCREEN\n"
@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _text = "";
             } else if (_text.contains("map view")) {
               TextToSpeech.speak("navigate toMAP VIEW SCREEN");
-              Get.to(const MyMap());
+              Get.to(const MapPage());
               _isListening = false;
               _text = "";
             } else {

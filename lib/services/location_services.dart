@@ -28,14 +28,5 @@ class LocationService {
     );
   }
 
-  ///aasd
-  ///asd/
-  ///aasd
-  ///asd/
-  ///aasd
-  ///asd/
-  ///aasd
-  ///asd/
-
   void dispose() => _locationStreamController.close();
 }

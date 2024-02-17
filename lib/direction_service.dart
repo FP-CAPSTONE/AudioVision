@@ -2,6 +2,7 @@
 
 import 'dart:convert' as convert;
 // import 'package:flutter/services.dart';
+import 'package:audiovision/views/map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -95,7 +96,6 @@ class DirectionServcie {
             'duration': step['duration']['text'],
             'instructions': removeHtmlTags(step['html_instructions']),
           };
-
           if (step.containsKey('maneuver')) {
             stepResult['maneuver'] = step['maneuver'];
           }
@@ -135,6 +135,7 @@ class DirectionServcie {
     LatLng user_position,
     LatLng destination,
   ) async {
+    bool isNavigate = true;
     final String url_using_latlong =
         "https://maps.googleapis.com/maps/api/directions/json?origin=${user_position.latitude},${user_position.longitude}&"
         "destination=${destination.latitude},${destination.longitude}&"
@@ -160,7 +161,6 @@ class DirectionServcie {
       if (legs.isNotEmpty) {
         List<dynamic> steps = legs[0]['steps'];
         List<Map<String, dynamic>> stepResults = [];
-
         for (var step in steps) {
           Map<String, dynamic> stepResult = {
             'distance': step['distance']['text'],
@@ -186,8 +186,9 @@ class DirectionServcie {
     print('Polyline: ${results['polyline']}');
     print('Polyline Decoded: ${results['polyline_decoded']}');
     print('Steps:');
-
+    // while (isNavigate) {
     for (var step in results['steps']) {
+      print(MapPage.userLatitude);
       print(step);
       String textToSpeak =
           'Jarak: ${step['distance']}, Durasi: ${step['duration']}, Instruksi: ${step['instructions']}';
@@ -196,8 +197,9 @@ class DirectionServcie {
       }
       // await speak(textToSpeak);
       // await Future.delayed(Duration(seconds: 3));
-      await speakWithCompletion(textToSpeak);
+      // await speakWithCompletion(textToSpeak);
     }
+    // }
 
     return results;
   }
