@@ -6,13 +6,16 @@ import 'package:audiovision/pages/map_page/method/location_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:audiovision/pages/map_page/widget/button_start.dart';
 import 'package:audiovision/pages/map_page/widget/camera_view.dart';
+import 'package:audiovision/pages/map_page/widget/google_map.dart';
 import 'package:audiovision/pages/map_page/widget/navigate_bar.dart';
 import 'package:audiovision/services/location_services.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
+import 'package:riverpod/riverpod.dart';
 // ned to change the class name, there are two location service
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -23,6 +26,8 @@ class MapPage extends StatefulWidget {
   static LatLng destinationCoordinate = const LatLng(0, 0);
 
   static bool isStartNavigate = false;
+
+  static GoogleMapController? mapController;
 
   static List<dynamic> allSteps = [];
   static Map<String, dynamic> endLocation = {};
@@ -55,8 +60,6 @@ class _MapPageState extends State<MapPage> {
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
 
-  late GoogleMapController _mapController;
-
   static LocationService locationService = LocationService();
 
   late StreamSubscription _gyroscopeStreamSubscription;
@@ -67,6 +70,11 @@ class _MapPageState extends State<MapPage> {
 
   double cameraViewX = 0; // Persistent X position
   double cameraViewY = 0; // Persistent Y position
+  void updatePolyline(newPolylines) {
+    PolylineId id = const PolylineId("poly");
+
+    setState(() => MapPage.polylines[id] = newPolylines);
+  }
 
   @override
   void initState() {
@@ -109,10 +117,11 @@ class _MapPageState extends State<MapPage> {
           Expanded(
             child: Stack(
               children: [
-                build_GoogleMap(context),
+                GoogleMapWidget(),
                 build_SearchBar(context),
                 destination != null
-                    ? ButtonStartNavigateWidget(mapController: _mapController)
+                    ? ButtonStartNavigateWidget(
+                        mapController: MapPage.mapController!)
                     : Container(),
                 NavigateBarWidget(navigationText: navigationText),
                 MapPage.isStartNavigate ? _builCamera() : Container(),
@@ -135,14 +144,11 @@ class _MapPageState extends State<MapPage> {
       mapType: MapType.normal,
       initialCameraPosition: MapPage.cameraPosition,
       onMapCreated: (controller) {
-        _mapController = controller;
+        MapPage.mapController = controller;
         setState(() {
-          _mapController.animateCamera(
+          MapPage.mapController!.animateCamera(
               CameraUpdate.newCameraPosition(MapPage.cameraPosition));
         });
-      },
-      onCameraIdle: () {
-        setState(() {});
       },
       markers: MapPage.markers,
     );
@@ -280,9 +286,9 @@ class _MapPageState extends State<MapPage> {
                     ? MapPage.userLongitude
                     : MapPage.destinationCoordinate.longitude;
 
-            PolylineMethod().getPolyline();
+            PolylineMethod(updatePolyline).getPolyline();
 
-            _mapController.animateCamera(
+            MapPage.mapController!.animateCamera(
               CameraUpdate.newLatLngBounds(
                 LatLngBounds(
                   southwest: LatLng(minLat, minLng),

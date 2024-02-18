@@ -55,7 +55,7 @@ dependencies:
   convert: ^3.1.1
   flutter_dotenv :
   sensors_plus:
-
+  riverpod: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

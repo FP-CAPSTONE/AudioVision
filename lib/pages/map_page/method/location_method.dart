@@ -27,7 +27,8 @@ class LocationMethod {
             MapPage.allSteps[stepIndex]['end_long'],
           );
 
-          double destinationDistance = await NavigateMethod().calculateDistance(
+          double userAndDestinationDistance =
+              await NavigateMethod().calculateDistance(
             userLocation.latitude,
             userLocation.longitude,
             MapPage.destinationCoordinate.latitude,
@@ -38,7 +39,8 @@ class LocationMethod {
           double thresholdDistance = 50; // meters
           print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
 
-          if (distanceToStep <= thresholdDistance) {
+          if (distanceToStep <= thresholdDistance &&
+              userAndDestinationDistance > 10) {
             String maneuver = MapPage.allSteps[stepIndex]['maneuver'] ??
                 'Continue'; // Default to 'Continue' if maneuver is not provided
             print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
@@ -46,7 +48,7 @@ class LocationMethod {
             NavigateMethod().updateTextNavigate(maneuver);
             stepIndex++;
           }
-          if (destinationDistance <= 10) {
+          if (userAndDestinationDistance <= 10) {
             MapPage.isStartNavigate = false;
             print(
                 "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
@@ -72,7 +74,7 @@ class LocationMethod {
     );
 
     if (MapPage.isStartNavigate) {
-      PolylineMethod().getPolyline();
+      // PolylineMethod().getPolyline();
     }
   }
 }

@@ -7,6 +7,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class PolylineMethod {
   PolylinePoints polylinePoints = PolylinePoints();
   List<LatLng> polylineCoordinates = [];
+  final Function callback;
+  PolylineMethod(this.callback);
 
   void getPolyline() async {
     final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
@@ -40,7 +42,7 @@ class PolylineMethod {
       points: polylineCoordinates,
       width: 5,
     );
-    MapPage.polylines[id] = polyline;
+    callback(polyline);
   }
 
   void clearPolyline() {
