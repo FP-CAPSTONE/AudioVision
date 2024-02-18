@@ -4,7 +4,9 @@ import 'dart:async';
 
 import 'package:audiovision/controller/scan_controller.dart';
 import 'package:audiovision/direction_service.dart';
+import 'package:audiovision/pages/map_page/method/navigate_method.dart';
 import 'package:audiovision/services/location_services.dart';
+import 'package:audiovision/utils/map_utils.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:audiovision/utils/text_utils.dart';
 import 'package:audiovision/widget/object_detected.dart';
@@ -63,6 +65,7 @@ class _MapPageState extends State<MapPage> {
 
   bool isStartNavigate = false;
   late List<dynamic> allSteps;
+  late Map<String, dynamic> endLocation;
   int stepIndex = 0;
   String navigationText = "Heyo";
 
@@ -138,35 +141,39 @@ class _MapPageState extends State<MapPage> {
             LatLng(MapPage.userLatitude, MapPage.userLongitude));
       });
       if (isStartNavigate) {
-        double distanceToStep = await calculateDistance(
-          userLocation.latitude,
-          userLocation.longitude,
-          allSteps[stepIndex]['end_lat'],
-          allSteps[stepIndex]['end_long'],
-        );
+        if (stepIndex < allSteps.length) {
+          double distanceToStep = await NavigateMethod().calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            allSteps[stepIndex]['end_lat'],
+            allSteps[stepIndex]['end_long'],
+          );
 
-        double destinationDistance = await calculateDestinationDistance(
-          userLocation.latitude,
-          userLocation.longitude,
-        );
+          double destinationDistance = await NavigateMethod().calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            destinationCoordinate.latitude,
+            destinationCoordinate.longitude,
+          );
 
-        // Assuming there's a threshold distance to trigger the notification
-        double thresholdDistance = 50; // meters
-        print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
+          // Assuming there's a threshold distance to trigger the notification
+          double thresholdDistance = 50; // meters
+          print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
 
-        if (distanceToStep <= thresholdDistance) {
-          String maneuver = allSteps[stepIndex]['maneuver'] ??
-              'Continue'; // Default to 'Continue' if maneuver is not provided
-          print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-          print(maneuver);
-          updateTextNavigate(maneuver);
-          stepIndex++;
-        }
-        if (destinationDistance <= 10) {
-          isStartNavigate = false;
-          print(
-              "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
-          stepIndex = 0;
+          if (distanceToStep <= thresholdDistance) {
+            String maneuver = allSteps[stepIndex]['maneuver'] ??
+                'Continue'; // Default to 'Continue' if maneuver is not provided
+            print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+            print(maneuver);
+            updateTextNavigate(maneuver);
+            stepIndex++;
+          }
+          if (destinationDistance <= 10) {
+            isStartNavigate = false;
+            print(
+                "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
+            stepIndex = 0;
+          }
         }
       }
     });
@@ -647,6 +654,7 @@ class _MapPageState extends State<MapPage> {
 
         results['steps'] = stepResults;
         allSteps = results['steps'];
+        endLocation = results['end_location'];
       }
     }
 

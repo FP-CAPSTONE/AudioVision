@@ -45,8 +45,6 @@ class CameraView extends StatelessWidget {
       ),
     );
   }
-
-  //
 }
 
 

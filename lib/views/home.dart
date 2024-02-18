@@ -3,10 +3,10 @@
 import 'dart:async';
 
 import 'package:audiovision/mainAudio.dart';
+import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/screens/select_screen.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:audiovision/views/camera_view.dart';
-import 'package:audiovision/views/map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
