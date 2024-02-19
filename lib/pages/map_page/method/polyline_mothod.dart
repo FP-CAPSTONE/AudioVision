@@ -8,6 +8,7 @@ class PolylineMethod {
   PolylinePoints polylinePoints = PolylinePoints();
   List<LatLng> polylineCoordinates = [];
   final Function callback;
+
   PolylineMethod(this.callback);
 
   void getPolyline() async {

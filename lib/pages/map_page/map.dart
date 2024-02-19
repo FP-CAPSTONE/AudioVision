@@ -12,10 +12,8 @@ import 'package:audiovision/services/location_services.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
-import 'package:riverpod/riverpod.dart';
 // ned to change the class name, there are two location service
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -76,6 +74,10 @@ class _MapPageState extends State<MapPage> {
     setState(() => MapPage.polylines[id] = newPolylines);
   }
 
+  void updateUI() {
+    setState(() {});
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -85,7 +87,10 @@ class _MapPageState extends State<MapPage> {
 
     endFocusNode = FocusNode();
 
-    LocationMethod().listenToUserLocation(locationService);
+    LocationMethod(
+      updateUI: updateUI,
+      updatePolylines: updatePolyline,
+    ).listenToUserLocation(locationService);
 
     // _checkDeviceOrientation();
   }
@@ -124,7 +129,7 @@ class _MapPageState extends State<MapPage> {
                         mapController: MapPage.mapController!)
                     : Container(),
                 NavigateBarWidget(navigationText: navigationText),
-                MapPage.isStartNavigate ? _builCamera() : Container(),
+                // MapPage.isStartNavigate ? builCamera() : Container(),
                 // isStartNavigate
                 // ? Align(
                 //     alignment: Alignment.centerRight, child: cameraView())
@@ -137,24 +142,7 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  //Google Map Widget
-  Widget build_GoogleMap(BuildContext context) {
-    return GoogleMap(
-      polylines: Set<Polyline>.of(MapPage.polylines.values),
-      mapType: MapType.normal,
-      initialCameraPosition: MapPage.cameraPosition,
-      onMapCreated: (controller) {
-        MapPage.mapController = controller;
-        setState(() {
-          MapPage.mapController!.animateCamera(
-              CameraUpdate.newCameraPosition(MapPage.cameraPosition));
-        });
-      },
-      markers: MapPage.markers,
-    );
-  }
-
-  //Search Bar Widget
+  //Search Bar Widget <- SHOULD MOVE TO ANOTHER FILE
   Widget build_SearchBar(BuildContext context) {
     return Column(
       children: [
@@ -243,7 +231,7 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-// add destination when user clck the listview
+// add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void add_destination(int index) async {
     final placeId = predictions[index].placeId!;
     final details = await googlePlace.details.get(placeId);
@@ -320,7 +308,7 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  Widget _builCamera() {
+  Widget builCamera() {
     return Stack(
       children: [
         Positioned(

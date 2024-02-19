@@ -2,61 +2,30 @@ import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/method/navigate_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:audiovision/services/location_services.dart';
-import 'package:audiovision/utils/map_utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:math';
 
 class LocationMethod {
+  final Function? updateUI;
+  final Function? updatePolylines;
+
+  LocationMethod({
+    this.updateUI,
+    this.updatePolylines,
+  });
+
   void listenToUserLocation(
     LocationService locationService,
   ) {
-    int stepIndex = 0;
     // always listen to the user position and update it
-    locationService.locationStream.listen((userLocation) async {
-      // setState(() {
+    locationService.locationStream.listen((userLocation) {
       MapPage.userLatitude = userLocation.latitude;
       MapPage.userLongitude = userLocation.longitude;
       updateUserMarkerPosition(
           LatLng(MapPage.userLatitude, MapPage.userLongitude));
-      // });
-      if (MapPage.isStartNavigate) {
-        if (stepIndex < MapPage.allSteps.length) {
-          double distanceToStep = await NavigateMethod().calculateDistance(
-            userLocation.latitude,
-            userLocation.longitude,
-            MapPage.allSteps[stepIndex]['end_lat'],
-            MapPage.allSteps[stepIndex]['end_long'],
-          );
-
-          double userAndDestinationDistance =
-              await NavigateMethod().calculateDistance(
-            userLocation.latitude,
-            userLocation.longitude,
-            MapPage.destinationCoordinate.latitude,
-            MapPage.destinationCoordinate.longitude,
-          );
-
-          // Assuming there's a threshold distance to trigger the notification
-          double thresholdDistance = 50; // meters
-          print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
-
-          if (distanceToStep <= thresholdDistance &&
-              userAndDestinationDistance > 10) {
-            String maneuver = MapPage.allSteps[stepIndex]['maneuver'] ??
-                'Continue'; // Default to 'Continue' if maneuver is not provided
-            print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-            print(maneuver);
-            NavigateMethod().updateTextNavigate(maneuver);
-            stepIndex++;
-          }
-          if (userAndDestinationDistance <= 10) {
-            MapPage.isStartNavigate = false;
-            print(
-                "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
-            stepIndex = 0;
-          }
-        }
-      }
     });
+
+    NavigateMethod().routeGuidance();
   }
 
   // update the user marker  position
@@ -72,9 +41,10 @@ class LocationMethod {
         position: newPosition,
       ),
     );
+    updateUI!();
 
     if (MapPage.isStartNavigate) {
-      // PolylineMethod().getPolyline();
+      PolylineMethod(updatePolylines!).getPolyline();
     }
   }
 }

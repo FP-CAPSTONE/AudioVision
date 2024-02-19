@@ -106,4 +106,47 @@ class NavigateMethod {
   void updateTextNavigate(String newData) {
     // navigationText = newData;
   }
+  int stepIndex = 0;
+
+  void routeGuidance() async {
+    if (MapPage.isStartNavigate) {
+      if (stepIndex < MapPage.allSteps.length) {
+        double distanceToStep = await NavigateMethod().calculateDistance(
+          MapPage.userLatitude,
+          MapPage.userLatitude,
+          MapPage.allSteps[stepIndex]['end_lat'],
+          MapPage.allSteps[stepIndex]['end_long'],
+        );
+
+        double userAndDestinationDistance =
+            await NavigateMethod().calculateDistance(
+          MapPage.userLatitude,
+          MapPage.userLatitude,
+          MapPage.destinationCoordinate.latitude,
+          MapPage.destinationCoordinate.longitude,
+        );
+        int roundedDistance = distanceToStep.ceil();
+
+        // Assuming there's a threshold distance to trigger the notification
+        double thresholdDistance = 50; // meters
+        print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
+
+        if (distanceToStep <= thresholdDistance &&
+            userAndDestinationDistance > 10) {
+          String maneuver = MapPage.allSteps[stepIndex]['maneuver'] ??
+              'Continue'; // Default to 'Continue' if maneuver is not provided
+          print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+          print("In $roundedDistance metersss $maneuver");
+          NavigateMethod().updateTextNavigate(maneuver);
+          stepIndex++;
+        }
+        if (userAndDestinationDistance <= 10) {
+          MapPage.isStartNavigate = false;
+          print(
+              "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
+          stepIndex = 0;
+        }
+      }
+    }
+  }
 }
