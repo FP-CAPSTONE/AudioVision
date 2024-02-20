@@ -142,38 +142,38 @@ class _MapPageState extends State<MapPage> {
       });
       if (isStartNavigate) {
         if (stepIndex < allSteps.length) {
-          double distanceToStep = await NavigateMethod().calculateDistance(
-            userLocation.latitude,
-            userLocation.longitude,
-            allSteps[stepIndex]['end_lat'],
-            allSteps[stepIndex]['end_long'],
-          );
+          // double distanceToStep = await NavigateMethod().calculateDistance(
+          //   userLocation.latitude,
+          //   userLocation.longitude,
+          //   allSteps[stepIndex]['end_lat'],
+          //   allSteps[stepIndex]['end_long'],
+          // );
 
-          double destinationDistance = await NavigateMethod().calculateDistance(
-            userLocation.latitude,
-            userLocation.longitude,
-            destinationCoordinate.latitude,
-            destinationCoordinate.longitude,
-          );
+          // double destinationDistance = await NavigateMethod().calculateDistance(
+          //   userLocation.latitude,
+          //   userLocation.longitude,
+          //   destinationCoordinate.latitude,
+          //   destinationCoordinate.longitude,
+          // );
 
           // Assuming there's a threshold distance to trigger the notification
           double thresholdDistance = 50; // meters
           print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
 
-          if (distanceToStep <= thresholdDistance) {
-            String maneuver = allSteps[stepIndex]['maneuver'] ??
-                'Continue'; // Default to 'Continue' if maneuver is not provided
-            print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-            print(maneuver);
-            updateTextNavigate(maneuver);
-            stepIndex++;
-          }
-          if (destinationDistance <= 10) {
-            isStartNavigate = false;
-            print(
-                "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
-            stepIndex = 0;
-          }
+          // if (distanceToStep <= thresholdDistance) {
+          //   String maneuver = allSteps[stepIndex]['maneuver'] ??
+          //       'Continue'; // Default to 'Continue' if maneuver is not provided
+          //   print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+          //   print(maneuver);
+          //   updateTextNavigate(maneuver);
+          //   stepIndex++;
+          // }
+          // if (destinationDistance <= 10) {
+          //   isStartNavigate = false;
+          //   print(
+          //       "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
+          //   stepIndex = 0;
+          // }
         }
       }
     });

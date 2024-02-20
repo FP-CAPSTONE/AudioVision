@@ -11,6 +11,7 @@ class ButtonStartNavigateWidget extends StatelessWidget {
     super.key,
     required this.mapController,
   });
+  void update() {}
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,9 @@ class ButtonStartNavigateWidget extends StatelessWidget {
             right: MediaQuery.of(context).size.width / 2 -
                 120.0, // Adjusted to center horizontally
             child: GestureDetector(
-              onLongPress: () => TextToSpeech.speak("Start Navigation Button"),
+              onLongPress: () => TextToSpeech.speak(
+                "Start Navigation Button",
+              ),
               child: SizedBox(
                 width: 240.0, // Set the width of the button
                 height: 60.0, // Set the height of the button

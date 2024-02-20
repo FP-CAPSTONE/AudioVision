@@ -64,7 +64,7 @@ class _MapPageState extends State<MapPage> {
   double _heading = 0.0;
 
   int stepIndex = 0;
-  String navigationText = "Heyo";
+  String navigationText = "Continnue";
 
   double cameraViewX = 0; // Persistent X position
   double cameraViewY = 0; // Persistent Y position

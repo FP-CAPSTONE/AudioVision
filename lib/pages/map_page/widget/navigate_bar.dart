@@ -27,7 +27,10 @@ class NavigateBarWidget extends StatelessWidget {
               color: Color.fromARGB(255, 255, 255, 255),
             ),
             padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.mic, color: Colors.blue[400]),
+            child: Icon(
+              Icons.mic,
+              color: Colors.blue[400],
+            ),
           ),
         ],
       ),
