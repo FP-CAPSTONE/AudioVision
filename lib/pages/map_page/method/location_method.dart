@@ -18,7 +18,7 @@ class LocationMethod {
   void listenToUserLocation(
     LocationService locationService,
   ) {
-    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+    // final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
 
     // always listen to the user position and update it
     locationService.locationStream.listen((userLocation) {
@@ -28,14 +28,14 @@ class LocationMethod {
       updateUserMarkerPosition(
           LatLng(MapPage.userLatitude, MapPage.userLongitude));
       // Write user location data to the Firebase Realtime Database
-      databaseReference.child("users").child("user1").set({
-        "latitude": userLocation.latitude,
-        "longitude": userLocation.longitude,
-      }).then((_) {
-        print("User location updated successfully");
-      }).catchError((error) {
-        print("Failed to update user location: $error");
-      });
+      // databaseReference.child("users").child("user1").set({
+      //   "latitude": userLocation.latitude,
+      //   "longitude": userLocation.longitude,
+      // }).then((_) {
+      //   print("User location updated successfully");
+      // }).catchError((error) {
+      //   print("Failed to update user location: $error");
+      // });
     });
 
     NavigateMethod().routeGuidance();
