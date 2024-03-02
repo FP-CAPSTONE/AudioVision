@@ -599,12 +599,6 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  void updateTextNavigate(String newData) {
-    setState(() {
-      navigationText = newData;
-    });
-  }
-
   Future<Map<String, dynamic>> get_direction(
     LatLng user_position,
     LatLng destination,

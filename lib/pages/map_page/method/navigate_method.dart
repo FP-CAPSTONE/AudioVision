@@ -1,16 +1,11 @@
 import 'package:audiovision/direction_service.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
 class NavigateMethod {
-  // final Function? updateTextNavigation;
-
-  // NavigateMethod(this.updateTextNavigation);
-
   void startNavigate(
     mapController,
     LatLng destination,
@@ -92,61 +87,5 @@ class NavigateMethod {
     return results;
   }
 
-  Future<double> calculateDistance(
-    double startLatitude,
-    double startLongitude,
-    double endLatitude,
-    double endLongitude,
-  ) async {
-    double distanceInMeters = await Geolocator.distanceBetween(
-      startLatitude,
-      startLongitude,
-      endLatitude,
-      endLongitude,
-    );
-    return distanceInMeters;
-  }
-
   int stepIndex = 0;
-
-  void routeGuidance() async {
-    if (MapPage.isStartNavigate) {
-      if (stepIndex < MapPage.allSteps.length) {
-        double distanceToStep = await calculateDistance(
-          MapPage.userLatitude,
-          MapPage.userLatitude,
-          MapPage.allSteps[stepIndex]['end_lat'],
-          MapPage.allSteps[stepIndex]['end_long'],
-        );
-
-        double userAndDestinationDistance = await calculateDistance(
-          MapPage.userLatitude,
-          MapPage.userLatitude,
-          MapPage.destinationCoordinate.latitude,
-          MapPage.destinationCoordinate.longitude,
-        );
-        int roundedDistance = distanceToStep.ceil();
-
-        // Assuming there's a threshold distance to trigger the notification
-        double thresholdDistance = 100; // meters
-        print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
-
-        if (distanceToStep <= thresholdDistance &&
-            userAndDestinationDistance > 10) {
-          String maneuver = MapPage.allSteps[stepIndex]['maneuver'] ??
-              'Continue'; // Default to 'Continue' if maneuver is not provided
-          print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-          print("In $roundedDistance metersss $maneuver");
-          stepIndex++;
-        }
-        if (userAndDestinationDistance <= 20) {
-          MapPage.isStartNavigate = false;
-          print(
-              "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
-          stepIndex = 0;
-        }
-        // updateTextNavigation!(roundedDistance);
-      }
-    }
-  }
 }

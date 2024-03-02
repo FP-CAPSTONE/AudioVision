@@ -11,7 +11,6 @@ class ButtonStartNavigateWidget extends StatelessWidget {
     super.key,
     required this.mapController,
   });
-  void update() {}
 
   @override
   Widget build(BuildContext context) {

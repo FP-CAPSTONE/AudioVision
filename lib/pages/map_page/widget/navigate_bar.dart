@@ -35,6 +35,5 @@ class NavigateBarWidget extends StatelessWidget {
         ],
       ),
     );
-    ;
   }
 }

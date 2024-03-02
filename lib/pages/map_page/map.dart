@@ -2,7 +2,6 @@
 
 import 'dart:async';
 
-import 'package:audiovision/pages/map_page/method/location_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:audiovision/pages/map_page/widget/button_start.dart';
 import 'package:audiovision/pages/map_page/widget/camera_view.dart';
@@ -12,6 +11,7 @@ import 'package:audiovision/services/location_services.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 // ned to change the class name, there are two location service
@@ -68,14 +68,9 @@ class _MapPageState extends State<MapPage> {
 
   double cameraViewX = 0; // Persistent X position
   double cameraViewY = 0; // Persistent Y position
-  void updatePolyline(newPolylines) {
+  void updateUi(newPolylines) {
     PolylineId id = const PolylineId("poly");
-
     setState(() => MapPage.polylines[id] = newPolylines);
-  }
-
-  void updateUI() {
-    setState(() {});
   }
 
   @override
@@ -87,10 +82,7 @@ class _MapPageState extends State<MapPage> {
 
     endFocusNode = FocusNode();
 
-    LocationMethod(
-      updateUI: updateUI,
-      updatePolylines: updatePolyline,
-    ).listenToUserLocation(locationService);
+    listenToUserLocation(locationService);
 
     // _checkDeviceOrientation();
   }
@@ -123,12 +115,16 @@ class _MapPageState extends State<MapPage> {
             child: Stack(
               children: [
                 GoogleMapWidget(),
-                build_SearchBar(context),
+                MapPage.isStartNavigate
+                    ? Container()
+                    : build_SearchBar(context),
                 destination != null
                     ? ButtonStartNavigateWidget(
                         mapController: MapPage.mapController!)
                     : Container(),
-                NavigateBarWidget(navigationText: navigationText),
+                MapPage.isStartNavigate
+                    ? NavigateBarWidget(navigationText: navigationText)
+                    : Container(),
                 // MapPage.isStartNavigate ? builCamera() : Container(),
                 // isStartNavigate
                 // ? Align(
@@ -274,7 +270,7 @@ class _MapPageState extends State<MapPage> {
                     ? MapPage.userLongitude
                     : MapPage.destinationCoordinate.longitude;
 
-            PolylineMethod(updatePolyline).getPolyline();
+            PolylineMethod(updateUi).getPolyline();
 
             MapPage.mapController!.animateCamera(
               CameraUpdate.newLatLngBounds(
@@ -327,5 +323,112 @@ class _MapPageState extends State<MapPage> {
         ),
       ],
     );
+  }
+
+  void listenToUserLocation(
+    LocationService locationService,
+  ) {
+    // final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+
+    // always listen to the user position and update it
+    locationService.locationStream.listen((userLocation) {
+      MapPage.userLatitude = userLocation.latitude;
+      MapPage.userLongitude = userLocation.longitude;
+
+      updateUserMarkerPosition(
+          LatLng(MapPage.userLatitude, MapPage.userLongitude));
+      // Write user location data to the Firebase Realtime Database
+      // databaseReference.child("users").child("user1").set({
+      //   "latitude": userLocation.latitude,
+      //   "longitude": userLocation.longitude,
+      // }).then((_) {
+      //   print("User location updated successfully");
+      // }).catchError((error) {
+      //   print("Failed to update user location: $error");
+      // });
+      routeGuidance();
+    });
+  }
+
+  // update the user marker  position
+  void updateUserMarkerPosition(
+    LatLng newPosition,
+  ) {
+    MapPage.cameraPosition = CameraPosition(target: newPosition, zoom: 16.5);
+    // Update marker for user's position or add it if not present
+    MapPage.markers.removeWhere((marker) => marker.markerId.value == "You");
+    MapPage.markers.add(
+      Marker(
+        markerId: const MarkerId("You"),
+        position: newPosition,
+      ),
+    );
+    setState(() {});
+    if (MapPage.isStartNavigate) {
+      PolylineMethod(updateUi!).getPolyline();
+    }
+  }
+
+  void routeGuidance() async {
+    String maneuver = "";
+    if (MapPage.isStartNavigate) {
+      if (stepIndex < MapPage.allSteps.length) {
+        double distanceToStep = await calculateDistance(
+          MapPage.userLatitude,
+          MapPage.userLatitude,
+          MapPage.allSteps[stepIndex]['end_lat'],
+          MapPage.allSteps[stepIndex]['end_long'],
+        );
+
+        double userAndDestinationDistance = await calculateDistance(
+          MapPage.userLatitude,
+          MapPage.userLatitude,
+          MapPage.destinationCoordinate.latitude,
+          MapPage.destinationCoordinate.longitude,
+        );
+        int roundedDistance = distanceToStep.ceil();
+
+        // Assuming there's a threshold distance to trigger the notification
+        double thresholdDistance = 100; // meters
+        print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
+
+        if (distanceToStep <= thresholdDistance &&
+            userAndDestinationDistance > 10) {
+          maneuver = MapPage.allSteps[stepIndex]['maneuver'] ??
+              'Continue'; // Default to 'Continue' if maneuver is not provided
+          print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+          print("In $roundedDistance metersss $maneuver");
+          TextToSpeech.speak("In $roundedDistance meters $maneuver");
+          stepIndex++;
+        } else {
+          maneuver = "Continue Straight";
+        }
+        if (userAndDestinationDistance <= 20) {
+          MapPage.isStartNavigate = false;
+          print(
+              "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
+          print("CONGRATULATIONS, YOU HAVE REACEHED THE DESTINATION");
+          stepIndex = 0;
+        }
+        setState(() {
+          navigationText = maneuver;
+        });
+      }
+    }
+  }
+
+  Future<double> calculateDistance(
+    double startLatitude,
+    double startLongitude,
+    double endLatitude,
+    double endLongitude,
+  ) async {
+    double distanceInMeters = await Geolocator.distanceBetween(
+      startLatitude,
+      startLongitude,
+      endLatitude,
+      endLongitude,
+    );
+    return distanceInMeters;
   }
 }
