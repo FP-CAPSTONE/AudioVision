@@ -43,6 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              ElevatedButton(
+                onPressed: () {
+                  Get.to(() => const MapPage());
+                },
+                child: Text("GO TO LOGIN"),
+              ),
+              SizedBox(
+                height: 100,
+              ),
               GestureDetector(
                 onTap: () {
                   Get.to(() => const MapPage());
