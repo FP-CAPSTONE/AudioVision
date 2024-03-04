@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:audiovision/mainAudio.dart';
+import 'package:audiovision/pages/login_page/login.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/screens/select_screen.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
@@ -45,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  Get.to(() => const MapPage());
+                  Get.to(() => LoginPage());
                 },
                 child: Text("GO TO LOGIN"),
               ),
