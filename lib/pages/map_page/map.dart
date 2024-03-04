@@ -334,7 +334,12 @@ class _MapPageState extends State<MapPage> {
     locationService.locationStream.listen((userLocation) {
       MapPage.userLatitude = userLocation.latitude;
       MapPage.userLongitude = userLocation.longitude;
-
+      MapPage.cameraPosition = CameraPosition(
+        target: LatLng(
+          userLocation.latitude,
+          userLocation.longitude,
+        ),
+      );
       updateUserMarkerPosition(
           LatLng(MapPage.userLatitude, MapPage.userLongitude));
       // Write user location data to the Firebase Realtime Database
@@ -392,8 +397,7 @@ class _MapPageState extends State<MapPage> {
         double thresholdDistance = 100; // meters
         print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
 
-        if (distanceToStep <= thresholdDistance &&
-            userAndDestinationDistance > 10) {
+        if (distanceToStep <= thresholdDistance) {
           maneuver = MapPage.allSteps[stepIndex]['maneuver'] ??
               'Continue'; // Default to 'Continue' if maneuver is not provided
           print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");

@@ -15,8 +15,9 @@ class GoogleMapWidget extends StatelessWidget {
       initialCameraPosition: MapPage.cameraPosition,
       onMapCreated: (controller) {
         MapPage.mapController = controller;
-        MapPage.mapController!.animateCamera(
-            CameraUpdate.newCameraPosition(MapPage.cameraPosition));
+        MapPage.mapController!.animateCamera(CameraUpdate.newCameraPosition(
+          MapPage.cameraPosition,
+        ));
       },
       markers: MapPage.markers,
     );
