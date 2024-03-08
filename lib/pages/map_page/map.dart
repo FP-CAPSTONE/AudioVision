@@ -114,7 +114,7 @@ class _MapPageState extends State<MapPage> {
           Expanded(
             child: Stack(
               children: [
-                GoogleMapWidget(),
+                const GoogleMapWidget(),
                 MapPage.isStartNavigate
                     ? Container()
                     : build_SearchBar(context),
@@ -365,7 +365,7 @@ class _MapPageState extends State<MapPage> {
     );
     setState(() {});
     if (MapPage.isStartNavigate) {
-      PolylineMethod(updateUi!).getPolyline();
+      PolylineMethod(updateUi).getPolyline();
     }
   }
 
@@ -423,7 +423,7 @@ class _MapPageState extends State<MapPage> {
     double endLatitude,
     double endLongitude,
   ) async {
-    double distanceInMeters = await Geolocator.distanceBetween(
+    double distanceInMeters = Geolocator.distanceBetween(
       startLatitude,
       startLongitude,
       endLatitude,

@@ -6,7 +6,6 @@ import 'package:audiovision/direction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'utils/text_utils.dart';
@@ -19,6 +18,8 @@ void main() async {
 }
 
 class MyAudioGuide extends StatelessWidget {
+  const MyAudioGuide({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,12 +40,12 @@ class MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  TextEditingController _originController = TextEditingController();
-  TextEditingController _destinationController = TextEditingController();
+  final TextEditingController _originController = TextEditingController();
+  final TextEditingController _destinationController = TextEditingController();
 
-  Set<Marker> _markers = Set<Marker>();
-  Set<Polygon> _polygons = Set<Polygon>();
-  Set<Polyline> _polylines = Set<Polyline>();
+  final Set<Marker> _markers = <Marker>{};
+  final Set<Polygon> _polygons = <Polygon>{};
+  final Set<Polyline> _polylines = <Polyline>{};
 
   List<LatLng> polygonLatLngs = <LatLng>[];
 

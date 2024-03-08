@@ -4,9 +4,7 @@ import 'dart:async';
 
 import 'package:audiovision/controller/scan_controller.dart';
 import 'package:audiovision/direction_service.dart';
-import 'package:audiovision/pages/map_page/method/navigate_method.dart';
 import 'package:audiovision/services/location_services.dart';
-import 'package:audiovision/utils/map_utils.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:audiovision/utils/text_utils.dart';
 import 'package:audiovision/widget/object_detected.dart';
@@ -335,8 +333,8 @@ class _MapPageState extends State<MapPage> {
 
   Widget _build_NavigateBar(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
-      padding: EdgeInsets.all(12.0), // Adjust the padding as needed
+      margin: const EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
+      padding: const EdgeInsets.all(12.0), // Adjust the padding as needed
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(10)),
         color: Color.fromARGB(255, 50, 116, 45),
@@ -353,7 +351,7 @@ class _MapPageState extends State<MapPage> {
               shape: BoxShape.circle,
               color: Color.fromARGB(255, 255, 255, 255),
             ),
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Icon(Icons.mic, color: Colors.blue[400]),
           ),
         ],
@@ -567,7 +565,7 @@ class _MapPageState extends State<MapPage> {
                 cameraViewY += details.delta.dy;
               });
             },
-            child: Container(
+            child: SizedBox(
               height: 200,
               width: 150, // Example width of the camera view
               child: GetBuilder<ScanController>(
@@ -584,10 +582,10 @@ class _MapPageState extends State<MapPage> {
                             ),
                             DetectedObjectWidget(controller
                                 .detectionResult), // Display detected object info
-                            Text("data"),
+                            const Text("data"),
                           ],
                         )
-                      : Center(
+                      : const Center(
                           child: CircularProgressIndicator(),
                         );
                 },
@@ -719,14 +717,14 @@ class _MapPageState extends State<MapPage> {
 
   Future<double> calculateDistance(double startLatitude, double startLongitude,
       double endLatitude, double endLongitude) async {
-    double distanceInMeters = await Geolocator.distanceBetween(
+    double distanceInMeters = Geolocator.distanceBetween(
         startLatitude, startLongitude, endLatitude, endLongitude);
     return distanceInMeters;
   }
 
   Future<double> calculateDestinationDistance(
       double startLatitude, double startLongitude) async {
-    double distanceInMeters = await Geolocator.distanceBetween(
+    double distanceInMeters = Geolocator.distanceBetween(
         startLatitude,
         startLongitude,
         destinationCoordinate.latitude,

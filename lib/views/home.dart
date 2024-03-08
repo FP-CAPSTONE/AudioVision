@@ -48,9 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   Get.to(() => LoginPage());
                 },
-                child: Text("GO TO LOGIN"),
+                child: const Text("GO TO LOGIN"),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 100,
               ),
               GestureDetector(
@@ -114,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _text = "";
             } else if (_text.contains("guide")) {
               TextToSpeech.speak("navigate to AUDIO GUIDE SCREEN");
-              Get.to(MyAudioGuide());
+              Get.to(const MyAudioGuide());
               _isListening = false;
               _text = "";
             } else if (_text.contains("map view")) {

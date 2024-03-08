@@ -5,6 +5,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 class LoginPage extends StatelessWidget {
   final FlutterTts flutterTts = FlutterTts();
 
+  LoginPage({super.key});
+
   void _speak(String text) async {
     await flutterTts.setSpeechRate(0.5);
     await flutterTts.setPitch(1);
@@ -15,29 +17,29 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login Page'),
+        title: const Text('Login Page'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Login', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 20),
+            const Text('Login', style: TextStyle(fontSize: 24)),
+            const SizedBox(height: 20),
             TextFormField(
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextFormField(
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {},
-              child: Text('Login'),
+              child: const Text('Login'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -45,7 +47,7 @@ class LoginPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => RegisterPage()),
                 );
               },
-              child: Text('Don\'t have an account? Click here to register.'),
+              child: const Text('Don\'t have an account? Click here to register.'),
             ),
           ],
         ),

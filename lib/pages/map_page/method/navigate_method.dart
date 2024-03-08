@@ -37,13 +37,13 @@ class NavigateMethod {
     LatLng userPosition,
     LatLng destination,
   ) async {
-    final String url_using_latlong =
+    final String urlUsingLatlong =
         "https://maps.googleapis.com/maps/api/directions/json?origin=${userPosition.latitude},${userPosition.longitude}&"
         "destination=${destination.latitude},${destination.longitude}&"
         "mode=walking&"
         "key=AIzaSyCgjkSHUOL0bgO4w94tC4Z6je-7303-Jn4"; //WARNINGG !!!
 
-    var response = await http.get(Uri.parse(url_using_latlong));
+    var response = await http.get(Uri.parse(urlUsingLatlong));
     var json = convert.jsonDecode(response.body);
 
     List<dynamic> routes = json['routes'];

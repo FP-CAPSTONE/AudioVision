@@ -35,7 +35,7 @@ class _CameraaViewState extends State<CameraaView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Camera Page'),
+        title: const Text('Camera Page'),
       ),
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
@@ -43,7 +43,7 @@ class _CameraaViewState extends State<CameraaView> {
           if (snapshot.connectionState == ConnectionState.done) {
             return CameraPreview(_controller); // Display the camera preview
           } else {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),

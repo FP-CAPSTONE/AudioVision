@@ -6,7 +6,7 @@ class NowNavigationTextWidget extends StatelessWidget {
   final bool bold; // Add bold parameter
   final Color? color; // Add color parameter
 
-  NowNavigationTextWidget({
+  const NowNavigationTextWidget({super.key, 
     required this.text,
     required this.fontSize,
     this.bold = true, // Default to true
@@ -29,7 +29,7 @@ class NowNavigationTextWidget extends StatelessWidget {
 
 Widget buildArrowDirectionContainer(String iconName, {Color? color}) {
   return Container(
-    margin: EdgeInsets.only(right: 8.0),
+    margin: const EdgeInsets.only(right: 8.0),
     child: Icon(
       _getIconData(iconName), // Helper function to get IconData from icon name
       size: 30.0,

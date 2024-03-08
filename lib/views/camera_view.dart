@@ -5,16 +5,16 @@ import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 
 class CameraView extends StatelessWidget {
-  const CameraView({Key? key});
+  const CameraView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Camera View"),
+        title: const Text("Camera View"),
         backgroundColor: Colors.blue,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Get.back(); // Navigate back when the back button is pressed
             ScanController().onClose();
@@ -28,6 +28,13 @@ class CameraView extends StatelessWidget {
               ? Stack(
                   children: [
                     CameraPreview(controller.cameraController!),
+
+                    CustomPaint(
+                      // Draw black mask
+                      painter:
+                          MaskPainter(MediaQuery.of(context).size.height * 0.5),
+                    ),
+
                     CustomPaint(
                       // Use CustomPaint to draw the bounding box
                       painter: BoundingBoxPainter(
@@ -35,7 +42,7 @@ class CameraView extends StatelessWidget {
                     ),
                     DetectedObjectWidget(controller
                         .detectionResult), // Display detected object info
-                    Text("data"),
+                    const Text("data"),
                   ],
                 )
               : const Center(
@@ -47,7 +54,23 @@ class CameraView extends StatelessWidget {
   }
 }
 
+// Custom Painter to draw black mask
+class MaskPainter extends CustomPainter {
+  final double maskHeight;
 
+  MaskPainter(this.maskHeight);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()..color = Colors.black.withOpacity(0.5);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, maskHeight), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
 
 // WIDGET FIR BUILD OBJECT
 // Widget _buildDetectedObject(List<Map<String, dynamic>> detectionResult) {
