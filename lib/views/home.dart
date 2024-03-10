@@ -3,8 +3,10 @@
 import 'dart:async';
 
 import 'package:audiovision/mainAudio.dart';
+import 'package:audiovision/pages/camera/camera.dart';
 import 'package:audiovision/pages/login_page/login.dart';
 import 'package:audiovision/pages/map_page/map.dart';
+import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 import 'package:audiovision/screens/select_screen.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:audiovision/views/camera_view.dart';
@@ -49,6 +51,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   Get.to(() => LoginPage());
                 },
                 child: Text("GO TO LOGIN"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Get.to(const CameraViewv());
+                },
+                child: Text("GO TO CAMERA"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Get.to(const YoloVideo());
+                },
+                child: Text("GO TO CAMERA EXAMPLE"),
               ),
               SizedBox(
                 height: 100,
@@ -104,9 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
             print(_text);
             if (_text.contains("camera view")) {
               TextToSpeech.speak("navigate to CAMERA VIEW");
-              Get.to(const CameraView());
               _isListening = false;
               _text = "";
+              Get.to(CameraView());
             } else if (_text.contains("map screen")) {
               TextToSpeech.speak("navigate to MAP SCREEN");
               Get.to(const SelectScreen());

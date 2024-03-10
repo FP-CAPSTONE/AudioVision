@@ -1,49 +1,63 @@
 import 'package:audiovision/controller/scan_controller.dart';
+import 'package:audiovision/pages/map_page/widget/camera_view.dart';
+import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:audiovision/widget/object_detected.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
+// import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 
-class CameraView extends StatelessWidget {
-  const CameraView({Key? key});
+class CameraViewv extends StatelessWidget {
+  const CameraViewv({Key? key});
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Camera View"),
-        backgroundColor: Colors.blue,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.back(); // Navigate back when the back button is pressed
-            ScanController().onClose();
-          },
+        appBar: AppBar(
+          title: Text("Camera View"),
+          backgroundColor: Colors.blue,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Get.back(); // Navigate back when the back button is pressed
+              ScanController().onClose();
+            },
+          ),
         ),
-      ),
-      body: GetBuilder<ScanController>(
-        init: ScanController(),
-        builder: (controller) {
-          return controller.isCameraInitialized.value
-              ? Stack(
-                  children: [
-                    CameraPreview(controller.cameraController!),
-                    CustomPaint(
-                      // Use CustomPaint to draw the bounding box
-                      painter: BoundingBoxPainter(
-                          controller.detectionResult, context),
-                    ),
-                    DetectedObjectWidget(controller
-                        .detectionResult), // Display detected object info
-                    Text("data"),
-                  ],
-                )
-              : const Center(
-                  child: CircularProgressIndicator(),
-                );
-        },
-      ),
-    );
+        body: CameraView().cameraView(context)
+
+        // GetBuilder<ScanController>(
+        //   init: ScanController(),
+        //   builder: (controller) {
+        //     return controller.isCameraInitialized.value
+        //         ? Stack(
+        //             fit: StackFit.expand,
+        //             children: [
+        //               // CameraPreview(controller.cameraController!),
+        //               // ...ScanController().displayBoxesAroundRecognizedObjects(
+        //               //   size,
+        //               // ),
+        //               // CustomPaint(
+        //               //   // Use CustomPaint to draw the bounding box
+        //               //   painter: BoundingBoxPainter(
+        //               //       controller.detectionResult, context),
+        //               // ),
+        //               // DetectedObjectWidget(
+        //               //   controller.detectionResult,
+        //               // ),
+        //               SizedBox(
+        //                 height: 200,
+        //               ), // Display detected object info
+        //               // Center(child: Text("data")),
+        //             ],
+        //           )
+        //         : const Center(
+        //             child: CircularProgressIndicator(),
+        //           );
+        //   },
+        // ),
+        );
   }
 }
 
