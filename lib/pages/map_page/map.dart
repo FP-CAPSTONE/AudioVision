@@ -125,7 +125,7 @@ class _MapPageState extends State<MapPage> {
                 MapPage.isStartNavigate
                     ? NavigateBarWidget(navigationText: navigationText)
                     : Container(),
-                // MapPage.isStartNavigate ? builCamera() : Container(),
+                MapPage.isStartNavigate ? builCamera() : Container(),
                 // isStartNavigate
                 // ? Align(
                 //     alignment: Alignment.centerRight, child: cameraView())
