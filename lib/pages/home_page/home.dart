@@ -5,9 +5,11 @@ import 'dart:async';
 import 'package:audiovision/mainAudio.dart';
 import 'package:audiovision/pages/camera/camera.dart';
 import 'package:audiovision/pages/camera/test_camera.dart';
+import 'package:audiovision/pages/class/language.dart';
 import 'package:audiovision/pages/login_page/login.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/widget/camera_view.dart';
+import 'package:audiovision/pages/setting_page/setting.dart';
 import 'package:audiovision/screens/select_screen.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
@@ -16,17 +18,36 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:vibration/vibration.dart';
 
 class HomeScreen extends StatefulWidget {
+  static bool isIndonesianSelected = true;
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   final stt.SpeechToText _speech = stt.SpeechToText();
+  String _title = '';
 
   bool _isListening = false;
   String _text = '';
+  Future<void> _loadTitle() async {
+    // user open the app for the first time set the default language setting
+    await LanguagePreferences().setDefaultLanguage();
+
+    // set the value of language
+    HomeScreen.isIndonesianSelected =
+        await LanguagePreferences.isIndonesianSelected();
+    setState(() {
+      _title = HomeScreen.isIndonesianSelected ? 'Selamat Datang' : 'Welcome';
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadTitle();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +60,17 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("My Appbar"),
+          leading: Container(),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Get.to(
+                    () => SettingPage(),
+                  );
+                },
+                icon: Icon(Icons.settings))
+          ],
+          title: Text(_title),
           backgroundColor: Colors.blue,
         ),
         body: Center(

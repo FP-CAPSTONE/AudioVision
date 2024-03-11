@@ -58,6 +58,7 @@ dependencies:
   riverpod: ^1.0.0
   firebase_database: ^10.4.6
   firebase_core: 
+  shared_preferences:
 dev_dependencies:
   flutter_test:
     sdk: flutter
