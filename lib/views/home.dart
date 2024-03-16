@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:audiovision/mainAudio.dart';
 import 'package:audiovision/pages/camera/camera.dart';
-import 'package:audiovision/pages/login_page/login.dart';
+import 'package:audiovision/pages/auth_page/login.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 import 'package:audiovision/screens/select_screen.dart';

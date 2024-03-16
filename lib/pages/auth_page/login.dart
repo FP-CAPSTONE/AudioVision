@@ -1,6 +1,7 @@
-import 'package:audiovision/pages/register_page/register.dart';
+import 'package:audiovision/pages/auth_page/register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'dummy_api.dart'; // tambahkan import untuk DummyApi
 
 class LoginPage extends StatelessWidget {
   final FlutterTts flutterTts = FlutterTts();
@@ -26,15 +27,31 @@ class LoginPage extends StatelessWidget {
             SizedBox(height: 20),
             TextFormField(
               decoration: InputDecoration(labelText: 'Email'),
+              onTap: () {
+                _speak('Email field selected');
+              },
             ),
             SizedBox(height: 10),
             TextFormField(
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
+              onTap: () {
+                _speak('Password field selected');
+              },
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                // Login user
+                String email = 'john.doe@example.com';
+                String password = 'password123';
+                bool loginResult = DummyApi.loginUser(email, password);
+                if (loginResult) {
+                  _speak('Login successful');
+                } else {
+                  _speak('Email or password is incorrect');
+                }
+              },
               child: Text('Login'),
             ),
             SizedBox(height: 10),
