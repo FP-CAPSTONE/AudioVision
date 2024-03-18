@@ -84,7 +84,7 @@ class _MapPageState extends State<MapPage> {
 
     listenToUserLocation(locationService);
 
-    // _checkDeviceOrientation();
+    //_checkDeviceOrientation();
   }
 
   @override
@@ -299,7 +299,11 @@ class _MapPageState extends State<MapPage> {
         // print("z");
         // print(event.z * 10.0);
         _heading = event.z * 10.0;
-        // print(_heading);
+        if (MapPage.mapController != null) {
+          MapPage.mapController!
+              .animateCamera(CameraUpdate.scrollBy(0, _heading));
+        }
+        print(_heading);
       });
     });
   }
@@ -359,7 +363,13 @@ class _MapPageState extends State<MapPage> {
   void updateUserMarkerPosition(
     LatLng newPosition,
   ) {
+    print(MapPage.cameraPosition.zoom);
     MapPage.cameraPosition = CameraPosition(target: newPosition, zoom: 16.5);
+    // if (MapPage.cameraPosition.zoom == 0) {
+    //   MapPage.mapController!.animateCamera(CameraUpdate.newCameraPosition(
+    //     MapPage.cameraPosition,
+    //   ));
+    // }
     // Update marker for user's position or add it if not present
     MapPage.markers.removeWhere((marker) => marker.markerId.value == "You");
     MapPage.markers.add(
