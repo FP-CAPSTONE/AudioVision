@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:audiovision/screens/map_screen.dart';
+import 'package:audiovision/services/location_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_place/google_place.dart';
 
 class SelectScreen extends StatefulWidget {
@@ -25,6 +27,10 @@ class _SelectScreenState extends State<SelectScreen> {
   late GooglePlace googlePlace;
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
+  static double latitude = 0;
+  static double longitude = 0;
+
+  static LocationService locationService = LocationService();
 
   @override
   void initState() {
@@ -35,7 +41,22 @@ class _SelectScreenState extends State<SelectScreen> {
 
     startFocusNode = FocusNode();
     endFocusNode = FocusNode();
-    //_getCurrentLocation();
+
+    locationService.locationStream.listen((userLocation) {
+      setState(() {
+        latitude = userLocation.latitude;
+        longitude = userLocation.longitude;
+        startPosition = DetailsResult(
+          // Assign latitude and longitude values
+          geometry: Geometry(
+            location: Location(
+              lat: userLocation.latitude,
+              lng: userLocation.longitude,
+            ),
+          ),
+        );
+      });
+    });
   }
 
   @override
@@ -44,32 +65,20 @@ class _SelectScreenState extends State<SelectScreen> {
     super.dispose();
     startFocusNode.dispose();
     endFocusNode.dispose();
+
+    locationService.dispose();
   }
 
-  // Future<void> _getCurrentLocation() async {
-  //   try {
-  //     Position position = await Geolocator.getCurrentPosition(
-  //       desiredAccuracy: LocationAccuracy.high,
-  //     );
-  //     List<Placemark> placemarks = await placemarkFromCoordinates(
-  //       position.latitude,
-  //       position.longitude,
-  //     );
-  //     if (placemarks.isNotEmpty) {
-  //       String currentAddress = "${placemarks.first.name ?? ''}, "
-  //           "${placemarks.first.locality ?? ''}, "
-  //           "${placemarks.first.administrativeArea ?? ''}";
-
-  //       setState(() {
-  //         _startSearchFieldController.text = currentAddress;
-  //       });
-  //     } else {
-  //       // Handle the case where placemarks list is empty
-  //     }
-  //   } catch (e) {
-  //     // Handle location permissions denied or other exceptions
-  //   }
-  // }
+  void _getCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    if (mounted) {
+      setState(() {
+        _startSearchFieldController.text =
+            '(${position.latitude}, ${position.longitude})';
+      });
+    }
+  }
 
   void autoCompleteSearch(String value) async {
     var result = await googlePlace.autocomplete.get(value);
@@ -101,78 +110,81 @@ class _SelectScreenState extends State<SelectScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              TextField(
-                controller: _startSearchFieldController,
-                autofocus: false,
-                focusNode: startFocusNode,
-                style: TextStyle(fontSize: 24),
-                decoration: InputDecoration(
-                    hintText: "Starting point",
-                    hintStyle:
-                        TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide(
-                        width: 0,
-                        style: BorderStyle.none,
-                      ),
-                    ),
-                    isDense: true, // Added this
-                    contentPadding: EdgeInsets.all(15),
-                    suffixIcon: _startSearchFieldController.text.isNotEmpty
-                        ? IconButton(
-                            onPressed: () {
-                              setState(() {
-                                predictions = [];
-                                _startSearchFieldController.clear();
-                              });
-                            },
-                            icon: Icon(Icons.clear_outlined),
-                          )
-                        : null),
-                onChanged: (value) {
-                  if (_debounce?.isActive ?? false) _debounce!.cancel();
-                  _debounce = Timer(const Duration(milliseconds: 1000), () {
-                    if (value.isNotEmpty) {
-                      //places api
-                      autoCompleteSearch(value);
-                    } else {
-                      //clear out the results
-                      setState(() {
-                        predictions = [];
-                        startPosition = null;
-                      });
-                    }
-                  });
-                },
-              ),
-              SizedBox(
-                height: 15,
+              // TextField(
+              //   controller: _startSearchFieldController,
+              //   autofocus: false,
+              //   focusNode: startFocusNode,
+              //   style: const TextStyle(fontSize: 24),
+              //   decoration: InputDecoration(
+              //     hintText: "Starting point",
+              //     hintStyle: const TextStyle(
+              //         fontWeight: FontWeight.w500, fontSize: 24),
+              //     filled: true,
+              //     fillColor: Colors.grey[200],
+              //     border: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(40),
+              //       borderSide: const BorderSide(
+              //         width: 0,
+              //         style: BorderStyle.none,
+              //       ),
+              //     ),
+              //     isDense: true, // Added this
+              //     contentPadding: const EdgeInsets.all(15),
+              //     suffixIcon: _startSearchFieldController.text.isNotEmpty
+              //         ? IconButton(
+              //             onPressed: () {
+              //               setState(() {
+              //                 predictions = [];
+              //                 _startSearchFieldController.clear();
+              //               });
+              //             },
+              //             icon: const Icon(Icons.clear_outlined),
+              //           )
+              //         : null,
+              //   ),
+              //   onChanged: (value) {
+              //     if (_debounce?.isActive ?? false) _debounce!.cancel();
+              //     _debounce = Timer(const Duration(milliseconds: 1000), () {
+              //       if (value.isNotEmpty) {
+              //         //places api
+              //         autoCompleteSearch(value);
+              //       } else {
+              //         //clear out the results
+              //         setState(() {
+              //           predictions = [];
+              //           startPosition = null;
+              //         });
+              //       }
+              //     });
+              //   },
+              // ),
+              Text("YOUR CURRENT LOCATION "),
+              Text("latitude $latitude"),
+              Text("long $longitude"),
+              const SizedBox(
+                height: 55,
               ),
               TextField(
                 controller: _endSearchFieldController,
                 autofocus: false,
                 focusNode: endFocusNode,
-                enabled: _startSearchFieldController.text.isNotEmpty &&
-                    startPosition != null,
-                style: TextStyle(fontSize: 24),
+                // enabled: _startSearchFieldController.text.isNotEmpty,
+                style: const TextStyle(fontSize: 24),
                 decoration: InputDecoration(
                     hintText: "End point",
-                    hintStyle:
-                        TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
+                    hintStyle: const TextStyle(
+                        fontWeight: FontWeight.w500, fontSize: 24),
                     filled: true,
                     fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         width: 0,
                         style: BorderStyle.none,
                       ),
                     ),
                     isDense: true, // Added this
-                    contentPadding: EdgeInsets.all(15),
+                    contentPadding: const EdgeInsets.all(15),
                     suffixIcon: _endSearchFieldController.text.isNotEmpty
                         ? IconButton(
                             onPressed: () {
@@ -181,7 +193,7 @@ class _SelectScreenState extends State<SelectScreen> {
                                 _endSearchFieldController.clear();
                               });
                             },
-                            icon: Icon(Icons.clear_outlined),
+                            icon: const Icon(Icons.clear_outlined),
                           )
                         : null),
                 onChanged: (value) {
@@ -205,7 +217,7 @@ class _SelectScreenState extends State<SelectScreen> {
                   itemCount: predictions.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      leading: CircleAvatar(
+                      leading: const CircleAvatar(
                         child: Icon(
                           Icons.pin_drop,
                           color: Colors.white,
@@ -214,6 +226,40 @@ class _SelectScreenState extends State<SelectScreen> {
                       title: Text(
                         predictions[index].description.toString(),
                       ),
+                      // onTap: () async {
+                      //   final placeId = predictions[index].placeId!;
+                      //   final details = await googlePlace.details.get(placeId);
+                      //   if (details != null &&
+                      //       details.result != null &&
+                      //       mounted) {
+                      //     if (startFocusNode.hasFocus) {
+                      //       setState(() {
+                      //         startPosition = details.result;
+                      //         _startSearchFieldController.text =
+                      //             details.result!.name!;
+                      //         predictions = [];
+                      //       });
+                      //     } else {
+                      //       setState(() {
+                      //         endPosition = details.result;
+                      //         _endSearchFieldController.text =
+                      //             details.result!.name!;
+                      //         predictions = [];
+                      //       });
+                      //     }
+                      //     if (startPosition != null && endPosition != null) {
+                      //       print("Navigate");
+                      //       Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //           builder: (context) => MapScreen(
+                      //               startPosition: startPosition,
+                      //               endPosition: endPosition),
+                      //         ),
+                      //       );
+                      //     }
+                      //   }
+                      // },
                       onTap: () async {
                         final placeId = predictions[index].placeId!;
                         final details = await googlePlace.details.get(placeId);
@@ -235,6 +281,11 @@ class _SelectScreenState extends State<SelectScreen> {
                               predictions = [];
                             });
                           }
+
+                          print("Start Position: $startPosition");
+                          print("End Position: $endPosition");
+
+                          // Check if both start and end positions are set
                           if (startPosition != null && endPosition != null) {
                             print("Navigate");
                             Navigator.push(
@@ -245,11 +296,13 @@ class _SelectScreenState extends State<SelectScreen> {
                                     endPosition: endPosition),
                               ),
                             );
+                          } else {
+                            print("Both positions are not set yet");
                           }
                         }
                       },
                     );
-                  })
+                  }),
             ],
           ),
         ),

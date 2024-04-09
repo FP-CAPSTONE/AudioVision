@@ -1,3 +1,5 @@
 Go
 Got
 Stop
+Bollard
+Tiang

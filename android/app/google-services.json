@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496990230712",
+    "project_id": "capstone-project-92fdf",
+    "storage_bucket": "capstone-project-92fdf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496990230712:android:1e44c3b15160a4ef64fc4d",
+        "android_client_info": {
+          "package_name": "com.example.audiovision"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCM8KiKGTMM_jKZHWMtBawgUv7cT5MC1c8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

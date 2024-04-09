@@ -39,7 +39,7 @@ class _MapScreenState extends State<MapScreen> {
     } else {
       // Handle case where startPosition or its properties are null
       // For example, you could set a default initial position
-      _initialPosition = CameraPosition(
+      _initialPosition = const CameraPosition(
         target: LatLng(37.7749, -122.4194),
         zoom: 14.4746,
       );
@@ -47,7 +47,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   _addPolyLine() {
-    PolylineId id = PolylineId("poly");
+    PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
       color: Colors.blue,
@@ -73,30 +73,30 @@ class _MapScreenState extends State<MapScreen> {
         travelMode: TravelMode.driving);
 
     if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
+      for (var point in result.points) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      });
+      }
     }
     _addPolyLine();
   }
 
   @override
   Widget build(BuildContext context) {
-    Set<Marker> _markers = {};
+    Set<Marker> markers = {};
 
     if (widget.startPosition != null && widget.endPosition != null) {
-      _markers.add(
+      markers.add(
         Marker(
-          markerId: MarkerId("start"),
+          markerId: const MarkerId("start"),
           position: LatLng(
             widget.startPosition!.geometry!.location!.lat!,
             widget.startPosition!.geometry!.location!.lng!,
           ),
         ),
       );
-      _markers.add(
+      markers.add(
         Marker(
-          markerId: MarkerId("end"),
+          markerId: const MarkerId("end"),
           position: LatLng(
             widget.endPosition!.geometry!.location!.lat!,
             widget.endPosition!.geometry!.location!.lng!,
@@ -113,9 +113,9 @@ class _MapScreenState extends State<MapScreen> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: CircleAvatar(
+          icon: const CircleAvatar(
             backgroundColor: Colors.white,
-            child: const Icon(
+            child: Icon(
               Icons.arrow_back,
               color: Colors.black,
             ),
@@ -125,12 +125,12 @@ class _MapScreenState extends State<MapScreen> {
       body: GoogleMap(
         polylines: Set<Polyline>.of(polylines.values),
         initialCameraPosition: _initialPosition,
-        markers: Set.from(_markers),
+        markers: Set.from(markers),
         onMapCreated: (GoogleMapController controller) {
-          Future.delayed(Duration(milliseconds: 2000), () {
+          Future.delayed(const Duration(milliseconds: 2000), () {
             controller.animateCamera(CameraUpdate.newLatLngBounds(
                 MapUtils.boundsFromLatLngList(
-                    _markers.map((loc) => loc.position).toList()),
+                    markers.map((loc) => loc.position).toList()),
                 1));
             _getPolyline();
           });

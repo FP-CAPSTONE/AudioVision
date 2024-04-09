@@ -1,5 +1,5 @@
 import 'package:audiovision/controller/scan_controller.dart';
-import 'package:audiovision/views/object_detected.dart';
+import 'package:audiovision/widget/object_detected.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
@@ -17,6 +17,7 @@ class CameraView extends StatelessWidget {
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             Get.back(); // Navigate back when the back button is pressed
+            ScanController().onClose();
           },
         ),
       ),
@@ -26,7 +27,7 @@ class CameraView extends StatelessWidget {
           return controller.isCameraInitialized.value
               ? Stack(
                   children: [
-                    CameraPreview(controller.cameraController),
+                    CameraPreview(controller.cameraController!),
                     CustomPaint(
                       // Use CustomPaint to draw the bounding box
                       painter: BoundingBoxPainter(
@@ -37,7 +38,9 @@ class CameraView extends StatelessWidget {
                     Text("data"),
                   ],
                 )
-              : const Center(child: CircularProgressIndicator());
+              : const Center(
+                  child: CircularProgressIndicator(),
+                );
         },
       ),
     );

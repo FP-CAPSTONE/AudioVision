@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:audiovision/location_service.dart';
+import 'package:audiovision/direction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -52,10 +52,10 @@ class MapSampleState extends State<MapSample> {
   bool isSecondsRowVisible = false;
 
   String _getCurrentTime() {
-  DateTime now = DateTime.now();
-  String formattedTime = "${now.hour}:${now.minute}";
-  return formattedTime;
-}
+    DateTime now = DateTime.now();
+    String formattedTime = "${now.hour}:${now.minute}";
+    return formattedTime;
+  }
 
   // Tambahkan variabel ini
 
@@ -109,7 +109,7 @@ class MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text('Maps Guide'),
       ),
@@ -141,7 +141,7 @@ class MapSampleState extends State<MapSample> {
                 ),
                 IconButton(
                   onPressed: () async {
-                    var directions = await LocationService().getDirections(
+                    var directions = await DirectionServcie().getDirections(
                       _originController.text,
                       _destinationController.text,
                     );
@@ -339,3 +339,4 @@ class MapSampleState extends State<MapSample> {
     _setMarker(LatLng(lat, lng));
   }
 }
+

@@ -1,0 +1,17 @@
+{
+  "livetracking": {
+    "name": "john",
+    "coordinates": [
+      {
+        "longitude": 123.456789,
+        "latitude": -45.678901,
+        "timestamp": "2024-02-26T12:34:56.789Z"
+      },
+      {
+        "longitude": 98.765432,
+        "latitude": 12.345678,
+        "timestamp": "2024-02-26T12:35:00.000Z"
+      }
+    ]
+  }
+}
