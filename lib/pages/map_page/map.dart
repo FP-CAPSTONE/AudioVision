@@ -12,6 +12,7 @@ import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 // ned to change the class name, there are two location service
@@ -90,7 +91,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void dispose() {
     locationService.dispose();
-    _gyroscopeStreamSubscription.cancel();
+    //_gyroscopeStreamSubscription.cancel();
     super.dispose();
   }
 
@@ -102,6 +103,92 @@ class _MapPageState extends State<MapPage> {
         predictions = result.predictions!;
       });
     }
+  }
+
+  // Function to calculate total distance and total duration
+  Map<String, dynamic> _calculateTotals(List<dynamic> steps) {
+    double totalDistance = 0.0;
+    int totalDuration = 0;
+
+    for (var step in steps) {
+      totalDistance += double.parse(step['distance'].split(' ')[0]);
+      totalDuration += int.parse(step['duration'].split(' ')[0]);
+    }
+
+    // Convert total distance from meters to kilometers
+    totalDistance /= 1000;
+
+    return {'totalDistance': totalDistance, 'totalDuration': totalDuration};
+  }
+
+  void _showBottomSheet(BuildContext context) {
+    Map<String, dynamic> totals = _calculateTotals(MapPage.allSteps);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                    children: [
+                      TextSpan(
+                        text: '${totals['totalDuration']} mins ',
+                      ),
+                      TextSpan(
+                        text:
+                            '(${totals['totalDistance'].toStringAsFixed(2)} km)',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: MapPage.allSteps.length,
+                  itemBuilder: (context, index) {
+                    var step = MapPage.allSteps[index];
+                    return ListTile(
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      title: Text(
+                        step['instructions'],
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        '${step['distance']} - ${step['duration']}',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.blue,
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -125,11 +212,49 @@ class _MapPageState extends State<MapPage> {
                 MapPage.isStartNavigate
                     ? NavigateBarWidget(navigationText: navigationText)
                     : Container(),
-                MapPage.isStartNavigate ? builCamera() : Container(),
+                // MapPage.isStartNavigate ? builCamera() : Container(),
                 // isStartNavigate
                 // ? Align(
                 //     alignment: Alignment.centerRight, child: cameraView())
                 // : Container()
+
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          // Your map widgets...
+                        ],
+                      ),
+                    ),
+                    // Button to show bottom sheet
+                    ElevatedButton(
+                      onPressed: () {
+                        _showBottomSheet(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.white,
+                        onPrimary: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.directions, color: Colors.blue),
+                          SizedBox(width: 10),
+                          Text('Show Route Details',
+                              style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -363,19 +488,17 @@ class _MapPageState extends State<MapPage> {
   void updateUserMarkerPosition(
     LatLng newPosition,
   ) {
-    print(MapPage.cameraPosition.zoom);
     MapPage.cameraPosition = CameraPosition(target: newPosition, zoom: 16.5);
-    // if (MapPage.cameraPosition.zoom == 0) {
-    //   MapPage.mapController!.animateCamera(CameraUpdate.newCameraPosition(
-    //     MapPage.cameraPosition,
-    //   ));
-    // }
+
     // Update marker for user's position or add it if not present
     MapPage.markers.removeWhere((marker) => marker.markerId.value == "You");
     MapPage.markers.add(
       Marker(
         markerId: const MarkerId("You"),
         position: newPosition,
+        // Custom marker icon
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueBlue), // For example, you can use a blue marker
       ),
     );
     setState(() {});
@@ -388,25 +511,21 @@ class _MapPageState extends State<MapPage> {
     String maneuver = "";
     if (MapPage.isStartNavigate) {
       if (stepIndex < MapPage.allSteps.length) {
+        print(stepIndex);
         double distanceToStep = await calculateDistance(
           MapPage.userLatitude,
-          MapPage.userLatitude,
+          MapPage.userLongitude,
           MapPage.allSteps[stepIndex]['end_lat'],
           MapPage.allSteps[stepIndex]['end_long'],
         );
 
-        double userAndDestinationDistance = await calculateDistance(
-          MapPage.userLatitude,
-          MapPage.userLatitude,
-          MapPage.destinationCoordinate.latitude,
-          MapPage.destinationCoordinate.longitude,
-        );
         int roundedDistance = distanceToStep.ceil();
 
         // Assuming there's a threshold distance to trigger the notification
         double thresholdDistance = 100; // meters
         print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
-
+        print(MapPage.allSteps);
+        print(distanceToStep);
         if (distanceToStep <= thresholdDistance) {
           maneuver = MapPage.allSteps[stepIndex]['maneuver'] ??
               'Continue'; // Default to 'Continue' if maneuver is not provided
@@ -417,15 +536,28 @@ class _MapPageState extends State<MapPage> {
         } else {
           maneuver = "Continue Straight";
         }
-        if (userAndDestinationDistance <= 20) {
+
+        setState(() {
+          navigationText = maneuver;
+        });
+      }
+      double userAndDestinationDistance = await calculateDistance(
+        MapPage.userLatitude,
+        MapPage.userLongitude,
+        MapPage.destinationCoordinate.latitude,
+        MapPage.destinationCoordinate.longitude,
+      );
+      print(userAndDestinationDistance);
+
+      if (userAndDestinationDistance <= 30) {
+        setState(() {
           MapPage.isStartNavigate = false;
           print(
               "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
           print("CONGRATULATIONS, YOU HAVE REACEHED THE DESTINATION");
           stepIndex = 0;
-        }
-        setState(() {
-          navigationText = maneuver;
+          MapPage.markers
+              .removeWhere((marker) => marker.markerId.value == "planceName");
         });
       }
     }
@@ -437,6 +569,8 @@ class _MapPageState extends State<MapPage> {
     double endLatitude,
     double endLongitude,
   ) async {
+    print(startLatitude);
+    print(startLongitude);
     double distanceInMeters = await Geolocator.distanceBetween(
       startLatitude,
       startLongitude,
