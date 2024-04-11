@@ -3,17 +3,31 @@
 import 'dart:async';
 
 import 'package:audiovision/controller/scan_controller.dart';
+<<<<<<< HEAD
 import 'package:audiovision/services/location_services.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
+=======
+import 'package:audiovision/direction_service.dart';
+import 'package:audiovision/pages/map_page/method/navigate_method.dart';
+import 'package:audiovision/services/location_services.dart';
+import 'package:audiovision/utils/map_utils.dart';
+import 'package:audiovision/utils/text_to_speech.dart';
+import 'package:audiovision/utils/text_utils.dart';
+>>>>>>> map_guidance
 import 'package:audiovision/widget/object_detected.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+<<<<<<< HEAD
+=======
+import 'package:geolocator/geolocator.dart';
+>>>>>>> map_guidance
 import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 // ned to change the class name, there are two location service
+<<<<<<< HEAD
 import 'package:audiovision/direction_service.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -25,6 +39,22 @@ class MyMap extends StatefulWidget {
 }
 
 class _MyMapState extends State<MyMap> {
+=======
+import 'package:sensors_plus/sensors_plus.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
+
+class MapPage extends StatefulWidget {
+  static double userLatitude = 0;
+  static double userLongitude = 0;
+  const MapPage({super.key});
+
+  @override
+  State<MapPage> createState() => _MapPageState();
+}
+
+class _MapPageState extends State<MapPage> {
+>>>>>>> map_guidance
   final _endSearchFieldController = TextEditingController();
 
   DetailsResult? destination;
@@ -37,8 +67,11 @@ class _MyMapState extends State<MyMap> {
   late GooglePlace googlePlace;
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
+<<<<<<< HEAD
   static double userLatitude = 0;
   static double userLongitude = 0;
+=======
+>>>>>>> map_guidance
 
   static LocationService locationService = LocationService();
   late GoogleMapController _mapController;
@@ -46,8 +79,13 @@ class _MyMapState extends State<MyMap> {
   Set<Marker> markers = {};
   CameraPosition cameraPosition = CameraPosition(
     target: LatLng(
+<<<<<<< HEAD
       userLatitude,
       userLongitude,
+=======
+      MapPage.userLatitude,
+      MapPage.userLongitude,
+>>>>>>> map_guidance
     ),
   );
   Map<PolylineId, Polyline> polylines = {};
@@ -58,6 +96,16 @@ class _MyMapState extends State<MyMap> {
   double _heading = 0.0;
 
   bool isStartNavigate = false;
+<<<<<<< HEAD
+=======
+  late List<dynamic> allSteps;
+  late Map<String, dynamic> endLocation;
+  int stepIndex = 0;
+  String navigationText = "Heyo";
+
+  double cameraViewX = 0; // Persistent X position
+  double cameraViewY = 0; // Persistent Y position
+>>>>>>> map_guidance
 
   @override
   void initState() {
@@ -68,6 +116,7 @@ class _MyMapState extends State<MyMap> {
 
     endFocusNode = FocusNode();
 
+<<<<<<< HEAD
     // always listen to the user position and update it
     locationService.locationStream.listen((userLocation) {
       setState(() {
@@ -78,12 +127,21 @@ class _MyMapState extends State<MyMap> {
     });
 
     _checkDeviceOrientation();
+=======
+    _listenToUserLocation();
+
+    // _checkDeviceOrientation();
+>>>>>>> map_guidance
   }
 
   @override
   void dispose() {
     locationService.dispose();
+<<<<<<< HEAD
     _gyroscopeStreamSubscription?.cancel();
+=======
+    _gyroscopeStreamSubscription.cancel();
+>>>>>>> map_guidance
     super.dispose();
   }
 
@@ -109,8 +167,19 @@ class _MyMapState extends State<MyMap> {
               children: [
                 build_GoogleMap(context),
                 build_SearchBar(context),
+<<<<<<< HEAD
                 build_ButtonStart(context),
                 isStartNavigate ? cameraView() : Container()
+=======
+                destination != null ? build_ButtonStart(context) : Container(),
+
+                // isStartNavigate ? cameraView() : Container()
+                _build_NavigateBar(context),
+                // isStartNavigate
+                //     ? Align(
+                //         alignment: Alignment.centerRight, child: cameraView())
+                //     : Container()
+>>>>>>> map_guidance
               ],
             ),
           ),
@@ -119,6 +188,57 @@ class _MyMapState extends State<MyMap> {
     );
   }
 
+<<<<<<< HEAD
+=======
+  void _listenToUserLocation() {
+    // always listen to the user position and update it
+    locationService.locationStream.listen((userLocation) async {
+      setState(() {
+        MapPage.userLatitude = userLocation.latitude;
+        MapPage.userLongitude = userLocation.longitude;
+        updateUserMarkerPosition(
+            LatLng(MapPage.userLatitude, MapPage.userLongitude));
+      });
+      if (isStartNavigate) {
+        if (stepIndex < allSteps.length) {
+          // double distanceToStep = await NavigateMethod().calculateDistance(
+          //   userLocation.latitude,
+          //   userLocation.longitude,
+          //   allSteps[stepIndex]['end_lat'],
+          //   allSteps[stepIndex]['end_long'],
+          // );
+
+          // double destinationDistance = await NavigateMethod().calculateDistance(
+          //   userLocation.latitude,
+          //   userLocation.longitude,
+          //   destinationCoordinate.latitude,
+          //   destinationCoordinate.longitude,
+          // );
+
+          // Assuming there's a threshold distance to trigger the notification
+          double thresholdDistance = 50; // meters
+          print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
+
+          // if (distanceToStep <= thresholdDistance) {
+          //   String maneuver = allSteps[stepIndex]['maneuver'] ??
+          //       'Continue'; // Default to 'Continue' if maneuver is not provided
+          //   print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+          //   print(maneuver);
+          //   updateTextNavigate(maneuver);
+          //   stepIndex++;
+          // }
+          // if (destinationDistance <= 10) {
+          //   isStartNavigate = false;
+          //   print(
+          //       "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
+          //   stepIndex = 0;
+          // }
+        }
+      }
+    });
+  }
+
+>>>>>>> map_guidance
   //Google Map Widget
   Widget build_GoogleMap(BuildContext context) {
     return GoogleMap(
@@ -127,6 +247,7 @@ class _MyMapState extends State<MyMap> {
       initialCameraPosition: cameraPosition,
       onMapCreated: (controller) {
         _mapController = controller;
+<<<<<<< HEAD
         _mapController
             .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
       },
@@ -144,6 +265,14 @@ class _MyMapState extends State<MyMap> {
           // );
         });
       },
+=======
+        setState(() {
+          _mapController
+              .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+        });
+      },
+      markers: markers,
+>>>>>>> map_guidance
     );
   }
 
@@ -238,12 +367,21 @@ class _MyMapState extends State<MyMap> {
 
   //Start Button Widget
   Widget build_ButtonStart(BuildContext context) {
+<<<<<<< HEAD
     return Positioned(
       bottom: 30.0,
       right: MediaQuery.of(context).size.width / 2 -
           120.0, // Adjusted to center horizontally
       child: destination != null
           ? GestureDetector(
+=======
+    return !isStartNavigate
+        ? Positioned(
+            bottom: 30.0,
+            right: MediaQuery.of(context).size.width / 2 -
+                120.0, // Adjusted to center horizontally
+            child: GestureDetector(
+>>>>>>> map_guidance
               onLongPress: () => TextToSpeech.speak("Start Navigation Button"),
               child: SizedBox(
                 width: 240.0, // Set the width of the button
@@ -263,7 +401,10 @@ class _MyMapState extends State<MyMap> {
                       // );
 
                       _startNavigate();
+<<<<<<< HEAD
                       isStartNavigate = true;
+=======
+>>>>>>> map_guidance
                     },
                     borderRadius: BorderRadius.circular(
                       30.0,
@@ -280,6 +421,7 @@ class _MyMapState extends State<MyMap> {
                   ),
                 ),
               ),
+<<<<<<< HEAD
             )
           : Container(),
     );
@@ -287,6 +429,43 @@ class _MyMapState extends State<MyMap> {
 
 // always update the user position
   void updateUserLocation(LatLng newPosition) {
+=======
+            ),
+          )
+        : Container();
+  }
+
+  Widget _build_NavigateBar(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
+      padding: EdgeInsets.all(12.0), // Adjust the padding as needed
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        color: Color.fromARGB(255, 50, 116, 45),
+      ),
+      child: Row(
+        children: [
+          buildArrowDirectionContainer('arrow_upward'),
+          Expanded(
+            child:
+                NowNavigationTextWidget(text: navigationText, fontSize: 18.0),
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color.fromARGB(255, 255, 255, 255),
+            ),
+            padding: EdgeInsets.all(8.0),
+            child: Icon(Icons.mic, color: Colors.blue[400]),
+          ),
+        ],
+      ),
+    );
+  }
+
+// update the user marker  position
+  void updateUserMarkerPosition(LatLng newPosition) {
+>>>>>>> map_guidance
     setState(() {
       cameraPosition = CameraPosition(target: newPosition, zoom: 16.5);
       // Update marker for user's position or add it if not present
@@ -300,6 +479,7 @@ class _MyMapState extends State<MyMap> {
     });
 
     if (destination != null) {
+<<<<<<< HEAD
       // _mapController.animateCamera(CameraUpdate.newCameraPosition(
       //   LatLngBounds(
       //     southwest: newPosition,
@@ -310,6 +490,8 @@ class _MyMapState extends State<MyMap> {
       //   ),
       //   50, // Padding
       // ));
+=======
+>>>>>>> map_guidance
       _getPolyline(destinationCoordinate);
     }
   }
@@ -341,6 +523,7 @@ class _MyMapState extends State<MyMap> {
             );
 
             // find the north and south to animate the camera
+<<<<<<< HEAD
             double minLat = userLatitude < destinationCoordinate.latitude
                 ? userLatitude
                 : destinationCoordinate.latitude;
@@ -353,6 +536,24 @@ class _MyMapState extends State<MyMap> {
             double maxLng = userLongitude > destinationCoordinate.longitude
                 ? userLongitude
                 : destinationCoordinate.longitude;
+=======
+            double minLat =
+                MapPage.userLatitude < destinationCoordinate.latitude
+                    ? MapPage.userLatitude
+                    : destinationCoordinate.latitude;
+            double minLng =
+                MapPage.userLongitude < destinationCoordinate.longitude
+                    ? MapPage.userLongitude
+                    : destinationCoordinate.longitude;
+            double maxLat =
+                MapPage.userLatitude > destinationCoordinate.latitude
+                    ? MapPage.userLatitude
+                    : destinationCoordinate.latitude;
+            double maxLng =
+                MapPage.userLongitude > destinationCoordinate.longitude
+                    ? MapPage.userLongitude
+                    : destinationCoordinate.longitude;
+>>>>>>> map_guidance
 
             _mapController.animateCamera(
               CameraUpdate.newLatLngBounds(
@@ -376,8 +577,13 @@ class _MyMapState extends State<MyMap> {
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         key,
         PointLatLng(
+<<<<<<< HEAD
           userLatitude,
           userLongitude,
+=======
+          MapPage.userLatitude,
+          MapPage.userLongitude,
+>>>>>>> map_guidance
         ),
         PointLatLng(
           destinationCoordinate.latitude,
@@ -416,6 +622,7 @@ class _MyMapState extends State<MyMap> {
     _mapController.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
+<<<<<<< HEAD
             target: LatLng(userLatitude, userLongitude),
             zoom: 17,
             bearing: _heading),
@@ -423,6 +630,23 @@ class _MyMapState extends State<MyMap> {
     );
     DirectionServcie().get_direction(
       LatLng(userLatitude, userLongitude),
+=======
+          target: LatLng(MapPage.userLatitude, MapPage.userLongitude),
+          zoom: 17,
+          bearing: _heading,
+        ),
+      ),
+    );
+    print(LatLng(MapPage.userLatitude, MapPage.userLongitude));
+    print(LatLng(
+      destination!.geometry!.location!.lat!,
+      destination!.geometry!.location!.lng!,
+    ));
+
+    isStartNavigate = true;
+    get_direction(
+      LatLng(MapPage.userLatitude, MapPage.userLongitude),
+>>>>>>> map_guidance
       LatLng(
         destination!.geometry!.location!.lat!,
         destination!.geometry!.location!.lng!,
@@ -435,18 +659,28 @@ class _MyMapState extends State<MyMap> {
     _gyroscopeStreamSubscription =
         gyroscopeEvents.listen((GyroscopeEvent event) {
       setState(() {
+<<<<<<< HEAD
         print("x");
         print(event.x * 10.0);
         print("y");
         print(event.y * 10.0);
         print("z");
         print(event.z * 10.0);
+=======
+        // print("x");
+        // print(event.x * 10.0);
+        // print("y");
+        // print(event.y * 10.0);
+        // print("z");
+        // print(event.z * 10.0);
+>>>>>>> map_guidance
         _heading = event.z * 10.0;
         // print(_heading);
       });
     });
   }
 
+<<<<<<< HEAD
   cameraView() {
     return Container(
       height: 200,
@@ -474,4 +708,214 @@ class _MyMapState extends State<MyMap> {
       ),
     );
   }
+=======
+  // cameraView() {
+  //   return Container(
+  //     height: 200,
+  //     child: GetBuilder<ScanController>(
+  //       init: ScanController(),
+  //       builder: (controller) {
+  //         return controller.isCameraInitialized.value
+  //             ? Stack(
+  //                 children: [
+  //                   CameraPreview(controller.cameraController!),
+  //                   CustomPaint(
+  //                     // Use CustomPaint to draw the bounding box
+  //                     painter: BoundingBoxPainter(
+  //                         controller.detectionResult, context),
+  //                   ),
+  //                   DetectedObjectWidget(controller
+  //                       .detectionResult), // Display detected object info
+  //                   Text("data"),
+  //                 ],
+  //               )
+  //             : const Center(
+  //                 child: CircularProgressIndicator(),
+  //               );
+  //       },
+  //     ),
+  //   );
+  // }
+
+  Widget cameraView() {
+    return Stack(
+      children: [
+        Positioned(
+          left: cameraViewX,
+          top: cameraViewY,
+          child: GestureDetector(
+            onPanUpdate: (details) {
+              setState(() {
+                // Update the position of the camera view based on user drag
+                cameraViewX += details.delta.dx;
+                cameraViewY += details.delta.dy;
+              });
+            },
+            child: Container(
+              height: 200,
+              width: 150, // Example width of the camera view
+              child: GetBuilder<ScanController>(
+                init: ScanController(),
+                builder: (controller) {
+                  return controller.isCameraInitialized.value
+                      ? Stack(
+                          children: [
+                            CameraPreview(controller.cameraController!),
+                            CustomPaint(
+                              // Use CustomPaint to draw the bounding box
+                              painter: BoundingBoxPainter(
+                                  controller.detectionResult, context),
+                            ),
+                            DetectedObjectWidget(controller
+                                .detectionResult), // Display detected object info
+                            Text("data"),
+                          ],
+                        )
+                      : Center(
+                          child: CircularProgressIndicator(),
+                        );
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<Map<String, dynamic>> get_direction(
+    LatLng user_position,
+    LatLng destination,
+  ) async {
+    bool isNavigate = true;
+    final String url_using_latlong =
+        "https://maps.googleapis.com/maps/api/directions/json?origin=${user_position.latitude},${user_position.longitude}&"
+        "destination=${destination.latitude},${destination.longitude}&"
+        "mode=walking&"
+        "key=AIzaSyCgjkSHUOL0bgO4w94tC4Z6je-7303-Jn4"; //WARNINGG !!!
+
+    var response = await http.get(Uri.parse(url_using_latlong));
+    var json = convert.jsonDecode(response.body);
+
+    List<dynamic> routes = json['routes'];
+    Map<String, dynamic> results = {
+      'bounds_ne': routes[0]['bounds']['northeast'],
+      'bounds_sw': routes[0]['bounds']['southwest'],
+      'start_location': routes[0]['legs'][0]['start_location'],
+      'end_location': routes[0]['legs'][0]['end_location'],
+      'polyline': routes[0]['overview_polyline']['points'],
+      'polyline_decoded': PolylinePoints()
+          .decodePolyline(routes[0]['overview_polyline']['points']),
+    };
+
+    if (routes.isNotEmpty) {
+      List<dynamic> legs = routes[0]['legs'];
+      if (legs.isNotEmpty) {
+        List<dynamic> steps = legs[0]['steps'];
+        List<Map<String, dynamic>> stepResults = [];
+        for (var step in steps) {
+          Map<String, dynamic> stepResult = {
+            'distance': step['distance']['text'],
+            'duration': step['duration']['text'],
+            'end_lat': step['start_location']['lat'],
+            'end_long': step['start_location']['lng'],
+            'instructions':
+                DirectionServcie().removeHtmlTags(step['html_instructions']),
+          };
+
+          if (step.containsKey('maneuver')) {
+            stepResult['maneuver'] = step['maneuver'];
+          }
+
+          stepResults.add(stepResult);
+        }
+
+        results['steps'] = stepResults;
+        allSteps = results['steps'];
+        endLocation = results['end_location'];
+      }
+    }
+
+    // print('Bounds NE: ${results['bounds_ne']}');
+    // print('Bounds SW: ${results['bounds_sw']}');
+    // print('Start Location: ${results['start_location']}');
+    // print('End Location: ${results['end_location']}');
+    // print('Polyline: ${results['polyline']}');
+    // print('Polyline Decoded: ${results['polyline_decoded']}');
+    // print('Steps:');
+    // while (isNavigate) {
+    // int x = 0;
+    // while (isStartNavigate) {
+    //   // Obtain the user's current location inside the loop
+    //   double userLatitude = MapPage.userLatitude;
+    //   double userLongitude = MapPage.userLongitude;
+
+    //   List<dynamic> steps = results['steps'];
+    //   while (x < steps.length) {
+    //     double distanceToStep = await calculateDistance(
+    //       userLatitude,
+    //       userLongitude,
+    //       steps[x]['end_lat'],
+    //       steps[x]['end_long'],
+    //     );
+
+    //     double destinationDistance = await calculateDestinationDistance(
+    //       userLatitude,
+    //       userLongitude,
+    //     );
+
+    //     // Assuming there's a threshold distance to trigger the notification
+    //     double thresholdDistance = 50; // meters
+    //     print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
+
+    //     if (distanceToStep <= thresholdDistance) {
+    //       String maneuver = steps[x]['maneuver'] ??
+    //           'Continue'; // Default to 'Continue' if maneuver is not provided
+    //       print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+    //       print(maneuver);
+    //       updateTextNavigate(maneuver);
+    //       // break; // Exit loop after notifying the user about the next maneuver
+    //     }
+    //     if (destinationDistance <= 5) {
+    //       isStartNavigate = false;
+    //       print("CONGRATULATIONSSSSSSSSSSSSSSSS");
+    //     }
+    //     // String textToSpeak =
+    //     //     'Jarak: ${step['distance']}, Durasi: ${step['duration']}, Instruksi: ${step['instructions']}';
+    //     // if (step.containsKey('maneuver')) {
+    //     //   textToSpeak += ', Manuver: ${step['maneuver']}';
+    //     // }
+    //     // await speak(textToSpeak);
+    //     // await Future.delayed(Duration(seconds: 3));
+    //     // await speakWithCompletion(textToSpeak);
+    //     x++;
+    //   }
+    //   if (isStartNavigate) {
+    //     x = 0;
+    //     _listenToUserLocation();
+    //   }
+    // }
+
+    // }
+
+    return results;
+  }
+
+  Future<double> calculateDistance(double startLatitude, double startLongitude,
+      double endLatitude, double endLongitude) async {
+    double distanceInMeters = await Geolocator.distanceBetween(
+        startLatitude, startLongitude, endLatitude, endLongitude);
+    return distanceInMeters;
+  }
+
+  Future<double> calculateDestinationDistance(
+      double startLatitude, double startLongitude) async {
+    double distanceInMeters = await Geolocator.distanceBetween(
+        startLatitude,
+        startLongitude,
+        destinationCoordinate.latitude,
+        destinationCoordinate.longitude);
+    return distanceInMeters;
+  }
+>>>>>>> map_guidance
 }

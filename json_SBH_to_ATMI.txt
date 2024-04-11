@@ -1,0 +1,140 @@
+{
+   "geocoded_waypoints" : 
+   [
+      {
+         "geocoder_status" : "OK",
+         "place_id" : "ChIJid-QIsqEaS4RcUnvkH4Xzik",
+         "types" : 
+         [
+            "street_address"
+         ]
+      },
+      {
+         "geocoder_status" : "OK",
+         "place_id" : "ChIJPbFA_smEaS4RQT4kK9erMhc",
+         "types" : 
+         [
+            "street_address"
+         ]
+      }
+   ],
+   "routes" : 
+   [
+      {
+         "bounds" : 
+         {
+            "northeast" : 
+            {
+               "lat" : -6.28158,
+               "lng" : 107.1718056
+            },
+            "southwest" : 
+            {
+               "lat" : -6.2829511,
+               "lng" : 107.1706987
+            }
+         },
+         "copyrights" : "Map data ©2024",
+         "legs" : 
+         [
+            {
+               "distance" : 
+               {
+                  "text" : "0.2 km",
+                  "value" : 198
+               },
+               "duration" : 
+               {
+                  "text" : "3 mins",
+                  "value" : 159
+               },
+               "end_address" : "Jl. Sekolah Hijau No.42, Simpangan, Kec. Cikarang Utara, Kabupaten Bekasi, Jawa Barat 17530, Indonesia",
+               "end_location" : 
+               {
+                  "lat" : -6.28158,
+                  "lng" : 107.1717708
+               },
+               "start_address" : "Jl. Kampus Hijau No.127, Simpangan, Kec. Cikarang Utara, Kabupaten Bekasi, Jawa Barat 17530, Indonesia",
+               "start_location" : 
+               {
+                  "lat" : -6.2829511,
+                  "lng" : 107.1706987
+               },
+               "steps" : 
+               [
+                  {
+                     "distance" : 
+                     {
+                        "text" : "0.2 km",
+                        "value" : 193
+                     },
+                     "duration" : 
+                     {
+                        "text" : "3 mins",
+                        "value" : 154
+                     },
+                     "end_location" : 
+                     {
+                        "lat" : -6.281609599999999,
+                        "lng" : 107.1718056
+                     },
+                     "html_instructions" : "Head <b>northeast</b> on <b>Jl. Kampus Hijau</b>",
+                     "polyline" : 
+                     {
+                        "points" : "lcje@{wbmS_@YMIECYWoB_BmA}@"
+                     },
+                     "start_location" : 
+                     {
+                        "lat" : -6.2829511,
+                        "lng" : 107.1706987
+                     },
+                     "travel_mode" : "WALKING"
+                  },
+                  {
+                     "distance" : 
+                     {
+                        "text" : "5 m",
+                        "value" : 5
+                     },
+                     "duration" : 
+                     {
+                        "text" : "1 min",
+                        "value" : 5
+                     },
+                     "end_location" : 
+                     {
+                        "lat" : -6.28158,
+                        "lng" : 107.1717708
+                     },
+                     "html_instructions" : "Turn <b>left</b><div style=\"font-size:0.9em\">Restricted usage road</div><div style=\"font-size:0.9em\">Destination will be on the left</div>",
+                     "maneuver" : "turn-left",
+                     "polyline" : 
+                     {
+                        "points" : "`{ie@y~bmSEF"
+                     },
+                     "start_location" : 
+                     {
+                        "lat" : -6.281609599999999,
+                        "lng" : 107.1718056
+                     },
+                     "travel_mode" : "WALKING"
+                  }
+               ],
+               "traffic_speed_entry" : [],
+               "via_waypoint" : []
+            }
+         ],
+         "overview_polyline" : 
+         {
+            "points" : "lcje@{wbmSmA_A}D}CEF"
+         },
+         "summary" : "Jl. Kampus Hijau",
+         "warnings" : 
+         [
+            "Walking directions are in beta. Use caution – This route may be missing sidewalks or pedestrian paths."
+         ],
+         "waypoint_order" : []
+      }
+   ],
+   "status" : "OK"
+}

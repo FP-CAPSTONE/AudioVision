@@ -12,7 +12,7 @@ class BoundingBoxPainter extends CustomPainter {
       return; // No detection result or null result, do nothing
     }
 
-    double factorX = size.width / (1280);
+    double factorX = size.width / (720);
     double factorY = size.height / (720);
 
     List<double> box = detectionResult[0]['box'].cast<double>();

@@ -1,8 +1,12 @@
 import 'dart:async';
 
+<<<<<<< HEAD
 import 'package:audiovision/services/firebase_realtime.dart';
 import 'package:audiovision/services/user_location.dart';
 import 'package:firebase_database/firebase_database.dart';
+=======
+import 'package:audiovision/services/user_location.dart';
+>>>>>>> map_guidance
 import 'package:location/location.dart';
 
 class LocationService {
@@ -12,6 +16,7 @@ class LocationService {
   Stream<UserLocation> get locationStream => _locationStreamController.stream;
 
   LocationService() {
+<<<<<<< HEAD
     location.requestPermission().then((permissionStatus) {
       if (permissionStatus == PermissionStatus.granted) {
         Timer.periodic(Duration(minutes: 1), (Timer timer) {
@@ -55,6 +60,24 @@ class LocationService {
     });
 
     print('Updating location data: $locationData');
+=======
+    location.requestPermission().then(
+      (permissionStatus) {
+        if (permissionStatus == PermissionStatus.granted) {
+          location.onLocationChanged.listen(
+            (locationData) {
+              _locationStreamController.add(
+                UserLocation(
+                  latitude: locationData.latitude!,
+                  longitude: locationData.longitude!,
+                ),
+              );
+            },
+          );
+        }
+      },
+    );
+>>>>>>> map_guidance
   }
 
   void dispose() => _locationStreamController.close();

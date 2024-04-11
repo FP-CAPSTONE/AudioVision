@@ -13,12 +13,15 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+<<<<<<< HEAD
     <!-- Firebase -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FOREGROUND_LOCATION" />
 
 
+=======
+>>>>>>> map_guidance
 
     <uses-feature android:name="android.hardware.camera"/>
 

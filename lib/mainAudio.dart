@@ -1,9 +1,12 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:async';
 
 import 'package:audiovision/direction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'utils/text_utils.dart';

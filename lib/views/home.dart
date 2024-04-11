@@ -3,6 +3,10 @@
 import 'dart:async';
 
 import 'package:audiovision/mainAudio.dart';
+import 'package:audiovision/pages/camera/camera.dart';
+import 'package:audiovision/pages/auth_page/login.dart';
+import 'package:audiovision/pages/map_page/map.dart';
+import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 import 'package:audiovision/screens/select_screen.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:audiovision/views/camera_view.dart';
@@ -43,9 +47,36 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+<<<<<<< HEAD
               GestureDetector(
                 onTap: () {
                   Get.to(() => const MyMap());
+=======
+              ElevatedButton(
+                onPressed: () {
+                  Get.to(() => LoginPage());
+                },
+                child: Text("GO TO LOGIN"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Get.to(const CameraViewv());
+                },
+                child: Text("GO TO CAMERA"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Get.to(const YoloVideo());
+                },
+                child: Text("GO TO CAMERA EXAMPLE"),
+              ),
+              SizedBox(
+                height: 100,
+              ),
+              GestureDetector(
+                onTap: () {
+                  Get.to(() => const MapPage());
+>>>>>>> map_guidance
                 },
                 child: const Text(
                   "DOULBE TAP ANYWHERE ON THE SCREEN\n"
@@ -69,8 +100,13 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 10),
               Text(
                 _text,
+<<<<<<< HEAD
                 style: TextStyle(fontSize: 16),
               ),             
+=======
+                style: const TextStyle(fontSize: 16),
+              ),
+>>>>>>> map_guidance
             ],
           ),
         ),
@@ -94,9 +130,15 @@ class _HomeScreenState extends State<HomeScreen> {
             print(_text);
             if (_text.contains("camera view")) {
               TextToSpeech.speak("navigate to CAMERA VIEW");
+<<<<<<< HEAD
               Get.to(const CameraView());
               _isListening = false;
               _text = "";
+=======
+              _isListening = false;
+              _text = "";
+              Get.to(CameraView());
+>>>>>>> map_guidance
             } else if (_text.contains("map screen")) {
               TextToSpeech.speak("navigate to MAP SCREEN");
               Get.to(const SelectScreen());
@@ -109,7 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
               _text = "";
             } else if (_text.contains("map view")) {
               TextToSpeech.speak("navigate toMAP VIEW SCREEN");
+<<<<<<< HEAD
               Get.to(const MyMap());
+=======
+              Get.to(const MapPage());
+>>>>>>> map_guidance
               _isListening = false;
               _text = "";
             } else {
