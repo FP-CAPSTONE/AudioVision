@@ -56,9 +56,12 @@ dependencies:
   flutter_dotenv :
   sensors_plus:
   riverpod: ^1.0.0
-  firebase_database: ^10.4.6
-  firebase_core: 
   shared_preferences:
+
+    # cloud_firebase: ^10.4.6
+  firebase_core: ^2.27.0 
+  firebase_database:
+  cloud_firestore: 
 dev_dependencies:
   flutter_test:
     sdk: flutter

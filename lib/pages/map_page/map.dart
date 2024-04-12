@@ -7,8 +7,11 @@ import 'package:audiovision/pages/map_page/widget/button_start.dart';
 import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 import 'package:audiovision/pages/map_page/widget/google_map.dart';
 import 'package:audiovision/pages/map_page/widget/navigate_bar.dart';
+import 'package:audiovision/services/firebase_realtime.dart';
 import 'package:audiovision/services/location_services.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
@@ -56,6 +59,8 @@ class _MapPageState extends State<MapPage> {
   late FocusNode endFocusNode;
 
   late GooglePlace googlePlace;
+  late DatabaseReference dbRef;
+
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
 
@@ -78,12 +83,15 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    Firebase.initializeApp();
+
     String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
     googlePlace = GooglePlace(apiKey);
 
     endFocusNode = FocusNode();
 
     listenToUserLocation(locationService);
+    dbRef = FirebaseDatabase.instance.ref();
 
     //_checkDeviceOrientation();
   }
@@ -93,6 +101,18 @@ class _MapPageState extends State<MapPage> {
     locationService.dispose();
     //_gyroscopeStreamSubscription.cancel();
     super.dispose();
+  }
+
+  updateLocationData(CurrentLocationData locationData) {
+    // Mengirim data ke Firebase Realtime Database
+    dbRef.child('livetracking').push().set({
+      'name': locationData.name,
+      'coordinates': locationData.coordinates
+          .map((coordinate) => coordinate.toJson())
+          .toList(),
+    });
+
+    print('Updating location data: $locationData');
   }
 
   void autoCompleteSearch(String value) async {
@@ -471,15 +491,18 @@ class _MapPageState extends State<MapPage> {
       );
       updateUserMarkerPosition(
           LatLng(MapPage.userLatitude, MapPage.userLongitude));
-      // Write user location data to the Firebase Realtime Database
-      // databaseReference.child("users").child("user1").set({
-      //   "latitude": userLocation.latitude,
-      //   "longitude": userLocation.longitude,
-      // }).then((_) {
-      //   print("User location updated successfully");
-      // }).catchError((error) {
-      //   print("Failed to update user location: $error");
-      // });
+
+      updateLocationData(CurrentLocationData(
+        name: 'John',
+        coordinates: [
+          Coordinate(
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
+            timestamp: DateTime.now(),
+          ),
+        ],
+      ));
+
       routeGuidance();
     });
   }
