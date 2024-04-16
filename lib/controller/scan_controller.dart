@@ -1,12 +1,9 @@
 import 'dart:async';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:camera/camera.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:vibration/vibration.dart';
 
@@ -17,7 +14,7 @@ class ScanController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
-    //_checkDeviceOrientation();
+    _checkDeviceOrientation();
     initCamera();
     initTFLite();
   }
@@ -46,49 +43,36 @@ class ScanController extends GetxController {
   CameraImage? cameraImage;
   var detectedObject = "".obs;
   List<Map<String, dynamic>> detectionResult = [];
-  // List<Map<String, dynamic>> detectionResult = [
-  //   {
-  //     "box": [
-  //       0.0,
-  //       0.0,
-  //       0.0,
-  //       0.0,
-  //       0.0,
-  //     ],
-  //     "tag": ""
-  //     // "polygons": List<Map<String, double>>: [{x:coordx, y:coordy}]
-  //   }
-  // ];
+  bool canNotify = true;
   var accelerometerEventX, accelerometerEventY, accelerometerEventZ = 0.0;
   var cameraCount = 0;
 
-  // var x, y, w, h = 0.0;
-  // var label = "";
-
   var isCameraInitialized = false.obs;
 
-  final FlutterTts flutterTts = FlutterTts();
-
-  // function text to speach
-  Future<void> speak(String text) async {
-    // await flutterTts.setLanguage("en-US");
-    await flutterTts.setLanguage("id-ID"); // Set language to Indonesian
-    await flutterTts.setPitch(1);
-    await flutterTts.setSpeechRate(0.5);
-    await flutterTts.speak(text);
-  }
-
   // Check accelerometer data to determine device orientation
-  // void _checkDeviceOrientation() {
-  //   // Store the subscription returned by accelerometerEvents.listen()
-  //   _accelerometerSubscription =
-  //       accelerometerEvents.listen((AccelerometerEvent event) {
-  //     print(event);
-  //     accelerometerEventX = event.x;
-  //     accelerometerEventY = event.y;
-  //     accelerometerEventZ = event.z;
-  //   });
-  // }
+  void _checkDeviceOrientation() {
+    bool canNotify = true; // Flag to control notification frequency
+
+    // Store the subscription returned by accelerometerEvents.listen()
+    _accelerometerSubscription =
+        accelerometerEvents.listen((AccelerometerEvent event) {
+      print(event);
+      // if the phone is not facing forward
+      if (event.y < 0 && canNotify) {
+        Vibration.vibrate();
+
+        TextToSpeech.speak("Please hold your phone upright.");
+
+        // Set canNotify to false to prevent further notifications
+        canNotify = false;
+
+        // Reset canNotify after a delay
+        Future.delayed(Duration(seconds: 5), () {
+          canNotify = true;
+        });
+      }
+    });
+  }
 
   // camera init to sending each frame to the model (set 10fps)
   initCamera() async {
@@ -105,16 +89,10 @@ class ScanController extends GetxController {
           print("cameraCountr" + cameraCount.toString());
           // run object detection each 10 fps
           // if (cameraCount % 10 == 0) {
-          // if (accelerometerEventY > 0) {
+
           cameraImage = image;
           objectDetector(image);
-          cameraCount = 0;
-          // } else {
-          //   Vibration.vibrate();
-          //   cameraCount -= 1000;
-          //   speak("tolong kamera lu yang benar lah wooooy!");
-          //   print("tolong kamera lu yang benar lah wooooy!");
-          // }
+
           update();
           // }
         });
@@ -161,9 +139,19 @@ class ScanController extends GetxController {
       //example result
       // [{box: [0.0, 763.1640625, 357.9225158691406, 1116.581787109375, 0.5627957582473755], tag: Stop}]
 
-      // speak(detectionResult[0]['tag']);
-      Vibration.vibrate();
-      print("vibration");
+      if (canNotify) {
+        Vibration.vibrate();
+
+        TextToSpeech.speak(detectionResult[0]['tag']);
+
+        // Set canNotify to false to prevent further notifications
+        canNotify = false;
+
+        // Reset canNotify after a delay
+        Future.delayed(Duration(seconds: 5), () {
+          canNotify = true;
+        });
+      }
     }
     update();
   }
