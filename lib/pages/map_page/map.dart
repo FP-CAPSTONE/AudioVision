@@ -232,7 +232,7 @@ class _MapPageState extends State<MapPage> {
                 MapPage.isStartNavigate
                     ? NavigateBarWidget(navigationText: navigationText)
                     : Container(),
-                // MapPage.isStartNavigate ? builCamera() : Container(),
+                MapPage.isStartNavigate ? builCamera() : Container(),
                 // isStartNavigate
                 // ? Align(
                 //     alignment: Alignment.centerRight, child: cameraView())
@@ -492,16 +492,17 @@ class _MapPageState extends State<MapPage> {
       updateUserMarkerPosition(
           LatLng(MapPage.userLatitude, MapPage.userLongitude));
 
-      updateLocationData(CurrentLocationData(
-        name: 'John',
-        coordinates: [
-          Coordinate(
-            latitude: userLocation.latitude,
-            longitude: userLocation.longitude,
-            timestamp: DateTime.now(),
-          ),
-        ],
-      ));
+      // WRRITE DATA IN REALTIME DATABASE
+      // updateLocationData(CurrentLocationData(
+      //   name: 'John',
+      //   coordinates: [
+      //     Coordinate(
+      //       latitude: userLocation.latitude,
+      //       longitude: userLocation.longitude,
+      //       timestamp: DateTime.now(),
+      //     ),
+      //   ],
+      // ));
 
       routeGuidance();
     });

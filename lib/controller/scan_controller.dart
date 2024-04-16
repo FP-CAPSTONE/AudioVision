@@ -32,10 +32,12 @@ class ScanController extends GetxController {
 
   @override
   void dispose() {
-    // TODO : STOP CAMERA WHEN MOVING TO ANOTHER SCREEN
-    // TODO: implement dispose
+    // Cancel the accelerometer subscription when the controller is closed
+    _accelerometerSubscription?.cancel();
+    // Dispose of cameraController if it is not null
+    cameraController?.dispose();
+    Get.delete<CameraController>();
     super.dispose();
-    cameraController!.dispose();
   }
 
   FlutterVision vision = FlutterVision();
@@ -93,26 +95,28 @@ class ScanController extends GetxController {
     if (await Permission.camera.request().isGranted) {
       cameras = await availableCameras();
 
-      cameraController = CameraController(cameras[0], ResolutionPreset.max);
+      cameraController = CameraController(cameras[0], ResolutionPreset.max,
+          enableAudio: false);
       // await cameraController.initialize();
       await cameraController!.initialize().then((value) {
         detectionResult = [];
         cameraController!.startImageStream((image) {
           cameraCount++;
+          print("cameraCountr" + cameraCount.toString());
           // run object detection each 10 fps
-          if (cameraCount % 10 == 0) {
-            // if (accelerometerEventY > 0) {
-            cameraImage = image;
-            objectDetector(image);
-            cameraCount = 0;
-            // } else {
-            //   Vibration.vibrate();
-            //   cameraCount -= 1000;
-            //   speak("tolong kamera lu yang benar lah wooooy!");
-            //   print("tolong kamera lu yang benar lah wooooy!");
-            // }
-          }
+          // if (cameraCount % 10 == 0) {
+          // if (accelerometerEventY > 0) {
+          cameraImage = image;
+          objectDetector(image);
+          cameraCount = 0;
+          // } else {
+          //   Vibration.vibrate();
+          //   cameraCount -= 1000;
+          //   speak("tolong kamera lu yang benar lah wooooy!");
+          //   print("tolong kamera lu yang benar lah wooooy!");
+          // }
           update();
+          // }
         });
       });
       isCameraInitialized(true);
@@ -128,22 +132,13 @@ class ScanController extends GetxController {
 
     //flutter vision
     await vision.loadYoloModel(
-      modelPath: 'assets/model/yolov5n.tflite',
       labels: 'assets/model/labels.txt',
-      modelVersion: "yolov5",
+      modelPath: 'assets/model/yolov8n-seg_float32.tflite',
+      modelVersion: "yolov8seg",
+      numThreads: 5,
       quantization: true,
-      numThreads: 3,
-      useGpu: true,
+      useGpu: false,
     );
-    //load yolo segmentation
-    // await vision.loadYoloModel(
-    //   modelPath: 'assets/model/mymodel_seg-n400.tflite',
-    //   labels: 'assets/model/seg_label.txt',
-    //   modelVersion: "yolov8seg",
-    //   quantization: true,
-    //   numThreads: 1,
-    //   useGpu: false,
-    // );
     print("MODEL LOAD SUCCESSFULLY");
   }
 
@@ -154,55 +149,22 @@ class ScanController extends GetxController {
       bytesList: image.planes.map((plane) => plane.bytes).toList(),
       imageHeight: image.height,
       imageWidth: image.width,
-      iouThreshold: 0.4,
-      confThreshold: 0.4,
-      classThreshold: 0.5,
+      iouThreshold: 0.5,
+      confThreshold: 0.5,
+      classThreshold: 0.6,
     );
-    print(result);
+
+    print("kont" + image.toString() + result.toString());
     if (result.isNotEmpty) {
       detectionResult = result;
+      // print(result);
       //example result
       // [{box: [0.0, 763.1640625, 357.9225158691406, 1116.581787109375, 0.5627957582473755], tag: Stop}]
 
-      speak(detectionResult[0]['tag']);
+      // speak(detectionResult[0]['tag']);
       Vibration.vibrate();
+      print("vibration");
     }
-    // update();
-  }
-
-  List<Widget> displayBoxesAroundRecognizedObjects(
-    Size screen,
-  ) {
-    if (detectionResult.isEmpty) return []; // Ensure returning List<Widget>
-    double factorX = screen.width / (cameraImage?.height ?? 1);
-    double factorY = screen.height / (cameraImage?.width ?? 1);
-    print(cameraImage?.height ?? 1);
-    Color colorPick = const Color.fromARGB(255, 50, 233, 30);
-
-    return detectionResult.map((result) {
-      // Specify return type as Widget
-      TextToSpeech.speak("${result['tag']}");
-
-      return Positioned(
-        left: result["box"][0] * factorX,
-        top: result["box"][1] * factorY,
-        width: (result["box"][2] - result["box"][0]) * factorX,
-        height: (result["box"][3] - result["box"][1]) * factorY,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-            border: Border.all(color: Colors.pink, width: 2.0),
-          ),
-          child: Text(
-            "${result['tag']} ${(result['box'][4] * 100).toStringAsFixed(0)}%",
-            style: TextStyle(
-              background: Paint()..color = colorPick,
-              color: Colors.white,
-              fontSize: 18.0,
-            ),
-          ),
-        ),
-      );
-    }).toList();
+    update();
   }
 }
