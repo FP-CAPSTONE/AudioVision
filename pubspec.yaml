@@ -98,6 +98,7 @@ flutter:
     - .env
     - assets/model/yolov5n.tflite
     - assets/model/yolov8n-seg_float32.tflite
+    - assets/model/transfer-1.tflite
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class RegisterPage extends StatelessWidget {
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
   final FlutterTts flutterTts = FlutterTts();
 
   void _speak(String text) async {
@@ -24,14 +28,17 @@ class RegisterPage extends StatelessWidget {
             Text('Register', style: TextStyle(fontSize: 24)),
             SizedBox(height: 20),
             TextFormField(
+              controller: _nameController,
               decoration: InputDecoration(labelText: 'Name'),
             ),
             SizedBox(height: 10),
             TextFormField(
+              controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),
             ),
             SizedBox(height: 10),
             TextFormField(
+              controller: _passwordController,
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
