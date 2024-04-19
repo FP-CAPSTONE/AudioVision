@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:audiovision/mainAudio.dart';
+import 'package:audiovision/pages/auth_page/services/auth_services.dart';
 import 'package:audiovision/pages/camera/camera.dart';
 import 'package:audiovision/pages/camera/test_camera.dart';
 import 'package:audiovision/pages/class/language.dart';
@@ -47,6 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     super.initState();
     _loadTitle();
+
+    // check weather user login or not
+    isLogin();
   }
 
   @override
@@ -94,6 +98,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   Get.to(const YoloVideo());
                 },
                 child: Text("GO TO CAMERA"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  AuthService.logOut();
+                },
+                child: Text("Log Out"),
               ),
               SizedBox(
                 height: 100,
@@ -205,6 +215,18 @@ class _HomeScreenState extends State<HomeScreen> {
         print("Speech recognition timeout");
       }
     });
+  }
+
+  void isLogin() async {
+    bool loggedIn = await AuthService.isAuthenticated();
+    if (loggedIn) {
+      print('User is authenticated');
+      // User is authenticated, proceed with authenticated actions
+    } else {
+      Get.to(LoginPage());
+      print('User is not authenticated');
+      // User is not authenticated, redirect to login page or show login screen
+    }
   }
 }
 
