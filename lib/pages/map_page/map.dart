@@ -2,7 +2,10 @@
 
 import 'dart:async';
 
+import 'package:audiovision/pages/auth_page/services/auth_services.dart';
+import 'package:audiovision/pages/home_page/home.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
+import 'package:audiovision/pages/map_page/method/share_location_method.dart';
 import 'package:audiovision/pages/map_page/widget/button_start.dart';
 import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 import 'package:audiovision/pages/map_page/widget/google_map.dart';
@@ -59,7 +62,6 @@ class _MapPageState extends State<MapPage> {
   late FocusNode endFocusNode;
 
   late GooglePlace googlePlace;
-  late DatabaseReference dbRef;
 
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
@@ -91,7 +93,7 @@ class _MapPageState extends State<MapPage> {
     endFocusNode = FocusNode();
 
     listenToUserLocation(locationService);
-    dbRef = FirebaseDatabase.instance.ref();
+    ShareLocation.dbRef = FirebaseDatabase.instance.ref();
 
     //_checkDeviceOrientation();
   }
@@ -101,18 +103,6 @@ class _MapPageState extends State<MapPage> {
     locationService.dispose();
     //_gyroscopeStreamSubscription.cancel();
     super.dispose();
-  }
-
-  updateLocationData(CurrentLocationData locationData) {
-    // Mengirim data ke Firebase Realtime Database
-    dbRef.child('livetracking').push().set({
-      'name': locationData.name,
-      'coordinates': locationData.coordinates
-          .map((coordinate) => coordinate.toJson())
-          .toList(),
-    });
-
-    print('Updating location data: $locationData');
   }
 
   void autoCompleteSearch(String value) async {
@@ -224,7 +214,9 @@ class _MapPageState extends State<MapPage> {
                 GoogleMapWidget(),
                 MapPage.isStartNavigate
                     ? Container()
-                    : build_SearchBar(context),
+                    : ShareLocation.isTracking
+                        ? Container()
+                        : build_SearchBar(context),
                 destination != null
                     ? ButtonStartNavigateWidget(
                         mapController: MapPage.mapController!)
@@ -232,7 +224,7 @@ class _MapPageState extends State<MapPage> {
                 MapPage.isStartNavigate
                     ? NavigateBarWidget(navigationText: navigationText)
                     : Container(),
-                MapPage.isStartNavigate ? builCamera() : Container(),
+                // MapPage.isStartNavigate ? builCamera() : Container(),
                 // isStartNavigate
                 // ? Align(
                 //     alignment: Alignment.centerRight, child: cameraView())
@@ -250,29 +242,186 @@ class _MapPageState extends State<MapPage> {
                       ),
                     ),
                     // Button to show bottom sheet
-                    ElevatedButton(
-                      onPressed: () {
-                        _showBottomSheet(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.white,
-                        onPrimary: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.directions, color: Colors.blue),
-                          SizedBox(width: 10),
-                          Text('Show Route Details',
-                              style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                    ),
+                    MapPage.isStartNavigate
+                        ? ElevatedButton(
+                            onPressed: () {
+                              _showBottomSheet(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.white,
+                              onPrimary: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.directions, color: Colors.blue),
+                                SizedBox(width: 10),
+                                Text('Show Route Details',
+                                    style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                          )
+                        : Container(),
+                    MapPage.isStartNavigate
+                        ? ElevatedButton(
+                            onPressed: () {
+                              TextToSpeech.speak(
+                                  'Do you want to share your location?. To share your location, Share your ID to other people. your ID is ${AuthService.userId.toString().split("")}');
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Share Location?'),
+                                    content: Text(
+                                        'Do you want to share your location? To share your location, Share your ID to other people. your ID is ${AuthService.userId}'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(
+                                              false); // Return false indicating user doesn't want to share location
+                                        },
+                                        child: Text('No'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(
+                                              true); // Return true indicating user wants to share location
+                                        },
+                                        child: Text('Yes'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ).then((value) {
+                                if (value == true) {
+                                  ShareLocation.shareUserLocation(
+                                    LatLng(MapPage.userLatitude,
+                                        MapPage.userLongitude),
+                                    MapPage.destinationCoordinate,
+                                  );
+                                }
+                              });
+                            },
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(width: 10),
+                                Text('Share Location',
+                                    style: TextStyle(fontSize: 16)),
+                              ],
+                            ),
+                          )
+                        : ShareLocation.isTracking
+                            ? ElevatedButton(
+                                onPressed: () {
+                                  // Show confirmation dialog to stop tracking
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Stop Tracking"),
+                                        content: Text(
+                                            "Are you sure you want to stop tracking?"),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: Text("Cancel"),
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: Text("Stop"),
+                                            onPressed: () {
+                                              // stop tracking
+
+                                              ShareLocation.stopTracking();
+
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Text('Stop Tracking'),
+                              )
+                            : ElevatedButton(
+                                onPressed: () {
+                                  TextEditingController _userIdController =
+                                      TextEditingController();
+                                  // Show a dialog to input user ID
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Enter User ID'),
+                                        content: TextField(
+                                          controller: _userIdController,
+                                          decoration: InputDecoration(
+                                            hintText: 'Enter User ID',
+                                          ),
+                                        ),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog
+                                            },
+                                            child: Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              // Get the entered user ID
+                                              String userId = _userIdController
+                                                  .text
+                                                  .trim(); // Trim any leading/trailing spaces
+
+                                              // Check if the entered user ID is empty
+                                              if (userId.isEmpty) {
+                                                TextToSpeech.speak(
+                                                    "Please enter a User ID.");
+                                                // Show an error message indicating that the User ID cannot be empty
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                  content: Text(
+                                                      'Please enter a User ID.'),
+                                                ));
+                                                return; // Return without further action
+                                              }
+
+                                              // Perform actions with the entered user ID
+                                              print('User ID entered: $userId');
+                                              ShareLocation.trackingId = userId;
+                                              ShareLocation
+                                                  .getOtherUserLocation();
+
+                                              // Close the dialog
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('OK'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(width: 10),
+                                    Text('Tracking Location',
+                                        style: TextStyle(fontSize: 16)),
+                                  ],
+                                ),
+                              )
                   ],
                 ),
               ],
@@ -492,6 +641,18 @@ class _MapPageState extends State<MapPage> {
       updateUserMarkerPosition(
           LatLng(MapPage.userLatitude, MapPage.userLongitude));
 
+      // if tracking user take the value from firebase
+      if (ShareLocation.isTracking) {
+        ShareLocation.getOtherUserLocation();
+
+        updateUserTrackingMarkerPosition();
+      }
+
+      if (ShareLocation.isShared) {
+        ShareLocation.updateUserLocation(
+            LatLng(MapPage.userLatitude, MapPage.userLongitude));
+      }
+
       // WRRITE DATA IN REALTIME DATABASE
       // updateLocationData(CurrentLocationData(
       //   name: 'John',
@@ -528,6 +689,45 @@ class _MapPageState extends State<MapPage> {
     setState(() {});
     if (MapPage.isStartNavigate) {
       PolylineMethod(updateUi!).getPolyline();
+    }
+  }
+
+  updateUserTrackingMarkerPosition() {
+    // Check if trackingUserName is not null
+    if (ShareLocation.isTracking) {
+      // Update marker for user's position or add it if not present
+      MapPage.markers.removeWhere(
+        (marker) => marker.markerId.value == ShareLocation.trackingUserName!,
+      );
+      MapPage.markers.add(
+        Marker(
+          markerId: MarkerId(
+              ShareLocation.trackingUserName!), // Assert non-null using !
+          position: LatLng(ShareLocation.trackUserCoordinate!.latitude,
+              ShareLocation.trackUserCoordinate!.longitude),
+          // Custom marker icon
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueCyan,
+          ), // For example, you can use a blue marker
+        ),
+      );
+
+      // Update marker for user's position or add it if not present
+      MapPage.markers.removeWhere(
+        (marker) => marker.markerId.value == "Tracking Destination",
+      );
+      MapPage.markers.add(
+        Marker(
+          markerId: MarkerId("Tracking Destination"), // Assert non-null using !
+          position: LatLng(ShareLocation.trackDestinationCoordinate!.latitude,
+              ShareLocation.trackDestinationCoordinate!.longitude),
+          // Custom marker icon
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueRed,
+          ), // For example, you can use a blue marker
+        ),
+      );
+      setState(() {});
     }
   }
 
@@ -603,4 +803,16 @@ class _MapPageState extends State<MapPage> {
     );
     return distanceInMeters;
   }
+
+  // updateUserLocation(CurrentLocationData locationData) {
+  //   // Mengirim data ke Firebase Realtime Database
+  //   dbRef.child('livetracking').push().set({
+  //     'name': locationData.name,
+  //     'coordinates': locationData.coordinates
+  //         .map((coordinate) => coordinate.toJson())
+  //         .toList(),
+  //   });
+
+  //   print('Updating location data: $locationData');
+  // }
 }
