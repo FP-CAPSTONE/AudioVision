@@ -94,7 +94,7 @@ class ScanController extends GetxController {
           objectDetector(image);
 
           update();
-          // }
+          // }=
         });
       });
       isCameraInitialized(true);
@@ -112,6 +112,7 @@ class ScanController extends GetxController {
     await vision.loadYoloModel(
       labels: 'assets/model/labels.txt',
       modelPath: 'assets/model/yolov8n-seg_float32.tflite',
+      // modelPath: 'assets/model/transfer-1.tflite',
       modelVersion: "yolov8seg",
       numThreads: 5,
       quantization: true,
