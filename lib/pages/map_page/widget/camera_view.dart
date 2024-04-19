@@ -9,8 +9,8 @@ class CameraView {
     final Size size = MediaQuery.of(context).size;
 
     return SizedBox(
-      height: 2000,
-      width: 1500, // Example width of the camera view
+      height: 200,
+      width: 150, // Example width of the camera view
       child: GetBuilder<ScanController>(
         init: ScanController(),
         builder: (controller) {
