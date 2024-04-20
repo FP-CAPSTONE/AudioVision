@@ -448,13 +448,19 @@ class _MapPageState extends State<MapPage> {
                 const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
             filled: true,
             fillColor: Colors.grey[200],
-            border: const OutlineInputBorder(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10)),
-              borderSide: BorderSide(width: 0, style: BorderStyle.none),
+            // border: const OutlineInputBorder(
+            //   borderRadius: BorderRadius.only(
+            //       topLeft: Radius.circular(40),
+            //       topRight: Radius.circular(40),
+            //       bottomLeft: Radius.circular(10),
+            //       bottomRight: Radius.circular(10)),
+            //   borderSide: BorderSide(width: 0, style: BorderStyle.none),
+            // ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10),
+              ),
+              borderSide: BorderSide(width: 1, style: BorderStyle.solid),
             ),
             isDense: true,
             contentPadding: const EdgeInsets.all(15),

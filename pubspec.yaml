@@ -99,6 +99,9 @@ flutter:
     - assets/model/yolov5n.tflite
     - assets/model/yolov8n-seg_float32.tflite
     - assets/model/transfer-1.tflite
+    - assets/maptheme/retro_map.json
+    - assets/maptheme/night_map.json
+    - assets/maptheme/standard_map.json
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
