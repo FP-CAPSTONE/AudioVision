@@ -6,10 +6,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class ButtonStartNavigateWidget extends StatelessWidget {
   final GoogleMapController mapController;
-
+  final Function callback;
+  final BuildContext context;
   const ButtonStartNavigateWidget({
     super.key,
     required this.mapController,
+    required this.callback,
+    required this.context,
   });
 
   @override
@@ -37,6 +40,7 @@ class ButtonStartNavigateWidget extends StatelessWidget {
                         mapController,
                         MapPage.destinationCoordinate,
                       );
+                      callback(context);
                     },
                     borderRadius: BorderRadius.circular(
                       30.0,

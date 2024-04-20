@@ -9,6 +9,9 @@ import 'dart:convert';
 class AuthService {
   static String? userName;
   static int? userId;
+
+  static bool isAuthenticate = false;
+
   // Function to check authentication status
   static Future<bool> isAuthenticated() async {
     final prefs = await SharedPreferences.getInstance();
@@ -25,6 +28,9 @@ class AuthService {
       final token = userData['token'] as String?;
       userName = userData['userName'];
       userId = userData['userId'];
+
+      isAuthenticate = token != null;
+
       return token !=
           null; // Return true if token is not null, indicating user is logged in
     } else {

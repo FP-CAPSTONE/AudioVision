@@ -64,7 +64,6 @@ class ShareLocation {
       return;
     }
 
-    isTracking = true;
     final snapshot = await dbRef.child(trackingId!).get();
 
     if (snapshot.exists) {
@@ -83,6 +82,20 @@ class ShareLocation {
           destinationLocationData['lat'], destinationLocationData['long']);
 
       print(snapshot.value);
+
+      MapPage.markers.add(
+        Marker(
+          markerId: MarkerId("Tracking Destination"), // Assert non-null using !
+          position: LatLng(ShareLocation.trackDestinationCoordinate!.latitude,
+              ShareLocation.trackDestinationCoordinate!.longitude),
+          // Custom marker icon
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueRed,
+          ), // For example, you can use a blue marker
+        ),
+      );
+
+      isTracking = true;
     } else {
       print('No data available.');
     }

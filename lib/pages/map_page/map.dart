@@ -2,8 +2,10 @@
 
 import 'dart:async';
 
+import 'package:audiovision/pages/auth_page/login.dart';
 import 'package:audiovision/pages/auth_page/services/auth_services.dart';
 import 'package:audiovision/pages/home_page/home.dart';
+import 'package:audiovision/pages/map_page/method/navigate_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:audiovision/pages/map_page/method/share_location_method.dart';
 import 'package:audiovision/pages/map_page/widget/button_start.dart';
@@ -95,6 +97,8 @@ class _MapPageState extends State<MapPage> {
     listenToUserLocation(locationService);
     ShareLocation.dbRef = FirebaseDatabase.instance.ref();
 
+    isLogin();
+
     //_checkDeviceOrientation();
   }
 
@@ -134,68 +138,147 @@ class _MapPageState extends State<MapPage> {
   void _showBottomSheet(BuildContext context) {
     Map<String, dynamic> totals = _calculateTotals(MapPage.allSteps);
 
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double initialHeight = 0.2; // 20% initial height
+    double currentHeight = initialHeight;
+    DateTime now = DateTime.now();
+    int totalDurationMinutes = totals['totalDuration'];
+    DateTime expectedArrivalTime =
+        now.add(Duration(minutes: totalDurationMinutes));
     showModalBottomSheet(
+      elevation: 1,
+      backgroundColor: Color.fromARGB(255, 236, 5, 5),
+      barrierColor: const Color.fromARGB(17, 0, 0, 0),
+      isDismissible: false,
       context: context,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                    children: [
-                      TextSpan(
-                        text: '${totals['totalDuration']} mins ',
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return GestureDetector(
+              onVerticalDragUpdate: (details) {
+                // Calculate drag direction
+                double dy = details.primaryDelta!;
+                bool isDraggingUpwards = dy < 0;
+
+                // Clamp between 20% and 60%
+                if (isDraggingUpwards) {
+                  setState(() {
+                    currentHeight = 0.6;
+                  });
+                } else {
+                  setState(() {
+                    currentHeight = 0.2;
+                  });
+                }
+              },
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300), // Adjust animation speed
+                width: screenWidth * 0.97, // Set width to 95% of screen width
+                height: screenHeight * currentHeight,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${totals['totalDuration']} mins ',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          '${totals['totalDistance'].toStringAsFixed(2)} km . ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              ElevatedButton(
+                                  onPressed: () {
+                                    shareLocation();
+                                  },
+                                  child: Icon(Icons.share)),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    MapPage.isStartNavigate = false;
+                                    Navigator.of(context)
+                                        .pop(); // Close the bottom sheet
+                                  },
+                                  child: Text("Exit"))
+                            ],
+                          )
+                        ],
                       ),
-                      TextSpan(
-                        text:
-                            '(${totals['totalDistance'].toStringAsFixed(2)} km)',
-                        style: TextStyle(color: Colors.grey),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 1,
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: MapPage.allSteps.length,
+                        itemBuilder: (context, index) {
+                          var step = MapPage.allSteps[index];
+                          return ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            title: Text(
+                              step['instructions'],
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              '${step['distance']} - ${step['duration']}',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.blue,
+                              child: Text(
+                                '${index + 1}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: MapPage.allSteps.length,
-                  itemBuilder: (context, index) {
-                    var step = MapPage.allSteps[index];
-                    return ListTile(
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      title: Text(
-                        step['instructions'],
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        '${step['distance']} - ${step['duration']}',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.blue,
-                        child: Text(
-                          '${index + 1}',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -219,7 +302,10 @@ class _MapPageState extends State<MapPage> {
                         : build_SearchBar(context),
                 destination != null
                     ? ButtonStartNavigateWidget(
-                        mapController: MapPage.mapController!)
+                        mapController: MapPage.mapController!,
+                        callback: _showBottomSheet,
+                        context: context,
+                      )
                     : Container(),
                 MapPage.isStartNavigate
                     ? NavigateBarWidget(navigationText: navigationText)
@@ -242,71 +328,10 @@ class _MapPageState extends State<MapPage> {
                       ),
                     ),
                     // Button to show bottom sheet
+
                     MapPage.isStartNavigate
                         ? ElevatedButton(
-                            onPressed: () {
-                              _showBottomSheet(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                              onPrimary: Colors.black,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 15),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.directions, color: Colors.blue),
-                                SizedBox(width: 10),
-                                Text('Show Route Details',
-                                    style: TextStyle(fontSize: 16)),
-                              ],
-                            ),
-                          )
-                        : Container(),
-                    MapPage.isStartNavigate
-                        ? ElevatedButton(
-                            onPressed: () {
-                              TextToSpeech.speak(
-                                  'Do you want to share your location?. To share your location, Share your ID to other people. your ID is ${AuthService.userId.toString().split("")}');
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Share Location?'),
-                                    content: Text(
-                                        'Do you want to share your location? To share your location, Share your ID to other people. your ID is ${AuthService.userId}'),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop(
-                                              false); // Return false indicating user doesn't want to share location
-                                        },
-                                        child: Text('No'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop(
-                                              true); // Return true indicating user wants to share location
-                                        },
-                                        child: Text('Yes'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ).then((value) {
-                                if (value == true) {
-                                  ShareLocation.shareUserLocation(
-                                    LatLng(MapPage.userLatitude,
-                                        MapPage.userLongitude),
-                                    MapPage.destinationCoordinate,
-                                  );
-                                }
-                              });
-                            },
+                            onPressed: () {},
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -575,6 +600,17 @@ class _MapPageState extends State<MapPage> {
                 100, // Padding
               ),
             );
+
+            NavigateMethod().getDirection(
+              LatLng(
+                MapPage.userLatitude,
+                MapPage.userLongitude,
+              ),
+              LatLng(
+                MapPage.destinationCoordinate.latitude,
+                MapPage.destinationCoordinate.longitude,
+              ),
+            );
           },
         );
       }
@@ -696,9 +732,14 @@ class _MapPageState extends State<MapPage> {
     // Check if trackingUserName is not null
     if (ShareLocation.isTracking) {
       // Update marker for user's position or add it if not present
-      MapPage.markers.removeWhere(
+      final markerToRemove = MapPage.markers.firstWhere(
         (marker) => marker.markerId.value == ShareLocation.trackingUserName!,
+        orElse: () => Marker(markerId: MarkerId('default_marker')),
       );
+
+      if (markerToRemove.markerId.value == ShareLocation.trackingUserName!) {
+        MapPage.markers.remove(markerToRemove);
+      }
       MapPage.markers.add(
         Marker(
           markerId: MarkerId(
@@ -712,21 +753,6 @@ class _MapPageState extends State<MapPage> {
         ),
       );
 
-      // Update marker for user's position or add it if not present
-      MapPage.markers.removeWhere(
-        (marker) => marker.markerId.value == "Tracking Destination",
-      );
-      MapPage.markers.add(
-        Marker(
-          markerId: MarkerId("Tracking Destination"), // Assert non-null using !
-          position: LatLng(ShareLocation.trackDestinationCoordinate!.latitude,
-              ShareLocation.trackDestinationCoordinate!.longitude),
-          // Custom marker icon
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueRed,
-          ), // For example, you can use a blue marker
-        ),
-      );
       setState(() {});
     }
   }
@@ -804,15 +830,51 @@ class _MapPageState extends State<MapPage> {
     return distanceInMeters;
   }
 
-  // updateUserLocation(CurrentLocationData locationData) {
-  //   // Mengirim data ke Firebase Realtime Database
-  //   dbRef.child('livetracking').push().set({
-  //     'name': locationData.name,
-  //     'coordinates': locationData.coordinates
-  //         .map((coordinate) => coordinate.toJson())
-  //         .toList(),
-  //   });
+  void isLogin() async {
+    await AuthService.isAuthenticated();
+  }
 
-  //   print('Updating location data: $locationData');
-  // }
+  void shareLocation() {
+    if (!AuthService.isAuthenticate) {
+      Get.to(LoginPage());
+      TextToSpeech.speak(
+          "You are not logged in. To share your location, you must log in first.");
+      return;
+    }
+    TextToSpeech.speak(
+        'Do you want to share your location?. To share your location, Share your ID to other people. your ID is ${AuthService.userId.toString().split("")}');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Share Location?'),
+          content: Text(
+              'Do you want to share your location? To share your location, Share your ID to other people. your ID is ${AuthService.userId}'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(
+                    false); // Return false indicating user doesn't want to share location
+              },
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(
+                    true); // Return true indicating user wants to share location
+              },
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
+    ).then((value) {
+      if (value == true) {
+        ShareLocation.shareUserLocation(
+          LatLng(MapPage.userLatitude, MapPage.userLongitude),
+          MapPage.destinationCoordinate,
+        );
+      }
+    });
+  }
 }
