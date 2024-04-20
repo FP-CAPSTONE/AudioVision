@@ -8,7 +8,7 @@ import 'dart:convert';
 
 class AuthService {
   static String? userName;
-  static int? userId;
+  static String? userId;
 
   static bool isAuthenticate = false;
 
@@ -38,18 +38,19 @@ class AuthService {
     }
   }
 
+  static String apiUrl = "http://172.20.10.4:8000/";
   // static String apiUrl = "http://10.35.117.223/";
-  static String apiUrl = "https://dummyjson.com/";
+  // static String apiUrl = "https://dummyjson.com/";
   static login(String email, password) async {
     try {
       print("login testt");
       var response = await http.post(
         Uri.parse("${apiUrl}auth/login"),
-        // body: jsonEncode({"email": email, "password": password}),
-        body: jsonEncode({
-          "username": email,
-          "password": password
-        }), // example deummy json server
+        body: jsonEncode({"email": email, "password": password}),
+        // body: jsonEncode({
+        //   "username": email,
+        //   "password": password
+        // }), // example deummy json server
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -63,17 +64,15 @@ class AuthService {
         var data = jsonDecode(response.body.toString());
         print(data);
 
-        // var loginResult = data['loginResult'];
-        // var userId =
-        //     loginResult['userId'];
-        // var name =
-        //     loginResult['name'];
-        // var token = data['token'];
+        var loginResult = data['loginResult'];
+        var userId = loginResult['userId'];
+        var name = loginResult['name'];
+        var token = data['token'];
 
         // dummy json sevrer response
-        var userId = data['id'];
-        var name = data['username'];
-        var token = data['token'];
+        // var userId = data['id'];
+        // var name = data['username'];
+        // var token = data['token'];
 
         final prefs = await SharedPreferences.getInstance();
         final userData = json.encode({
@@ -101,7 +100,7 @@ class AuthService {
     try {
       print("register function run");
       var response = await http.post(
-        Uri.parse("${apiUrl}/auth/register"),
+        Uri.parse("${apiUrl}auth/register"),
         body: jsonEncode({"name": name, "email": email, "password": password}),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -114,9 +113,9 @@ class AuthService {
         var data = jsonDecode(response.body.toString());
         print(data);
 
-        var loginResult = data['loginResult'];
-        var userId = loginResult['userId'];
-        var name = loginResult['name'];
+        var loginResult = data['user'];
+        var userId = loginResult['uid'];
+        var name = loginResult['displayName'];
         var token = data['token'];
 
         final prefs = await SharedPreferences.getInstance();

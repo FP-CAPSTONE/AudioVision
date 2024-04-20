@@ -1,5 +1,6 @@
 import 'package:audiovision/pages/auth_page/services/auth_services.dart';
 import 'package:audiovision/pages/map_page/map.dart';
+import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -107,6 +108,8 @@ class ShareLocation {
     trackingId = null;
     trackUserCoordinate = null;
     trackDestinationCoordinate = null;
+    PolylineMethod(stopTracking)
+        .clearPolyline(); // stop tracking did not use in clearPolyline method
 
     MapPage.markers.removeWhere(
       (marker) => marker.markerId.value == ShareLocation.trackingUserName!,

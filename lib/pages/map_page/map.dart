@@ -589,7 +589,10 @@ class _MapPageState extends State<MapPage> {
                     ? MapPage.userLongitude
                     : MapPage.destinationCoordinate.longitude;
 
-            PolylineMethod(updateUi).getPolyline();
+            PolylineMethod(updateUi).getPolyline(
+              LatLng(MapPage.userLatitude, MapPage.userLongitude),
+              MapPage.destinationCoordinate,
+            );
 
             MapPage.mapController!.animateCamera(
               CameraUpdate.newLatLngBounds(
@@ -724,7 +727,10 @@ class _MapPageState extends State<MapPage> {
     );
     setState(() {});
     if (MapPage.isStartNavigate) {
-      PolylineMethod(updateUi!).getPolyline();
+      PolylineMethod(updateUi!).getPolyline(
+        LatLng(MapPage.userLatitude, MapPage.userLongitude),
+        MapPage.destinationCoordinate,
+      );
     }
   }
 
@@ -752,6 +758,15 @@ class _MapPageState extends State<MapPage> {
           ), // For example, you can use a blue marker
         ),
       );
+      PolylineMethod(updateUi).getPolyline(
+          LatLng(
+            ShareLocation.trackUserCoordinate!.latitude,
+            ShareLocation.trackUserCoordinate!.longitude,
+          ),
+          LatLng(
+            ShareLocation.trackDestinationCoordinate!.latitude,
+            ShareLocation.trackDestinationCoordinate!.longitude,
+          ));
 
       setState(() {});
     }
