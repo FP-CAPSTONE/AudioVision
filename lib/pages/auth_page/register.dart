@@ -8,9 +8,11 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _nameController = TextEditingController(text: "boben");
+  TextEditingController _emailController =
+      TextEditingController(text: "abdul.saipi@student.president.ac.id");
+  TextEditingController _passwordController =
+      TextEditingController(text: "passwordsaya");
 
   final FlutterTts flutterTts = FlutterTts();
 

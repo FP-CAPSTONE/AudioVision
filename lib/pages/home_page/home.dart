@@ -48,9 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     super.initState();
     _loadTitle();
-
-    // check weather user login or not
-    isLogin();
   }
 
   @override
@@ -215,18 +212,6 @@ class _HomeScreenState extends State<HomeScreen> {
         print("Speech recognition timeout");
       }
     });
-  }
-
-  void isLogin() async {
-    bool loggedIn = await AuthService.isAuthenticated();
-    if (loggedIn) {
-      print('User is authenticated');
-      // User is authenticated, proceed with authenticated actions
-    } else {
-      Get.to(LoginPage());
-      print('User is not authenticated');
-      // User is not authenticated, redirect to login page or show login screen
-    }
   }
 }
 

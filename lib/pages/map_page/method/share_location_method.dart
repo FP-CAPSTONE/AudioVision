@@ -1,5 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:audiovision/pages/auth_page/services/auth_services.dart';
 import 'package:audiovision/pages/map_page/map.dart';
+import 'package:audiovision/pages/map_page/method/marker_method.dart';
+import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,14 +15,15 @@ class ShareLocation {
   static bool isTracking = false;
   static String? trackingId;
   static String? trackingUserName;
+  static String? trackingDestinationLocationName;
   static LatLng? trackUserCoordinate;
   static LatLng? trackDestinationCoordinate;
 
 // update shared data
   static bool isShared = false;
 
-  static shareUserLocation(
-      LatLng userLocation, LatLng destinationLocation) async {
+  static shareUserLocation(LatLng userLocation, LatLng destinationLocation,
+      String destinationLocationName) async {
     isShared = true;
     final snapshot = await dbRef.child(AuthService.userId.toString()).get();
 
@@ -30,10 +35,11 @@ class ShareLocation {
           "lat": userLocation.latitude,
           "long": userLocation.longitude
         },
+        'destinationLocationName': destinationLocationName,
         'destinationLocation': {
           "lat": destinationLocation.latitude,
           "long": destinationLocation.longitude
-        }
+        },
       });
     } else {
       // ID already exists, handle accordingly (optional)
@@ -64,7 +70,6 @@ class ShareLocation {
       return;
     }
 
-    isTracking = true;
     final snapshot = await dbRef.child(trackingId!).get();
 
     if (snapshot.exists) {
@@ -76,13 +81,30 @@ class ShareLocation {
       dynamic destinationLocationData = userData['destinationLocation'];
 
       trackingUserName = userData['name'];
-      // Assign the coordinates trackUserCoordinate
+
+      // Assign the location name and coordinates trackUserCoordinate
+      trackingDestinationLocationName = userData['destinationLocationName'];
+
       trackUserCoordinate =
           LatLng(userLocationData['lat'], userLocationData['long']);
       trackDestinationCoordinate = LatLng(
           destinationLocationData['lat'], destinationLocationData['long']);
-
       print(snapshot.value);
+      final Uint8List markerDestination = await MarkerMethod.getBytesFromAsset(
+          'assets/markers/destination-marker.png', 100);
+      MapPage.markers.add(
+        Marker(
+          markerId: MarkerId("Tracking Destination"), // Assert non-null using !
+          position: LatLng(ShareLocation.trackDestinationCoordinate!.latitude,
+              ShareLocation.trackDestinationCoordinate!.longitude),
+          // Custom marker icon
+          icon: BitmapDescriptor.fromBytes(markerDestination),
+          infoWindow:
+              InfoWindow(title: ShareLocation.trackingDestinationLocationName),
+        ),
+      );
+
+      isTracking = true;
     } else {
       print('No data available.');
     }
@@ -94,6 +116,8 @@ class ShareLocation {
     trackingId = null;
     trackUserCoordinate = null;
     trackDestinationCoordinate = null;
+    PolylineMethod(stopTracking)
+        .clearPolyline(); // stop tracking did not use in clearPolyline method
 
     MapPage.markers.removeWhere(
       (marker) => marker.markerId.value == ShareLocation.trackingUserName!,

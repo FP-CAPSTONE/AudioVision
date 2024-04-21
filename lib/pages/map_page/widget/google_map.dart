@@ -1,4 +1,5 @@
 import 'package:audiovision/pages/map_page/map.dart';
+import 'package:audiovision/pages/map_page/map_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -18,13 +19,14 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   Widget _buildMap() {
     return GoogleMap(
       polylines: Set<Polyline>.of(MapPage.polylines.values),
-      mapType: MapType.normal,
+      mapType: MapType.terrain,
       initialCameraPosition: MapPage.cameraPosition,
       onMapCreated: (controller) {
         MapPage.mapController = controller;
         MapPage.mapController!.animateCamera(
           CameraUpdate.newCameraPosition(MapPage.cameraPosition),
         );
+        // controller.setMapStyle(Utils.mapStyles);
       },
       markers: MapPage.markers,
     );
