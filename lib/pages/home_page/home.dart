@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:audiovision/mainAudio.dart';
+import 'package:audiovision/pages/auth_page/services/auth_services.dart';
 import 'package:audiovision/pages/camera/camera.dart';
 import 'package:audiovision/pages/camera/test_camera.dart';
 import 'package:audiovision/pages/class/language.dart';
@@ -81,7 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   Get.to(() => LoginPage());
                 },
-                child: Text("GO TO LOGIN"),
+                child: HomeScreen.isIndonesianSelected
+                    ? Text("PERGI KE LOGIN")
+                    : Text("GO TO LOGIN"),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -94,6 +97,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   Get.to(const YoloVideo());
                 },
                 child: Text("GO TO CAMERA"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  AuthService.logOut();
+                },
+                child: Text("Log Out"),
               ),
               SizedBox(
                 height: 100,
@@ -113,18 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   "to navigate to another page",
                   style: TextStyle(fontSize: 16),
                 ),
-              ),
-              _isListening
-                  ? const Icon(
-                      Icons.mic,
-                      size: 50,
-                      color: Colors.red,
-                    )
-                  : const SizedBox(),
-              const SizedBox(height: 10),
-              Text(
-                _text,
-                style: const TextStyle(fontSize: 16),
               ),
             ],
           ),

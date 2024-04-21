@@ -19,6 +19,8 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late CameraPosition _initialPosition;
+
+  String mapTheme = "";
   final Completer<GoogleMapController> _controller = Completer();
   Map<PolylineId, Polyline> polylines = {};
   List<LatLng> polylineCoordinates = [];
@@ -27,6 +29,12 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    DefaultAssetBundle.of(context)
+        .loadString("assets/maptheme/retro_map.json")
+        .then((value) {
+      mapTheme = value;
+    });
+
     if (widget.startPosition != null &&
         widget.startPosition!.geometry != null &&
         widget.startPosition!.geometry!.location != null) {
@@ -107,8 +115,46 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+        title: Text("Maps Theme"),
+        backgroundColor: Colors.blue,
+        actions: [
+          PopupMenuButton(
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                    onTap: () {
+                      _controller.future.then((value) {
+                        DefaultAssetBundle.of(context)
+                            .loadString("assets/maptheme/standard_map.json")
+                            .then((string) {
+                          value.setMapStyle(string);
+                        });
+                      });
+                    },
+                    child: Text("Standard")),
+                    PopupMenuItem(
+                        onTap: () {
+                          _controller.future.then((value) {
+                            DefaultAssetBundle.of(context)
+                                .loadString("assets/maptheme/retro_map.json")
+                                .then((string) {
+                                  value.setMapStyle(string);
+                            });
+                          });
+                        },
+                        child: Text("Retro")),
+                    PopupMenuItem(
+                        onTap: () {
+                          _controller.future.then((value) {
+                            DefaultAssetBundle.of(context)
+                                .loadString("assets/maptheme/night_map.json")
+                                .then((string) {
+                              value.setMapStyle(string);
+                            });
+                          });
+                    }, child: Text("Night")),
+                  ])
+        ],
+        elevation: 5,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
@@ -127,6 +173,7 @@ class _MapScreenState extends State<MapScreen> {
         initialCameraPosition: _initialPosition,
         markers: Set.from(markers),
         onMapCreated: (GoogleMapController controller) {
+          controller.setMapStyle(mapTheme); //for map style
           Future.delayed(const Duration(milliseconds: 2000), () {
             controller.animateCamera(CameraUpdate.newLatLngBounds(
                 MapUtils.boundsFromLatLngList(

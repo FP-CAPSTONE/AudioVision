@@ -36,6 +36,9 @@ dependencies:
   flutter_polyline_points: ^1.0.0
   geolocator: ^7.7.0
   geocoding: ^2.0.0
+  
+  #splashscreen
+  flutter_native_splash: ^2.2.16
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -57,12 +60,17 @@ dependencies:
   flutter_dotenv :
   sensors_plus:
   riverpod: ^1.0.0
+
   shared_preferences:
+  flutter_compass:
+  
 
     # cloud_firebase: ^10.4.6
   firebase_core: ^2.27.0 
   firebase_database:
   cloud_firestore: 
+  smooth_page_indicator: ^1.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -87,6 +95,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/markers/
+    - assets/images/directions/
     - assets/model/mylabels.txt
     - assets/model/seg_label.txt
     - assets/model/labels.txt
@@ -99,6 +109,14 @@ flutter:
     - .env
     - assets/model/yolov5n.tflite
     - assets/model/yolov8n-seg_float32.tflite
+    - assets/model/transfer-1.tflite
+    - assets/maptheme/retro_map.json
+    - assets/maptheme/night_map.json
+    - assets/maptheme/standard_map.json
+
+    #asset image
+    - assets/image/
+
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

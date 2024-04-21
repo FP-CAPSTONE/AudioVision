@@ -11,17 +11,17 @@ class PolylineMethod {
 
   PolylineMethod(this.callback);
 
-  void getPolyline() async {
+  void getPolyline(LatLng firstCoordinate, LatLng secondCoordinate) async {
     final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       key,
       PointLatLng(
-        MapPage.userLatitude,
-        MapPage.userLongitude,
+        firstCoordinate.latitude,
+        firstCoordinate.longitude,
       ),
       PointLatLng(
-        MapPage.destinationCoordinate.latitude,
-        MapPage.destinationCoordinate.longitude,
+        secondCoordinate.latitude,
+        secondCoordinate.longitude,
       ),
       travelMode: TravelMode.walking,
     );
@@ -39,7 +39,7 @@ class PolylineMethod {
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
-      color: Colors.blue,
+      color: Color.fromARGB(255, 73, 73, 73),
       points: polylineCoordinates,
       width: 5,
     );

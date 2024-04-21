@@ -6,10 +6,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class ButtonStartNavigateWidget extends StatelessWidget {
   final GoogleMapController mapController;
-
+  final BuildContext context;
   const ButtonStartNavigateWidget({
     super.key,
     required this.mapController,
+    required this.context,
   });
 
   @override
