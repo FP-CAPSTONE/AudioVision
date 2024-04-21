@@ -23,17 +23,35 @@ class LoginPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Login', style: TextStyle(fontSize: 24)),
+            Text('Login', style: TextStyle(fontSize: 24, color: Colors.black)),
             SizedBox(height: 20),
             TextFormField(
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(color: Colors.black),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
               onTap: () {
                 _speak('Email field selected');
               },
             ),
             SizedBox(height: 10),
             TextFormField(
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+                labelStyle: TextStyle(color: Colors.black),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
               obscureText: true,
               onTap: () {
                 _speak('Password field selected');
@@ -53,6 +71,7 @@ class LoginPage extends StatelessWidget {
                 }
               },
               child: Text('Login'),
+              style: ElevatedButton.styleFrom(primary: Colors.black, onPrimary: Colors.white),
             ),
             SizedBox(height: 10),
             GestureDetector(
@@ -62,7 +81,10 @@ class LoginPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => RegisterPage()),
                 );
               },
-              child: Text('Don\'t have an account? Click here to register.'),
+              child: Text(
+                'Don\'t have an account? Click here to register.',
+                style: TextStyle(color: Colors.black, decoration: TextDecoration.underline),
+              ),
             ),
           ],
         ),
@@ -70,3 +92,4 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+
