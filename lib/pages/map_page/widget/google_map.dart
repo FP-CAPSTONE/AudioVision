@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/map_styles.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,13 @@ class GoogleMapWidget extends StatefulWidget {
 class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   bool _isCameraPositionSet = false;
 
+
+  String mapTheme = "";
+  final Completer<GoogleMapController> _controller = Completer();
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return _isCameraPositionSet ? _buildMap() : _buildLoadingIndicator();
@@ -19,9 +28,10 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   Widget _buildMap() {
     return GoogleMap(
       polylines: Set<Polyline>.of(MapPage.polylines.values),
-      mapType: MapType.terrain,
+      //mapType: MapType.terrain,
       initialCameraPosition: MapPage.cameraPosition,
       onMapCreated: (controller) {
+        controller.setMapStyle(mapTheme); //for map style
         MapPage.mapController = controller;
         MapPage.mapController!.animateCamera(
           CameraUpdate.newCameraPosition(MapPage.cameraPosition),

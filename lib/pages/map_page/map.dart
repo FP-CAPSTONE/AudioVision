@@ -31,6 +31,8 @@ import 'package:google_place/google_place.dart';
 // ned to change the class name, there are two location service
 import 'package:sensors_plus/sensors_plus.dart';
 
+import '../setting_page/setting.dart';
+
 class MapPage extends StatefulWidget {
   //public variable
   static double userLatitude = 0;
@@ -78,6 +80,10 @@ class _MapPageState extends State<MapPage> {
 
   late GooglePlace googlePlace;
 
+
+  String mapTheme = "";
+  final Completer<GoogleMapController> _controller = Completer();
+
   List<AutocompletePrediction> predictions = [];
   Timer? _debounce;
 
@@ -101,6 +107,7 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     Firebase.initializeApp();
 
     String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
@@ -115,6 +122,12 @@ class _MapPageState extends State<MapPage> {
     print("init");
     _initCompass();
     //_checkDeviceOrientation();
+
+    DefaultAssetBundle.of(context)
+        .loadString("assets/maptheme/retro_map.json")
+        .then((value) {
+      mapTheme = value;
+    });
   }
 
   // Initialize compass and start listening to updates
@@ -338,101 +351,313 @@ class _MapPageState extends State<MapPage> {
   }
 
   //Search Bar Widget <- SHOULD MOVE TO ANOTHER FILE
+  // Widget build_SearchBar(BuildContext context) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(top: 20),
+  //       //const SizedBox(height: 40),
+  //       child: Row(
+  //         children: [
+  //           Expanded(
+  //             child: TextField(
+  //               controller: _endSearchFieldController,
+  //               autofocus: false,
+  //               focusNode: endFocusNode,
+  //               style: const TextStyle(fontSize: 24),
+  //               decoration: InputDecoration(
+  //                 hintText: "Search Here",
+  //                 hintStyle:
+  //                     const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
+  //                 filled: true,
+  //                 fillColor: Colors.grey[200],
+  //                 // border: const OutlineInputBorder(
+  //                 //   borderRadius: BorderRadius.only(
+  //                 //       topLeft: Radius.circular(40),
+  //                 //       topRight: Radius.circular(40),
+  //                 //       bottomLeft: Radius.circular(10),
+  //                 //       bottomRight: Radius.circular(10)),
+  //                 //   borderSide: BorderSide(width: 0, style: BorderStyle.none),
+  //                 // ),
+  //                 border: OutlineInputBorder(
+  //                   borderRadius: BorderRadius.all(
+  //                     Radius.circular(10),
+  //                   ),
+  //                   borderSide: BorderSide(width: 1, style: BorderStyle.solid),
+  //                 ),
+  //                 isDense: true,
+  //                 contentPadding: const EdgeInsets.all(15),
+  //                 suffixIcon: _endSearchFieldController.text.isNotEmpty
+  //                     ? IconButton(
+  //                         onPressed: () {
+  //                           setState(() {
+  //                             predictions = [];
+  //                             _endSearchFieldController.clear();
+  //                           });
+  //                         },
+  //                         icon: const Icon(Icons.clear_outlined),
+  //                       )
+  //                     : null,
+  //               ),
+  //               onChanged: (value) {
+  //                 if (_debounce?.isActive ?? false) _debounce!.cancel();
+  //                 _debounce = Timer(const Duration(milliseconds: 1000), () {
+  //                   if (value.isNotEmpty) {
+  //                     autoCompleteSearch(value);
+  //                   } else {
+  //                     setState(() {
+  //                       predictions = [];
+  //                       destination = null;
+  //                     });
+  //                   }
+  //                 });
+  //               },
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     predictions.isNotEmpty
+  //           ? Expanded(
+  //               child: ListView.builder(
+  //                 padding: EdgeInsets.zero,
+  //                 itemCount: predictions.length,
+  //                 itemBuilder: (context, index) {
+  //                   return GestureDetector(
+  //                     onLongPress: () {
+  //                       print(
+  //                           "res" + predictions[index].description.toString());
+  //                       TextToSpeech.speak(
+  //                           predictions[index].description.toString());
+  //                     },
+  //                     child: Container(
+  //                       color: Colors.white,
+  //                       child: ListTile(
+  //                         leading: const CircleAvatar(
+  //                           child: Icon(
+  //                             Icons.location_on,
+  //                             color: Colors.white,
+  //                           ),
+  //                         ),
+  //                         title: Text(
+  //                           predictions[index].description.toString(),
+  //                         ),
+  //                         onTap: () {
+  //                           add_destination(index);
+  //                         },
+  //                       ),
+  //                     ),
+  //                   );
+  //                 },
+  //               ),
+  //             )
+  //           : Container(),
+  //               IconButton(
+  //                 onPressed: () {
+  //                   // Add your settings icon onPressed logic here
+  //                 },
+  //                 icon: const Icon(Icons.settings),
+  //               ),
+  //
+  //
+  //   );
+  // }
+
+
+
+
+
+
+
+
+  //search bar 2
+  // Widget build_SearchBar(BuildContext context) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(top: 20),
+  //     //padding: const EdgeInsets.all(8.0),
+  //     child: Row(
+  //       children: [
+  //         Expanded(
+  //           child: TextField(
+  //             controller: _endSearchFieldController,
+  //             autofocus: false,
+  //             focusNode: endFocusNode,
+  //             style: const TextStyle(fontSize: 24),
+  //             decoration: InputDecoration(
+  //               hintText: "Search Here",
+  //               hintStyle: const TextStyle(
+  //                   fontWeight: FontWeight.w500, fontSize: 24),
+  //               filled: true,
+  //               fillColor: Colors.grey[200],
+  //               border: OutlineInputBorder(
+  //                 borderRadius: BorderRadius.only(
+  //                   topLeft: Radius.circular(10),
+  //                   bottomLeft: Radius.circular(10),
+  //                 ),
+  //                 borderSide: BorderSide(
+  //                     width: 1, style: BorderStyle.solid),
+  //               ),
+  //               isDense: true,
+  //               contentPadding: const EdgeInsets.all(15),
+  //               suffixIcon: _endSearchFieldController
+  //                   .text.isNotEmpty
+  //                   ? IconButton(
+  //                 onPressed: () {
+  //                   setState(() {
+  //                     predictions = [];
+  //                     _endSearchFieldController.clear();
+  //                   });
+  //                 },
+  //                 icon: const Icon(Icons.clear_outlined),
+  //               )
+  //                   : null,
+  //             ),
+  //             onChanged: (value) {
+  //               if (_debounce?.isActive ?? false) _debounce!.cancel();
+  //               _debounce = Timer(const Duration(milliseconds: 1000), () {
+  //                 if (value.isNotEmpty) {
+  //                   autoCompleteSearch(value);
+  //                 } else {
+  //                   setState(() {
+  //                     predictions = [];
+  //                     destination = null;
+  //                   });
+  //                 }
+  //               });
+  //             },
+  //           ),
+  //         ),
+  //         IconButton(
+  //           onPressed: () {
+  //             // Add your settings icon onPressed logic here
+  //           },
+  //           icon: const Icon(Icons.settings),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+
+
+
+  //search bar 3
   Widget build_SearchBar(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 100),
-        TextField(
-          controller: _endSearchFieldController,
-          autofocus: false,
-          focusNode: endFocusNode,
-          style: const TextStyle(fontSize: 24),
-          decoration: InputDecoration(
-            hintText: "Search Here",
-            hintStyle:
-                const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
-            filled: true,
-            fillColor: Colors.grey[200],
-            // border: const OutlineInputBorder(
-            //   borderRadius: BorderRadius.only(
-            //       topLeft: Radius.circular(40),
-            //       topRight: Radius.circular(40),
-            //       bottomLeft: Radius.circular(10),
-            //       bottomRight: Radius.circular(10)),
-            //   borderSide: BorderSide(width: 0, style: BorderStyle.none),
-            // ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-              borderSide: BorderSide(width: 1, style: BorderStyle.solid),
-            ),
-            isDense: true,
-            contentPadding: const EdgeInsets.all(15),
-            suffixIcon: _endSearchFieldController.text.isNotEmpty
-                ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        predictions = [];
-                        _endSearchFieldController.clear();
-                      });
-                    },
-                    icon: const Icon(Icons.clear_outlined),
-                  )
-                : null,
-          ),
-          onChanged: (value) {
-            if (_debounce?.isActive ?? false) _debounce!.cancel();
-            _debounce = Timer(const Duration(milliseconds: 1000), () {
-              if (value.isNotEmpty) {
-                autoCompleteSearch(value);
-              } else {
-                setState(() {
-                  predictions = [];
-                  destination = null;
-                });
-              }
-            });
-          },
-        ),
-        predictions.isNotEmpty
-            ? Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: predictions.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onLongPress: () {
-                        print(
-                            "res" + predictions[index].description.toString());
-                        TextToSpeech.speak(
-                            predictions[index].description.toString());
-                      },
-                      child: Container(
-                        color: Colors.white,
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(
-                              Icons.location_on,
-                              color: Colors.white,
-                            ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 40),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _endSearchFieldController,
+                      autofocus: false,
+                      focusNode: endFocusNode,
+                      style: const TextStyle(fontSize: 24),
+                      decoration: InputDecoration(
+                        hintText: "Search Here",
+                        hintStyle: const TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 24),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            bottomLeft: Radius.circular(10),
                           ),
-                          title: Text(
-                            predictions[index].description.toString(),
-                          ),
-                          onTap: () {
-                            add_destination(index);
-                          },
+                          borderSide: BorderSide(
+                              width: 1, style: BorderStyle.solid),
                         ),
+                        isDense: true,
+                        contentPadding: const EdgeInsets.all(15),
+                        suffixIcon: _endSearchFieldController
+                            .text.isNotEmpty
+                            ? IconButton(
+                          onPressed: () {
+                            setState(() {
+                              predictions = [];
+                              _endSearchFieldController.clear();
+                            });
+                          },
+                          icon: const Icon(Icons.clear_outlined),
+                        )
+                            : null,
                       ),
-                    );
-                  },
+                      onChanged: (value) {
+                        if (_debounce?.isActive ?? false) _debounce!.cancel();
+                        _debounce = Timer(const Duration(milliseconds: 1000), () {
+                          if (value.isNotEmpty) {
+                            autoCompleteSearch(value);
+                          } else {
+                            setState(() {
+                              predictions = [];
+                              destination = null;
+                            });
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Get.to(
+                            () => SettingPage(),
+                      );
+                      // Add your settings icon onPressed logic here
+                    },
+                    icon: const Icon(Icons.settings),
+                  ),
+                  ]
+              ),
+              if (predictions.isNotEmpty)
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: predictions.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onLongPress: () {
+                          print(
+                              "res" + predictions[index].description.toString());
+                          TextToSpeech.speak(
+                              predictions[index].description.toString());
+                        },
+                        child: Container(
+                          color: Colors.white,
+                          child: ListTile(
+                            leading: const CircleAvatar(
+                              child: Icon(
+                                Icons.location_on,
+                                color: Colors.white,
+                              ),
+                            ),
+                            title: Text(
+                              predictions[index].description.toString(),
+                            ),
+                            onTap: () {
+                              add_destination(index);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              )
-            : Container(),
-      ],
+              // IconButton(
+              //   onPressed: () {
+              //     // Add your settings icon onPressed logic here
+              //   },
+              //   icon: const Icon(Icons.settings),
+              // ),
+            ],
+          )
     );
+
+
   }
+
+
+
+
+
 
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void add_destination(int index) async {
