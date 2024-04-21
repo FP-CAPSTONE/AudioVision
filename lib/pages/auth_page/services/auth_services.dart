@@ -27,7 +27,7 @@ class AuthService {
       final userData = json.decode(userDataString);
       final token = userData['token'] as String?;
       userName = userData['userName'];
-      userId = userData['userId'];
+      userId = userData['userId'].toString();
 
       isAuthenticate = token != null;
 

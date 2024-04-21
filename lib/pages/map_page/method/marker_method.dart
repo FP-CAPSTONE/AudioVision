@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:audiovision/pages/map_page/map.dart';
 import 'package:flutter/services.dart';
 
-import 'dart:math' as Math;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +16,50 @@ class MarkerMethod {
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
         .buffer
         .asUint8List();
+  }
+
+  static updateMarkerAndCameraRotation() {
+    // Find the marker with markerId value "You" and update its rotation
+    Iterable<Marker> markersToUpdate =
+        MapPage.markers.where((marker) => marker.markerId.value == "You");
+
+    List<Marker> updatedMarkers = [];
+
+    markersToUpdate.forEach((marker) {
+      // Create a new marker with the updated rotation
+      Marker updatedMarker = Marker(
+        markerId: marker.markerId,
+        position: marker.position,
+        icon: marker.icon,
+        infoWindow: marker.infoWindow,
+        rotation: MapPage.compassHeading,
+        anchor: marker.anchor,
+      );
+      updatedMarkers.add(updatedMarker);
+    });
+
+// Remove old markers and add updated markers
+    MapPage.markers.removeWhere((marker) => marker.markerId.value == "You");
+    MapPage.markers.addAll(updatedMarkers);
+
+    // Perform the operation after the first frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (MapPage.mapController != null && MapPage.isStartNavigate) {
+        // Access the mapController and perform operations
+        MapPage.mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(MapPage.userLatitude, MapPage.userLongitude),
+              zoom: 17, // Use the current zoom level
+              bearing: MapPage
+                  .compassHeading, // Rotate the camera based on the compass heading
+            ),
+          ),
+        );
+      } else {
+        print("Map controller is null. Cannot animate camera.");
+      }
+    });
   }
 
   // this to ratate marker  according to the position direction

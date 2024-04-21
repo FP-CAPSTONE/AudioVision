@@ -60,6 +60,8 @@ class MapPage extends StatefulWidget {
   static int totalDurationToDestination = 0;
   static String destinationLocationName = "";
 
+  static double compassHeading = 0;
+
   const MapPage({super.key});
 
   @override
@@ -85,7 +87,8 @@ class _MapPageState extends State<MapPage> {
   double _compassHeading = 0;
 
   int stepIndex = 0;
-  String navigationText = "Continnue";
+  String navigationText = "";
+  String distanceToNextStep = "";
 
   double cameraViewX = 0; // Persistent X position
   double cameraViewY = 0; // Persistent Y position
@@ -119,29 +122,16 @@ class _MapPageState extends State<MapPage> {
     print("init");
     FlutterCompass.events?.listen((CompassEvent event) {
       setState(() {
-        _compassHeading = event.heading ?? 0;
-// Find the marker with markerId value "You" and update its rotation
-        Iterable<Marker> markersToUpdate =
-            MapPage.markers.where((marker) => marker.markerId.value == "You");
+        double compassHeading = event.heading ?? 0;
 
-        List<Marker> updatedMarkers = [];
+        // Check if the difference between the current compass heading and the previous heading is greater than 5 degrees
+        print(compassHeading);
+        if ((compassHeading - MapPage.compassHeading).abs() > 10) {
+          MapPage.compassHeading = compassHeading;
 
-        markersToUpdate.forEach((marker) {
-          // Create a new marker with the updated rotation
-          Marker updatedMarker = Marker(
-            markerId: marker.markerId,
-            position: marker.position,
-            icon: marker.icon,
-            infoWindow: marker.infoWindow,
-            rotation: _compassHeading,
-            anchor: marker.anchor,
-          );
-          updatedMarkers.add(updatedMarker);
-        });
-
-// Remove old markers and add updated markers
-        MapPage.markers.removeWhere((marker) => marker.markerId.value == "You");
-        MapPage.markers.addAll(updatedMarkers);
+          // Update marker and camera rotation only when the rotation of the compass > 5 degrees
+          MarkerMethod.updateMarkerAndCameraRotation();
+        }
       });
     });
   }
@@ -166,167 +156,183 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                GoogleMapWidget(),
-                MapPage.isStartNavigate
-                    ? Container()
-                    : ShareLocation.isTracking
-                        ? Container()
-                        : build_SearchBar(context),
-                destination != null
-                    ? ButtonStartNavigateWidget(
-                        mapController: MapPage.mapController!,
-                        context: context,
-                      )
-                    : Container(),
-                MapPage.isStartNavigate
-                    ? NavigateBarWidget(navigationText: navigationText)
-                    : Container(),
-                MapPage.isStartNavigate
-                    ? CustomBottomSheet(
-                        callback: shareLocation,
-                      )
-                    : Container(),
+      body: GestureDetector(
+        onDoubleTap: () {
+          TextToSpeech.speak("Audio command activated, say something");
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  GoogleMapWidget(),
+                  MapPage.isStartNavigate
+                      ? Container()
+                      : ShareLocation.isTracking
+                          ? Container()
+                          : build_SearchBar(context),
+                  destination != null
+                      ? ButtonStartNavigateWidget(
+                          mapController: MapPage.mapController!,
+                          context: context,
+                        )
+                      : Container(),
+                  MapPage.isStartNavigate
+                      ? NavigateBarWidget(
+                          navigationText: navigationText,
+                          distance: distanceToNextStep,
+                          manuever: maneuver,
+                          instruction: instruction,
+                        )
+                      : Container(),
+                  MapPage.isStartNavigate
+                      ? CustomBottomSheet(
+                          callback: shareLocation,
+                        )
+                      : Container(),
+                  // NavigateBarWidget(
+                  //   navigationText: "navigationText",
+                  //   distance: "20 m",
+                  //   manuever: "turn-left",
+                  // ),
+                  // MapPage.isStartNavigate ? builCamera() : Container(),
+                  // isStartNavigate
+                  // ? Align(
+                  //     alignment: Alignment.centerRight, child: cameraView())
+                  // : Container()
 
-                // MapPage.isStartNavigate ? builCamera() : Container(),
-                // isStartNavigate
-                // ? Align(
-                //     alignment: Alignment.centerRight, child: cameraView())
-                // : Container()
-
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          // Your map widgets...
-                        ],
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            // Your map widgets...
+                          ],
+                        ),
                       ),
-                    ),
-                    // Button to show bottom sheet
+                      // Button to show bottom sheet
 
-                    MapPage.isStartNavigate
-                        ? Container()
-                        : ShareLocation.isTracking
-                            ? ElevatedButton(
-                                onPressed: () {
-                                  // Show confirmation dialog to stop tracking
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text("Stop Tracking"),
-                                        content: Text(
-                                            "Are you sure you want to stop tracking?"),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            child: Text("Cancel"),
-                                            onPressed: () {
-                                              Navigator.of(context)
-                                                  .pop(); // Close the dialog
-                                            },
+                      MapPage.isStartNavigate
+                          ? Container()
+                          : ShareLocation.isTracking
+                              ? ElevatedButton(
+                                  onPressed: () {
+                                    // Show confirmation dialog to stop tracking
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text("Stop Tracking"),
+                                          content: Text(
+                                              "Are you sure you want to stop tracking?"),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              child: Text("Cancel"),
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: Text("Stop"),
+                                              onPressed: () {
+                                                // stop tracking
+
+                                                ShareLocation.stopTracking();
+
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Text('Stop Tracking'),
+                                )
+                              : ElevatedButton(
+                                  onPressed: () {
+                                    TextEditingController _userIdController =
+                                        TextEditingController();
+                                    // Show a dialog to input user ID
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Enter User ID'),
+                                          content: TextField(
+                                            controller: _userIdController,
+                                            decoration: InputDecoration(
+                                              hintText: 'Enter User ID',
+                                            ),
                                           ),
-                                          TextButton(
-                                            child: Text("Stop"),
-                                            onPressed: () {
-                                              // stop tracking
+                                          actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              },
+                                              child: Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                // Get the entered user ID
+                                                String userId = _userIdController
+                                                    .text
+                                                    .trim(); // Trim any leading/trailing spaces
 
-                                              ShareLocation.stopTracking();
+                                                // Check if the entered user ID is empty
+                                                if (userId.isEmpty) {
+                                                  TextToSpeech.speak(
+                                                      "Please enter a User ID.");
+                                                  // Show an error message indicating that the User ID cannot be empty
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Please enter a User ID.'),
+                                                  ));
+                                                  return; // Return without further action
+                                                }
 
-                                              Navigator.of(context)
-                                                  .pop(); // Close the dialog
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Text('Stop Tracking'),
-                              )
-                            : ElevatedButton(
-                                onPressed: () {
-                                  TextEditingController _userIdController =
-                                      TextEditingController();
-                                  // Show a dialog to input user ID
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Enter User ID'),
-                                        content: TextField(
-                                          controller: _userIdController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Enter User ID',
-                                          ),
-                                        ),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context)
-                                                  .pop(); // Close the dialog
-                                            },
-                                            child: Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              // Get the entered user ID
-                                              String userId = _userIdController
-                                                  .text
-                                                  .trim(); // Trim any leading/trailing spaces
+                                                // Perform actions with the entered user ID
+                                                print(
+                                                    'User ID entered: $userId');
+                                                ShareLocation.trackingId =
+                                                    userId;
+                                                ShareLocation
+                                                    .getOtherUserLocation();
 
-                                              // Check if the entered user ID is empty
-                                              if (userId.isEmpty) {
-                                                TextToSpeech.speak(
-                                                    "Please enter a User ID.");
-                                                // Show an error message indicating that the User ID cannot be empty
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(SnackBar(
-                                                  content: Text(
-                                                      'Please enter a User ID.'),
-                                                ));
-                                                return; // Return without further action
-                                              }
-
-                                              // Perform actions with the entered user ID
-                                              print('User ID entered: $userId');
-                                              ShareLocation.trackingId = userId;
-                                              ShareLocation
-                                                  .getOtherUserLocation();
-
-                                              // Close the dialog
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('OK'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(width: 10),
-                                    Text('Tracking Location',
-                                        style: TextStyle(fontSize: 16)),
-                                  ],
-                                ),
-                              )
-                  ],
-                ),
-              ],
+                                                // Close the dialog
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Text('OK'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(width: 10),
+                                      Text('Tracking Location',
+                                          style: TextStyle(fontSize: 16)),
+                                    ],
+                                  ),
+                                )
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -391,6 +397,8 @@ class _MapPageState extends State<MapPage> {
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onLongPress: () {
+                        print(
+                            "res" + predictions[index].description.toString());
                         TextToSpeech.speak(
                             predictions[index].description.toString());
                       },
@@ -399,7 +407,7 @@ class _MapPageState extends State<MapPage> {
                         child: ListTile(
                           leading: const CircleAvatar(
                             child: Icon(
-                              Icons.pin_drop,
+                              Icons.location_on,
                               color: Colors.white,
                             ),
                           ),
@@ -559,6 +567,7 @@ class _MapPageState extends State<MapPage> {
           userLocation.longitude,
         ),
       );
+
       updateUserMarkerPosition(
           LatLng(MapPage.userLatitude, MapPage.userLongitude));
 
@@ -623,6 +632,8 @@ class _MapPageState extends State<MapPage> {
         LatLng(MapPage.userLatitude, MapPage.userLongitude),
         MapPage.destinationCoordinate,
       );
+    } else {
+      stepIndex = 0;
     }
   }
 
@@ -666,8 +677,10 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  String maneuver = "";
+  String distance = "";
+  String instruction = "";
   void routeGuidance() async {
-    String maneuver = "";
     if (MapPage.isStartNavigate) {
       if (stepIndex < MapPage.allSteps.length) {
         print(stepIndex);
@@ -677,6 +690,7 @@ class _MapPageState extends State<MapPage> {
           MapPage.allSteps[stepIndex]['end_lat'],
           MapPage.allSteps[stepIndex]['end_long'],
         );
+        print(MapPage.allSteps);
 
         int roundedDistance = distanceToStep.ceil();
 
@@ -686,18 +700,20 @@ class _MapPageState extends State<MapPage> {
         print(MapPage.allSteps);
         print(distanceToStep);
         if (distanceToStep <= thresholdDistance) {
-          maneuver = MapPage.allSteps[stepIndex]['maneuver'] ??
-              'Continue'; // Default to 'Continue' if maneuver is not provided
+          maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+          instruction =
+              MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+          distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
           print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
           print("In $roundedDistance metersss $maneuver");
           TextToSpeech.speak("In $roundedDistance meters $maneuver");
           stepIndex++;
-        } else {
-          maneuver = "Continue Straight";
         }
 
         setState(() {
           navigationText = maneuver;
+          distanceToNextStep = distance;
+          instruction = instruction;
         });
       }
       double userAndDestinationDistance = await calculateDistance(

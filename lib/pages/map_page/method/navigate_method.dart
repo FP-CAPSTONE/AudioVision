@@ -21,16 +21,6 @@ class NavigateMethod {
     );
 
     MapPage.isStartNavigate = true;
-    getDirection(
-      LatLng(
-        MapPage.userLatitude,
-        MapPage.userLongitude,
-      ),
-      LatLng(
-        destination.latitude,
-        destination.longitude,
-      ),
-    );
   }
 
   Future<Map<String, dynamic>> getDirection(

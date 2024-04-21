@@ -186,7 +186,7 @@ class MapSampleState extends State<MapSample> {
               ),
               child: Row(
                 children: [
-                  buildArrowDirectionContainer('arrow_upward'),
+                  // buildArrowDirectionContainer('arrow_upward'),
                   Expanded(
                     child: NowNavigationTextWidget(
                         text: "Head North", fontSize: 18.0),
@@ -234,7 +234,7 @@ class MapSampleState extends State<MapSample> {
                         ),
                       ],
                     ),
-                    buildArrowDirectionContainer('arrow_forward'),
+                    // buildArrowDirectionContainer('arrow_forward'),
                   ],
                 ),
               ),
@@ -306,8 +306,8 @@ class MapSampleState extends State<MapSample> {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.black.withOpacity(0.4)),
                     ),
-                    child: buildArrowDirectionContainer('call_split',
-                        color: Colors.black),
+                    // child: buildArrowDirectionContainer('call_split',
+                    //     color: Colors.black),
                   ),
                 ],
               ),

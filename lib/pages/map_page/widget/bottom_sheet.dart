@@ -1,5 +1,6 @@
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CustomBottomSheet extends StatefulWidget {
   final Function callback;
@@ -89,20 +90,43 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                           ),
                           Row(
                             children: [
-                              ElevatedButton(
-                                  onPressed: () {
-                                    widget.callback();
-                                  },
-                                  child: Icon(Icons.share)),
+                              Container(
+                                height: 50,
+                                child: ElevatedButton(
+                                    onPressed: () {
+                                      widget.callback();
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                        Color.fromARGB(255, 36, 36, 36),
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.share,
+                                      color: Colors.white,
+                                    )),
+                              ),
                               const SizedBox(
                                 width: 5,
                               ),
-                              ElevatedButton(
+                              Container(
+                                height: 50,
+                                child: ElevatedButton(
                                   onPressed: () {
                                     MapPage.isStartNavigate = false;
-                                    Navigator.of(context).pop();
                                   },
-                                  child: Text("Exit"))
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.red),
+                                  ),
+                                  child: Text(
+                                    "Exit",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              )
                             ],
                           )
                         ],
@@ -121,6 +145,9 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                   itemCount: MapPage.allSteps.length,
                   itemBuilder: (context, index) {
                     var step = MapPage.allSteps[index];
+                    var maneuver = step['maneuver'] != null
+                        ? step['maneuver']
+                        : "continue";
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -131,16 +158,10 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(
-                        '${step['distance']} - ${step['duration']}',
+                        '${step['distance']} - ${step['duration']}' + maneuver,
                         style: TextStyle(color: Colors.grey),
                       ),
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.blue,
-                        child: Text(
-                          '${index + 1}',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                      leading: getDirectionImage(maneuver),
                     );
                   },
                 ),
@@ -168,5 +189,80 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     totalDistance /= 1000;
 
     return {'totalDistance': totalDistance, 'totalDuration': totalDuration};
+  }
+
+  Widget getDirectionImage(String maneuver) {
+    String imagePath;
+    switch (maneuver.toLowerCase()) {
+      // case 'turn-slight-left':
+      //   imagePath = 'assets/images/directions/turn-slight-left.png';
+      //   break;
+      // case 'turn-sharp-left':
+      //   imagePath = 'assets/images/directions/turn-sharp-left.png';
+      //   break;
+      // case 'uturn-left':
+      //   imagePath = 'assets/images/directions/uturn-left.png';
+      //   break;
+      case 'turn-left':
+        imagePath = 'assets/images/directions/turn-left.png';
+        break;
+      case 'turn-slight-right':
+        imagePath = 'assets/images/directions/turn-slight-right.png';
+        break;
+      // case 'turn-sharp-right':
+      //   imagePath = 'assets/images/directions/turn-sharp-right.png';
+      //   break;
+      // case 'uturn-right':
+      //   imagePath = 'assets/images/directions/uturn-right.png';
+      //   break;
+      case 'turn-right':
+        imagePath = 'assets/images/directions/turn-right.png';
+        break;
+      case 'straight':
+        imagePath = 'assets/images/directions/straight.png';
+        break;
+      // case 'ramp-left':
+      //   imagePath = 'assets/images/directions/ramp-left.png';
+      //   break;
+      // case 'ramp-right':
+      //   imagePath = 'assets/images/directions/ramp-right.png';
+      //   break;
+      // case 'merge':
+      //   imagePath = 'assets/images/directions/merge.png';
+      //   break;
+      // case 'fork-left':
+      //   imagePath = 'assets/images/directions/fork-left.png';
+      //   break;
+      // case 'fork-right':
+      //   imagePath = 'assets/images/directions/fork-right.png';
+      //   break;
+      // case 'ferry':
+      //   imagePath = 'assets/images/directions/ferry.png';
+      //   break;
+      // case 'ferry-train':
+      //   imagePath = 'assets/images/directions/ferry-train.png';
+      //   break;
+      // case 'roundabout-left':
+      //   imagePath = 'assets/images/directions/roundabout-left.png';
+      //   break;
+      // case 'roundabout-right':
+      //   imagePath = 'assets/images/directions/roundabout-right.png';
+      //   break;
+      default:
+        // Use a default image if the maneuver type is not recognized
+        imagePath = 'assets/images/directions/straight.png';
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.only(right: 20),
+      child: Tab(
+        icon: Image.asset(
+          imagePath,
+          height: 35,
+          color: Colors.black,
+        ),
+      ),
+    );
   }
 }

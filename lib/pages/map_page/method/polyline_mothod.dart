@@ -39,7 +39,7 @@ class PolylineMethod {
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
-      color: Colors.blue,
+      color: Color.fromARGB(255, 73, 73, 73),
       points: polylineCoordinates,
       width: 5,
     );
