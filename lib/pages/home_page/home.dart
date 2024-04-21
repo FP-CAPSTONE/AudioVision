@@ -123,18 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(fontSize: 16),
                 ),
               ),
-              _isListening
-                  ? const Icon(
-                      Icons.mic,
-                      size: 50,
-                      color: Colors.red,
-                    )
-                  : const SizedBox(),
-              const SizedBox(height: 10),
-              Text(
-                _text,
-                style: const TextStyle(fontSize: 16),
-              ),
             ],
           ),
         ),
