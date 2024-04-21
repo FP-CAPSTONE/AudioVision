@@ -82,7 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   Get.to(() => LoginPage());
                 },
-                child: Text("GO TO LOGIN"),
+                child: HomeScreen.isIndonesianSelected
+                    ? Text("PERGI KE LOGIN")
+                    : Text("GO TO LOGIN"),
               ),
               ElevatedButton(
                 onPressed: () {

@@ -27,38 +27,16 @@ class NowNavigationTextWidget extends StatelessWidget {
   }
 }
 
-Widget buildArrowDirectionContainer(String iconName, {Color? color}) {
+Widget buildArrowDirectionContainer(
+    String iconName, String distance, String manuever,
+    {Color? color}) {
   return Container(
+    height: 60,
     margin: EdgeInsets.only(right: 8.0),
-    child: Icon(
-      _getIconData(iconName), // Helper function to get IconData from icon name
-      size: 30.0,
-      color: color ?? Colors.white, // Use provided color or default to white
+    child: Column(
+      children: [
+// Helper function to get IconData from icon name
+      ],
     ),
   );
-}
-
-IconData _getIconData(String iconName) {
-  switch (iconName) {
-    case 'arrow_forward':
-      return Icons.arrow_forward;
-    case 'arrow_back':
-      return Icons.arrow_back;
-    case 'arrow_upward':
-      return Icons.arrow_upward;
-    case 'arrow_downward':
-      return Icons.arrow_downward;
-    case 'arrow_back_ios':
-      return Icons.arrow_back_ios;
-    case 'arrow_forward_ios':
-      return Icons.arrow_forward_ios;
-    case 'close':
-      return Icons.close;
-    case 'call_split':
-      return Icons.call_split;
-    // Add more cases for other arrow icons as needed
-    default:
-      return Icons
-          .arrow_forward; // Default to arrow_forward if icon name is not recognized
-  }
 }

@@ -9,10 +9,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // TextEditingController _emailController =
+  //     TextEditingController(text: "kminchelle");
+  // TextEditingController _passwordController =
+  //     TextEditingController(text: "0lelplR");
   TextEditingController _emailController =
-      TextEditingController(text: "kminchelle");
+      TextEditingController(text: "abdul.saipi@student.president.ac.id");
   TextEditingController _passwordController =
-      TextEditingController(text: "0lelplR");
+      TextEditingController(text: "passwordsaya");
 
   bool _isLoading = false;
 

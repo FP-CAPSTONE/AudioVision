@@ -32,7 +32,7 @@ apply plugin: 'com.google.gms.google-services' //firebase
 
 android {
     namespace "com.example.audiovision"
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
