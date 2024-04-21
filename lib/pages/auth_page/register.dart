@@ -44,34 +44,65 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Register', style: TextStyle(fontSize: 24)),
+                Text('Register', style: TextStyle(fontSize: 24, color: Colors.black)),
                 SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(labelText: 'Name'),
+                  decoration: InputDecoration(
+                labelText: 'Name',
+                labelStyle: TextStyle(color: Colors.black),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
                 ),
                 SizedBox(height: 10),
                 TextFormField(
                   controller: _emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
+                  decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(color: Colors.black),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
                 ),
                 SizedBox(height: 10),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: InputDecoration(labelText: 'Password'),
+                  decoration: InputDecoration(
+                labelText: 'Password',
+                labelStyle: TextStyle(color: Colors.black),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
                   obscureText: true,
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   child: Text('Register'),
-                ),
+                  style: ElevatedButton.styleFrom(primary: Colors.black, onPrimary: Colors.white),
+            ),
                 SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  child: Text('Already have an account? Click here to login..'),
+                  child: Text(
+                'Already have an account? Click here to Login.',
+                style: TextStyle(color: Colors.black, decoration: TextDecoration.underline),
+              ),
                 ),
               ],
             ),

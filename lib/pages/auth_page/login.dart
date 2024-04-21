@@ -41,11 +41,20 @@ class _LoginPageState extends State<LoginPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Login', style: TextStyle(fontSize: 24)),
+              Text('Login', style: TextStyle(fontSize: 24, color: Colors.black)),
               SizedBox(height: 20),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(color: Colors.black),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
                 onTap: () {
                   TextToSpeech.speak('Email field selected');
                 },
@@ -53,7 +62,16 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 10),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                labelText: 'Password',
+                labelStyle: TextStyle(color: Colors.black),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                ),
+              ),
                 obscureText: true,
                 onTap: () {
                   TextToSpeech.speak('Password field selected');
@@ -65,7 +83,8 @@ class _LoginPageState extends State<LoginPage> {
                     ? null
                     : _login, // Disable button if isLoading is true
                 child: Text('Login'),
-              ),
+                style: ElevatedButton.styleFrom(primary: Colors.black, onPrimary: Colors.white),
+            ),
               SizedBox(height: 10),
               GestureDetector(
                 onTap: () {
@@ -74,7 +93,10 @@ class _LoginPageState extends State<LoginPage> {
                     MaterialPageRoute(builder: (context) => RegisterPage()),
                   );
                 },
-                child: Text('Don\'t have an account? Click here to register.'),
+                child: Text(
+                'Don\'t have an account? Click here to register.',
+                style: TextStyle(color: Colors.black, decoration: TextDecoration.underline),
+              ),
               ),
             ],
           ),
@@ -90,3 +112,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

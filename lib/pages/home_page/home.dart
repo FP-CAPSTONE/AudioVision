@@ -82,7 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   Get.to(() => LoginPage());
                 },
-                child: Text("GO TO LOGIN"),
+                child: HomeScreen.isIndonesianSelected
+                    ? Text("PERGI KE LOGIN")
+                    : Text("GO TO LOGIN"),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -120,18 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   "to navigate to another page",
                   style: TextStyle(fontSize: 16),
                 ),
-              ),
-              _isListening
-                  ? const Icon(
-                      Icons.mic,
-                      size: 50,
-                      color: Colors.red,
-                    )
-                  : const SizedBox(),
-              const SizedBox(height: 10),
-              Text(
-                _text,
-                style: const TextStyle(fontSize: 16),
               ),
             ],
           ),
