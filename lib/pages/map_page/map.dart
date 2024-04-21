@@ -1,23 +1,28 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:audiovision/pages/map_page/method/marker_method.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 
 import 'package:audiovision/pages/auth_page/login.dart';
 import 'package:audiovision/pages/auth_page/services/auth_services.dart';
-import 'package:audiovision/pages/home_page/home.dart';
 import 'package:audiovision/pages/map_page/method/navigate_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:audiovision/pages/map_page/method/share_location_method.dart';
+import 'package:audiovision/pages/map_page/widget/bottom_sheet.dart';
 import 'package:audiovision/pages/map_page/widget/button_start.dart';
 import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 import 'package:audiovision/pages/map_page/widget/google_map.dart';
 import 'package:audiovision/pages/map_page/widget/navigate_bar.dart';
-import 'package:audiovision/services/firebase_realtime.dart';
 import 'package:audiovision/services/location_services.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -30,6 +35,8 @@ class MapPage extends StatefulWidget {
   //public variable
   static double userLatitude = 0;
   static double userLongitude = 0;
+  static LatLng userPreviousCoordinate = const LatLng(0, 0);
+
   static LatLng destinationCoordinate = const LatLng(0, 0);
 
   static bool isStartNavigate = false;
@@ -49,6 +56,10 @@ class MapPage extends StatefulWidget {
   static Map<PolylineId, Polyline> polylines = {};
 
   static Set<Marker> markers = {};
+
+  static int totalDurationToDestination = 0;
+  static String destinationLocationName = "";
+
   const MapPage({super.key});
 
   @override
@@ -71,7 +82,7 @@ class _MapPageState extends State<MapPage> {
   static LocationService locationService = LocationService();
 
   late StreamSubscription _gyroscopeStreamSubscription;
-  double _heading = 0.0;
+  double _compassHeading = 0;
 
   int stepIndex = 0;
   String navigationText = "Continnue";
@@ -98,8 +109,41 @@ class _MapPageState extends State<MapPage> {
     ShareLocation.dbRef = FirebaseDatabase.instance.ref();
 
     isLogin();
-
+    print("init");
+    _initCompass();
     //_checkDeviceOrientation();
+  }
+
+  // Initialize compass and start listening to updates
+  void _initCompass() {
+    print("init");
+    FlutterCompass.events?.listen((CompassEvent event) {
+      setState(() {
+        _compassHeading = event.heading ?? 0;
+// Find the marker with markerId value "You" and update its rotation
+        Iterable<Marker> markersToUpdate =
+            MapPage.markers.where((marker) => marker.markerId.value == "You");
+
+        List<Marker> updatedMarkers = [];
+
+        markersToUpdate.forEach((marker) {
+          // Create a new marker with the updated rotation
+          Marker updatedMarker = Marker(
+            markerId: marker.markerId,
+            position: marker.position,
+            icon: marker.icon,
+            infoWindow: marker.infoWindow,
+            rotation: _compassHeading,
+            anchor: marker.anchor,
+          );
+          updatedMarkers.add(updatedMarker);
+        });
+
+// Remove old markers and add updated markers
+        MapPage.markers.removeWhere((marker) => marker.markerId.value == "You");
+        MapPage.markers.addAll(updatedMarkers);
+      });
+    });
   }
 
   @override
@@ -117,171 +161,6 @@ class _MapPageState extends State<MapPage> {
         predictions = result.predictions!;
       });
     }
-  }
-
-  // Function to calculate total distance and total duration
-  Map<String, dynamic> _calculateTotals(List<dynamic> steps) {
-    double totalDistance = 0.0;
-    int totalDuration = 0;
-
-    for (var step in steps) {
-      totalDistance += double.parse(step['distance'].split(' ')[0]);
-      totalDuration += int.parse(step['duration'].split(' ')[0]);
-    }
-
-    // Convert total distance from meters to kilometers
-    totalDistance /= 1000;
-
-    return {'totalDistance': totalDistance, 'totalDuration': totalDuration};
-  }
-
-  void _showBottomSheet(BuildContext context) {
-    Map<String, dynamic> totals = _calculateTotals(MapPage.allSteps);
-
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
-    double initialHeight = 0.2; // 20% initial height
-    double currentHeight = initialHeight;
-    DateTime now = DateTime.now();
-    int totalDurationMinutes = totals['totalDuration'];
-    DateTime expectedArrivalTime =
-        now.add(Duration(minutes: totalDurationMinutes));
-    showModalBottomSheet(
-      elevation: 1,
-      backgroundColor: Color.fromARGB(255, 236, 5, 5),
-      barrierColor: const Color.fromARGB(17, 0, 0, 0),
-      isDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return GestureDetector(
-              onVerticalDragUpdate: (details) {
-                // Calculate drag direction
-                double dy = details.primaryDelta!;
-                bool isDraggingUpwards = dy < 0;
-
-                // Clamp between 20% and 60%
-                if (isDraggingUpwards) {
-                  setState(() {
-                    currentHeight = 0.6;
-                  });
-                } else {
-                  setState(() {
-                    currentHeight = 0.2;
-                  });
-                }
-              },
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 300), // Adjust animation speed
-                width: screenWidth * 0.97, // Set width to 95% of screen width
-                height: screenHeight * currentHeight,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${totals['totalDuration']} mins ',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              SizedBox(height: 5),
-                              RichText(
-                                text: TextSpan(
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                          '${totals['totalDistance'].toStringAsFixed(2)} km . ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              ElevatedButton(
-                                  onPressed: () {
-                                    shareLocation();
-                                  },
-                                  child: Icon(Icons.share)),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              ElevatedButton(
-                                  onPressed: () {
-                                    MapPage.isStartNavigate = false;
-                                    Navigator.of(context)
-                                        .pop(); // Close the bottom sheet
-                                  },
-                                  child: Text("Exit"))
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      height: 1,
-                      color: Colors.grey.withOpacity(0.5),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: MapPage.allSteps.length,
-                        itemBuilder: (context, index) {
-                          var step = MapPage.allSteps[index];
-                          return ListTile(
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
-                            ),
-                            title: Text(
-                              step['instructions'],
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text(
-                              '${step['distance']} - ${step['duration']}',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.blue,
-                              child: Text(
-                                '${index + 1}',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   @override
@@ -303,13 +182,18 @@ class _MapPageState extends State<MapPage> {
                 destination != null
                     ? ButtonStartNavigateWidget(
                         mapController: MapPage.mapController!,
-                        callback: _showBottomSheet,
                         context: context,
                       )
                     : Container(),
                 MapPage.isStartNavigate
                     ? NavigateBarWidget(navigationText: navigationText)
                     : Container(),
+                MapPage.isStartNavigate
+                    ? CustomBottomSheet(
+                        callback: shareLocation,
+                      )
+                    : Container(),
+
                 // MapPage.isStartNavigate ? builCamera() : Container(),
                 // isStartNavigate
                 // ? Align(
@@ -330,17 +214,7 @@ class _MapPageState extends State<MapPage> {
                     // Button to show bottom sheet
 
                     MapPage.isStartNavigate
-                        ? ElevatedButton(
-                            onPressed: () {},
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(width: 10),
-                                Text('Share Location',
-                                    style: TextStyle(fontSize: 16)),
-                              ],
-                            ),
-                          )
+                        ? Container()
                         : ShareLocation.isTracking
                             ? ElevatedButton(
                                 onPressed: () {
@@ -548,6 +422,9 @@ class _MapPageState extends State<MapPage> {
 
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void add_destination(int index) async {
+    final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
+        'assets/markers/destination-marker.png', 100);
+
     final placeId = predictions[index].placeId!;
     final details = await googlePlace.details.get(placeId);
     if (details != null && details.result != null && mounted) {
@@ -556,6 +433,7 @@ class _MapPageState extends State<MapPage> {
           () {
             destination = details.result;
             _endSearchFieldController.text = details.result!.name!;
+            MapPage.destinationLocationName = _endSearchFieldController.text;
             predictions = [];
             MapPage.markers
                 .removeWhere((marker) => marker.markerId.value == "planceName");
@@ -568,6 +446,10 @@ class _MapPageState extends State<MapPage> {
               Marker(
                 markerId: const MarkerId("planceName"),
                 position: MapPage.destinationCoordinate,
+                icon: BitmapDescriptor.fromBytes(markerIcon),
+                infoWindow: InfoWindow(
+                  title: MapPage.destinationLocationName,
+                ),
               ),
             );
 
@@ -620,26 +502,26 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  void _checkDeviceOrientation() {
-    // Store the subscription returned by accelerometerEvents.listen()
-    _gyroscopeStreamSubscription =
-        gyroscopeEvents.listen((GyroscopeEvent event) {
-      setState(() {
-        // print("x");
-        // print(event.x * 10.0);
-        // print("y");
-        // print(event.y * 10.0);
-        // print("z");
-        // print(event.z * 10.0);
-        _heading = event.z * 10.0;
-        if (MapPage.mapController != null) {
-          MapPage.mapController!
-              .animateCamera(CameraUpdate.scrollBy(0, _heading));
-        }
-        print(_heading);
-      });
-    });
-  }
+  // void _checkDeviceOrientation() {
+  //   // Store the subscription returned by accelerometerEvents.listen()
+  //   _gyroscopeStreamSubscription =
+  //       gyroscopeEvents.listen((GyroscopeEvent event) {
+  //     setState(() {
+  //       // print("x");
+  //       // print(event.x * 10.0);
+  //       // print("y");
+  //       // print(event.y * 10.0);
+  //       // print("z");
+  //       // print(event.z * 10.0);
+  //       _heading = event.z * 10.0;
+  //       if (MapPage.mapController != null) {
+  //         MapPage.mapController!
+  //             .animateCamera(CameraUpdate.scrollBy(0, _heading));
+  //       }
+  //       print(_heading);
+  //     });
+  //   });
+  // }
 
   Widget builCamera() {
     return Stack(
@@ -711,7 +593,9 @@ class _MapPageState extends State<MapPage> {
   // update the user marker  position
   void updateUserMarkerPosition(
     LatLng newPosition,
-  ) {
+  ) async {
+    final Uint8List userMarker = await MarkerMethod.getBytesFromAsset(
+        'assets/markers/user-marker.png', 100);
     MapPage.cameraPosition = CameraPosition(target: newPosition, zoom: 16.5);
 
     // Update marker for user's position or add it if not present
@@ -721,10 +605,18 @@ class _MapPageState extends State<MapPage> {
         markerId: const MarkerId("You"),
         position: newPosition,
         // Custom marker icon
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueBlue), // For example, you can use a blue marker
+        icon: BitmapDescriptor.fromBytes(
+            userMarker), // For example, you can use a blue marker
+        infoWindow: InfoWindow(title: "You"),
+        rotation: _compassHeading,
+
+        anchor: const Offset(0.5, 0.5),
       ),
     );
+
+    MapPage.userPreviousCoordinate =
+        LatLng(MapPage.userLatitude, MapPage.userLongitude);
+
     setState(() {});
     if (MapPage.isStartNavigate) {
       PolylineMethod(updateUi!).getPolyline(
@@ -734,7 +626,9 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  updateUserTrackingMarkerPosition() {
+  updateUserTrackingMarkerPosition() async {
+    final Uint8List userTrackingMarker = await MarkerMethod.getBytesFromAsset(
+        'assets/markers/tracking-user-marker.png', 100);
     // Check if trackingUserName is not null
     if (ShareLocation.isTracking) {
       // Update marker for user's position or add it if not present
@@ -753,9 +647,9 @@ class _MapPageState extends State<MapPage> {
           position: LatLng(ShareLocation.trackUserCoordinate!.latitude,
               ShareLocation.trackUserCoordinate!.longitude),
           // Custom marker icon
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueCyan,
-          ), // For example, you can use a blue marker
+          icon: BitmapDescriptor.fromBytes(userTrackingMarker),
+          infoWindow: InfoWindow(title: ShareLocation.trackingUserName),
+          // For example, you can use a blue marker
         ),
       );
       PolylineMethod(updateUi).getPolyline(
@@ -888,8 +782,178 @@ class _MapPageState extends State<MapPage> {
         ShareLocation.shareUserLocation(
           LatLng(MapPage.userLatitude, MapPage.userLongitude),
           MapPage.destinationCoordinate,
+          MapPage.destinationLocationName,
         );
       }
     });
   }
 }
+
+
+  // void _showBottomSheet(BuildContext context) {
+  //   Map<String, dynamic> totals = _calculateTotals(MapPage.allSteps);
+
+  //   double screenHeight = MediaQuery.of(context).size.height;
+  //   double screenWidth = MediaQuery.of(context).size.width;
+  //   double initialHeight = 0.15; // 20% initial height
+  //   double currentHeight = initialHeight;
+  //   DateTime now = DateTime.now();
+  //   int totalDurationMinutes = totals['totalDuration'];
+  //   DateTime expectedArrivalTime =
+  //       now.add(Duration(minutes: totalDurationMinutes));
+  //   showModalBottomSheet(
+  //     useSafeArea: true,
+  //     elevation: 1,
+  //     isScrollControlled: true,
+  //     barrierColor: const Color.fromARGB(17, 0, 0, 0),
+  //     isDismissible: false,
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return SingleChildScrollView(
+  //         child: StatefulBuilder(
+  //           builder: (BuildContext context, StateSetter setState) {
+  //             return GestureDetector(
+  //               onVerticalDragUpdate: (details) {
+  //                 // Calculate drag direction
+  //                 double dy = details.primaryDelta!;
+  //                 bool isDraggingUpwards = dy < 0;
+
+  //                 // Clamp between 20% and 60%
+  //                 if (isDraggingUpwards) {
+  //                   setState(() {
+  //                     currentHeight = 0.6;
+  //                   });
+  //                 } else {
+  //                   setState(() {
+  //                     currentHeight = 0.15;
+  //                   });
+  //                 }
+  //               },
+  //               child: AnimatedContainer(
+  //                 duration:
+  //                     Duration(milliseconds: 300), // Adjust animation speed
+  //                 width: screenWidth * 0.97, // Set width to 95% of screen width
+  //                 height: screenHeight * currentHeight,
+  //                 decoration: const BoxDecoration(
+  //                   color: Colors.white,
+  //                   borderRadius:
+  //                       BorderRadius.vertical(top: Radius.circular(20)),
+  //                 ),
+  //                 child: Column(
+  //                   crossAxisAlignment: CrossAxisAlignment.center,
+  //                   children: [
+  //                     SizedBox(
+  //                       height: 10,
+  //                     ),
+  //                     Container(
+  //                       width: 40,
+  //                       height: 3,
+  //                       color: const Color.fromARGB(255, 221, 221, 221),
+  //                     ),
+  //                     Padding(
+  //                       padding: EdgeInsets.only(
+  //                           bottom: 20, left: 20, right: 20, top: 10),
+  //                       child: Stack(
+  //                         alignment: Alignment.center,
+  //                         children: [
+  //                           Row(
+  //                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                             children: [
+  //                               Column(
+  //                                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                                 children: [
+  //                                   Text(
+  //                                     '${totals['totalDuration']} mins ',
+  //                                     style: const TextStyle(
+  //                                       fontSize: 18,
+  //                                       fontWeight: FontWeight.bold,
+  //                                       color: Colors.black,
+  //                                     ),
+  //                                   ),
+  //                                   SizedBox(height: 5),
+  //                                   RichText(
+  //                                     text: TextSpan(
+  //                                       style: const TextStyle(
+  //                                         fontSize: 16,
+  //                                         fontWeight: FontWeight.bold,
+  //                                         color: Colors.black,
+  //                                       ),
+  //                                       children: [
+  //                                         TextSpan(
+  //                                           text:
+  //                                               '${totals['totalDistance'].toStringAsFixed(2)} km . ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
+  //                                           style:
+  //                                               TextStyle(color: Colors.grey),
+  //                                         ),
+  //                                       ],
+  //                                     ),
+  //                                   ),
+  //                                 ],
+  //                               ),
+  //                               Row(
+  //                                 children: [
+  //                                   ElevatedButton(
+  //                                       onPressed: () {
+  //                                         shareLocation();
+  //                                       },
+  //                                       child: Icon(Icons.share)),
+  //                                   const SizedBox(
+  //                                     width: 5,
+  //                                   ),
+  //                                   ElevatedButton(
+  //                                       onPressed: () {
+  //                                         MapPage.isStartNavigate = false;
+                                        
+  //                                       },
+  //                                       child: Text("Exit"))
+  //                                 ],
+  //                               )
+  //                             ],
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                     Container(
+  //                       width: double.infinity,
+  //                       height: 1,
+  //                       color: Colors.grey.withOpacity(0.5),
+  //                     ),
+  //                     Expanded(
+  //                       child: ListView.builder(
+  //                         itemCount: MapPage.allSteps.length,
+  //                         itemBuilder: (context, index) {
+  //                           var step = MapPage.allSteps[index];
+  //                           return ListTile(
+  //                             contentPadding: const EdgeInsets.symmetric(
+  //                               horizontal: 20,
+  //                               vertical: 10,
+  //                             ),
+  //                             title: Text(
+  //                               step['instructions'],
+  //                               style: TextStyle(fontWeight: FontWeight.bold),
+  //                             ),
+  //                             subtitle: Text(
+  //                               '${step['distance']} - ${step['duration']}',
+  //                               style: TextStyle(color: Colors.grey),
+  //                             ),
+  //                             leading: CircleAvatar(
+  //                               backgroundColor: Colors.blue,
+  //                               child: Text(
+  //                                 '${index + 1}',
+  //                                 style: TextStyle(color: Colors.white),
+  //                               ),
+  //                             ),
+  //                           );
+  //                         },
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }

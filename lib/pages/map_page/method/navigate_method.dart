@@ -45,19 +45,19 @@ class NavigateMethod {
 
     var response = await http.get(Uri.parse(url_using_latlong));
     var json = convert.jsonDecode(response.body);
-
+    Map<String, dynamic> results;
     List<dynamic> routes = json['routes'];
-    Map<String, dynamic> results = {
-      'bounds_ne': routes[0]['bounds']['northeast'],
-      'bounds_sw': routes[0]['bounds']['southwest'],
-      'start_location': routes[0]['legs'][0]['start_location'],
-      'end_location': routes[0]['legs'][0]['end_location'],
-      'polyline': routes[0]['overview_polyline']['points'],
-      'polyline_decoded': PolylinePoints()
-          .decodePolyline(routes[0]['overview_polyline']['points']),
-    };
-
     if (routes.isNotEmpty) {
+      results = {
+        'bounds_ne': routes[0]['bounds']['northeast'],
+        'bounds_sw': routes[0]['bounds']['southwest'],
+        'start_location': routes[0]['legs'][0]['start_location'],
+        'end_location': routes[0]['legs'][0]['end_location'],
+        'polyline': routes[0]['overview_polyline']['points'],
+        'polyline_decoded': PolylinePoints()
+            .decodePolyline(routes[0]['overview_polyline']['points']),
+      };
+
       List<dynamic> legs = routes[0]['legs'];
       if (legs.isNotEmpty) {
         List<dynamic> steps = legs[0]['steps'];
@@ -83,6 +83,15 @@ class NavigateMethod {
         MapPage.allSteps = results['steps'];
         MapPage.endLocation = results['end_location'];
       }
+    } else {
+      results = {
+        'bounds_ne': 0,
+        'bounds_sw': 0,
+        'start_location': 0,
+        'end_location': 0,
+        'polyline': 0,
+        'polyline_decoded': 0,
+      };
     }
     return results;
   }

@@ -57,6 +57,7 @@ dependencies:
   sensors_plus:
   riverpod: ^1.0.0
   shared_preferences:
+  flutter_compass:
 
     # cloud_firebase: ^10.4.6
   firebase_core: ^2.27.0 
@@ -86,6 +87,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/markers/
     - assets/model/mylabels.txt
     - assets/model/seg_label.txt
     - assets/model/labels.txt
