@@ -29,7 +29,8 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 // ned to change the class name, there are two location service
-import 'package:sensors_plus/sensors_plus.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:vibration/vibration.dart';
 
 class MapPage extends StatefulWidget {
   //public variable
@@ -84,7 +85,6 @@ class _MapPageState extends State<MapPage> {
   static LocationService locationService = LocationService();
 
   late StreamSubscription _gyroscopeStreamSubscription;
-  double _compassHeading = 0;
 
   int stepIndex = 0;
   String navigationText = "";
@@ -125,7 +125,6 @@ class _MapPageState extends State<MapPage> {
         double compassHeading = event.heading ?? 0;
 
         // Check if the difference between the current compass heading and the previous heading is greater than 5 degrees
-        print(compassHeading);
         if ((compassHeading - MapPage.compassHeading).abs() > 10) {
           MapPage.compassHeading = compassHeading;
 
@@ -149,6 +148,11 @@ class _MapPageState extends State<MapPage> {
       // print(result.predictions!.first.description);
       setState(() {
         predictions = result.predictions!;
+        if (predictions.length <= 2 && predictions.length != 0) {
+          add_destination(0);
+          TextToSpeech.speak(
+              "set destination to " + predictions[0].description.toString());
+        }
       });
     }
   }
@@ -159,6 +163,10 @@ class _MapPageState extends State<MapPage> {
       body: GestureDetector(
         onDoubleTap: () {
           TextToSpeech.speak("Audio command activated, say something");
+          _isListening = false;
+          _text = '';
+          Vibration.vibrate();
+          _listen();
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -187,6 +195,31 @@ class _MapPageState extends State<MapPage> {
                           instruction: instruction,
                         )
                       : Container(),
+                  Center(
+                    child: _isListening
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // SizedBox(
+                              //     height: MediaQuery.of(context).size.height *
+                              //         0.), // Adjust the height as needed
+                              const Icon(
+                                Icons.mic,
+                                size: 50,
+                                color: Colors.red,
+                              ),
+                              SizedBox(
+                                  height:
+                                      10), // Add some spacing between the icon and text
+                              Text(
+                                _text,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          )
+                        : SizedBox(),
+                  ),
+
                   MapPage.isStartNavigate
                       ? CustomBottomSheet(
                           callback: shareLocation,
@@ -207,7 +240,7 @@ class _MapPageState extends State<MapPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
+                      const Expanded(
                         child: Stack(
                           children: [
                             // Your map widgets...
@@ -293,7 +326,7 @@ class _MapPageState extends State<MapPage> {
                                                   // Show an error message indicating that the User ID cannot be empty
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(SnackBar(
-                                                    content: Text(
+                                                    content: const Text(
                                                         'Please enter a User ID.'),
                                                   ));
                                                   return; // Return without further action
@@ -361,7 +394,7 @@ class _MapPageState extends State<MapPage> {
             //       bottomRight: Radius.circular(10)),
             //   borderSide: BorderSide(width: 0, style: BorderStyle.none),
             // ),
-            border: OutlineInputBorder(
+            border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(
                 Radius.circular(10),
               ),
@@ -421,6 +454,9 @@ class _MapPageState extends State<MapPage> {
                             predictions[index].description.toString(),
                           ),
                           onTap: () {
+                            TextToSpeech.speak("set your destination to " +
+                                predictions[index].description.toString());
+                            // print(index);
                             add_destination(index);
                           },
                         ),
@@ -623,7 +659,7 @@ class _MapPageState extends State<MapPage> {
         icon: BitmapDescriptor.fromBytes(
             userMarker), // For example, you can use a blue marker
         infoWindow: InfoWindow(title: "You"),
-        rotation: _compassHeading,
+        rotation: MapPage.compassHeading,
 
         anchor: const Offset(0.5, 0.5),
       ),
@@ -765,38 +801,60 @@ class _MapPageState extends State<MapPage> {
     await AuthService.isAuthenticated();
   }
 
-  void shareLocation() {
+  void shareLocation(BuildContext context) {
     if (!AuthService.isAuthenticate) {
       Get.to(LoginPage());
       TextToSpeech.speak(
           "You are not logged in. To share your location, you must log in first.");
       return;
     }
+    String userId = AuthService.userId.toString();
     TextToSpeech.speak(
-        'Do you want to share your location?. To share your location, Share your ID to other people. your ID is ${AuthService.userId.toString().split("")}');
+        'Do you want to share your location?. To share your location, Share your ID to other people. your ID is $userId');
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Share Location?'),
-          content: Text(
-              'Do you want to share your location? To share your location, Share your ID to other people. your ID is ${AuthService.userId}'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(
-                    false); // Return false indicating user doesn't want to share location
-              },
-              child: Text('No'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(
-                    true); // Return true indicating user wants to share location
-              },
-              child: Text('Yes'),
-            ),
-          ],
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Do you want to share your location? To share your location, Share your ID to other people. your ID is $userId',
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(
+                          false); // Return false indicating user doesn't want to share location
+                    },
+                    child: Text('No'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Copy the user ID to the clipboard
+                      Clipboard.setData(ClipboardData(text: userId));
+                      Navigator.of(context).pop(
+                          true); // Return true indicating user wants to share location
+                    },
+                    child: Text('Copy ID'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Implement sharing functionality here
+                      // You can use packages like share or share_plus to share content
+                      // For example, share(userId);
+                    },
+                    child: Text('Share'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
       },
     ).then((value) {
@@ -809,173 +867,88 @@ class _MapPageState extends State<MapPage> {
       }
     });
   }
+
+  bool _isListening = false;
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  String _text = '';
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() {
+          _isListening = true;
+          _text = "Listening...";
+          print("Listening...");
+        });
+
+        _speech.listen(onResult: (result) {
+          setState(() {
+            _text = result.recognizedWords.toLowerCase();
+            print(_text);
+            if (_text.contains("go")) {
+              print("go");
+              _endSearchFieldController.text = _text.split("go").last;
+              autoCompleteSearch(_text);
+            } else if (_text.contains("stop") || _text.contains("exit")) {
+              if (MapPage.isStartNavigate) {
+                MapPage.isStartNavigate = false;
+                TextToSpeech.speak("Exiting navigation");
+
+                return;
+              }
+              TextToSpeech.speak(
+                  "To exit navigate, you have to start navigate first");
+            } else if (_text.contains("start")) {
+              if (!MapPage.isStartNavigate && predictions.isNotEmpty) {
+                MapPage.isStartNavigate = true;
+                NavigateMethod().startNavigate(
+                  MapPage.mapController,
+                  MapPage.destinationCoordinate,
+                );
+                TextToSpeech.speak("Start navigation");
+
+                return;
+              }
+              TextToSpeech.speak(
+                  "To exit navigate, you have to start navigate first");
+            } else {
+              // stop listening
+              _microphoneTimeout1();
+            }
+          });
+        });
+        // stop listening
+        _microphoneTimeout2();
+      } else {
+        print('The user denied the use of speech recognition.');
+      }
+    }
+  }
+
+  // stop listening after 8 seconds
+  void _microphoneTimeout1() {
+    Timer(const Duration(seconds: 8), () {
+      // Reset _isListening 8 seconds
+      setState(() {
+        _isListening = false;
+        _text = ""; // Clear the recognized text
+      });
+      print("Speech recognition timeout");
+    });
+  }
+
+  // stop listening if the user did not say anything
+  void _microphoneTimeout2() {
+    Timer(const Duration(seconds: 5), () {
+      if (_text == "Listening...") {
+        // Reset _isListening if no speech is recognized after 5 seconds
+        setState(() {
+          _isListening = false;
+          _text = ""; // Clear the recognized text
+        });
+        print("Speech recognition timeout");
+      }
+    });
+  }
 }
-
-
-  // void _showBottomSheet(BuildContext context) {
-  //   Map<String, dynamic> totals = _calculateTotals(MapPage.allSteps);
-
-  //   double screenHeight = MediaQuery.of(context).size.height;
-  //   double screenWidth = MediaQuery.of(context).size.width;
-  //   double initialHeight = 0.15; // 20% initial height
-  //   double currentHeight = initialHeight;
-  //   DateTime now = DateTime.now();
-  //   int totalDurationMinutes = totals['totalDuration'];
-  //   DateTime expectedArrivalTime =
-  //       now.add(Duration(minutes: totalDurationMinutes));
-  //   showModalBottomSheet(
-  //     useSafeArea: true,
-  //     elevation: 1,
-  //     isScrollControlled: true,
-  //     barrierColor: const Color.fromARGB(17, 0, 0, 0),
-  //     isDismissible: false,
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return SingleChildScrollView(
-  //         child: StatefulBuilder(
-  //           builder: (BuildContext context, StateSetter setState) {
-  //             return GestureDetector(
-  //               onVerticalDragUpdate: (details) {
-  //                 // Calculate drag direction
-  //                 double dy = details.primaryDelta!;
-  //                 bool isDraggingUpwards = dy < 0;
-
-  //                 // Clamp between 20% and 60%
-  //                 if (isDraggingUpwards) {
-  //                   setState(() {
-  //                     currentHeight = 0.6;
-  //                   });
-  //                 } else {
-  //                   setState(() {
-  //                     currentHeight = 0.15;
-  //                   });
-  //                 }
-  //               },
-  //               child: AnimatedContainer(
-  //                 duration:
-  //                     Duration(milliseconds: 300), // Adjust animation speed
-  //                 width: screenWidth * 0.97, // Set width to 95% of screen width
-  //                 height: screenHeight * currentHeight,
-  //                 decoration: const BoxDecoration(
-  //                   color: Colors.white,
-  //                   borderRadius:
-  //                       BorderRadius.vertical(top: Radius.circular(20)),
-  //                 ),
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.center,
-  //                   children: [
-  //                     SizedBox(
-  //                       height: 10,
-  //                     ),
-  //                     Container(
-  //                       width: 40,
-  //                       height: 3,
-  //                       color: const Color.fromARGB(255, 221, 221, 221),
-  //                     ),
-  //                     Padding(
-  //                       padding: EdgeInsets.only(
-  //                           bottom: 20, left: 20, right: 20, top: 10),
-  //                       child: Stack(
-  //                         alignment: Alignment.center,
-  //                         children: [
-  //                           Row(
-  //                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                             children: [
-  //                               Column(
-  //                                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                                 children: [
-  //                                   Text(
-  //                                     '${totals['totalDuration']} mins ',
-  //                                     style: const TextStyle(
-  //                                       fontSize: 18,
-  //                                       fontWeight: FontWeight.bold,
-  //                                       color: Colors.black,
-  //                                     ),
-  //                                   ),
-  //                                   SizedBox(height: 5),
-  //                                   RichText(
-  //                                     text: TextSpan(
-  //                                       style: const TextStyle(
-  //                                         fontSize: 16,
-  //                                         fontWeight: FontWeight.bold,
-  //                                         color: Colors.black,
-  //                                       ),
-  //                                       children: [
-  //                                         TextSpan(
-  //                                           text:
-  //                                               '${totals['totalDistance'].toStringAsFixed(2)} km . ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
-  //                                           style:
-  //                                               TextStyle(color: Colors.grey),
-  //                                         ),
-  //                                       ],
-  //                                     ),
-  //                                   ),
-  //                                 ],
-  //                               ),
-  //                               Row(
-  //                                 children: [
-  //                                   ElevatedButton(
-  //                                       onPressed: () {
-  //                                         shareLocation();
-  //                                       },
-  //                                       child: Icon(Icons.share)),
-  //                                   const SizedBox(
-  //                                     width: 5,
-  //                                   ),
-  //                                   ElevatedButton(
-  //                                       onPressed: () {
-  //                                         MapPage.isStartNavigate = false;
-                                        
-  //                                       },
-  //                                       child: Text("Exit"))
-  //                                 ],
-  //                               )
-  //                             ],
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                     Container(
-  //                       width: double.infinity,
-  //                       height: 1,
-  //                       color: Colors.grey.withOpacity(0.5),
-  //                     ),
-  //                     Expanded(
-  //                       child: ListView.builder(
-  //                         itemCount: MapPage.allSteps.length,
-  //                         itemBuilder: (context, index) {
-  //                           var step = MapPage.allSteps[index];
-  //                           return ListTile(
-  //                             contentPadding: const EdgeInsets.symmetric(
-  //                               horizontal: 20,
-  //                               vertical: 10,
-  //                             ),
-  //                             title: Text(
-  //                               step['instructions'],
-  //                               style: TextStyle(fontWeight: FontWeight.bold),
-  //                             ),
-  //                             subtitle: Text(
-  //                               '${step['distance']} - ${step['duration']}',
-  //                               style: TextStyle(color: Colors.grey),
-  //                             ),
-  //                             leading: CircleAvatar(
-  //                               backgroundColor: Colors.blue,
-  //                               child: Text(
-  //                                 '${index + 1}',
-  //                                 style: TextStyle(color: Colors.white),
-  //                               ),
-  //                             ),
-  //                           );
-  //                         },
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }

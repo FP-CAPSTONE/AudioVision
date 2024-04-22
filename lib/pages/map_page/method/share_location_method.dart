@@ -5,8 +5,8 @@ import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart'; // Import the services library for clipboard functionality
 
 class ShareLocation {
   static late DatabaseReference dbRef;

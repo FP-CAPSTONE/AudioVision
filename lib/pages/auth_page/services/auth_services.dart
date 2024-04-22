@@ -1,5 +1,6 @@
 import 'package:audiovision/pages/auth_page/login.dart';
 import 'package:audiovision/pages/home_page/home.dart';
+import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,14 +19,16 @@ class AuthService {
 
     // Check if 'userData' key exists in preferences
     if (!prefs.containsKey('userData')) {
+      print("no user data in pref");
       return false;
     }
 
     // Retrieve token from preferences
     final userDataString = prefs.getString('userData');
+    print("userdata" + userDataString.toString());
     if (userDataString != null) {
       final userData = json.decode(userDataString);
-      final token = userData['token'] as String?;
+      final token = userData['token'];
       userName = userData['userName'];
       userId = userData['userId'].toString();
 
@@ -38,12 +41,12 @@ class AuthService {
     }
   }
 
-  static String apiUrl = "http://172.20.10.4:8000/";
+  static String apiUrl = "https://audiovision-413417.as.r.appspot.com/";
   // static String apiUrl = "http://10.35.117.223/";
   // static String apiUrl = "https://dummyjson.com/";
   static login(String email, password) async {
     try {
-      print("login testt");
+      print("login testt" + email);
       var response = await http.post(
         Uri.parse("${apiUrl}auth/login"),
         body: jsonEncode({"email": email, "password": password}),
@@ -55,6 +58,7 @@ class AuthService {
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
+      print(response.toString() + "login testt" + email);
       print(response);
       print(email);
 
@@ -67,7 +71,7 @@ class AuthService {
         var loginResult = data['loginResult'];
         var userId = loginResult['userId'];
         var name = loginResult['name'];
-        var token = data['token'];
+        var token = loginResult['token'];
 
         // dummy json sevrer response
         // var userId = data['id'];
@@ -84,9 +88,10 @@ class AuthService {
 
         prefs.setString('userData', userData);
 
-        Get.to(const HomeScreen());
+        isAuthenticated();
 
-        print("Login create successfuly");
+        Get.to(const MapPage());
+        print("Login successfuly");
       } else {
         TextToSpeech.speak('Login Faild');
         print("Failed");

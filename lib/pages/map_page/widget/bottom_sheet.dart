@@ -94,7 +94,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                 height: 50,
                                 child: ElevatedButton(
                                     onPressed: () {
-                                      widget.callback();
+                                      widget.callback(context);
                                     },
                                     style: ButtonStyle(
                                       backgroundColor:
