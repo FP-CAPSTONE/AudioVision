@@ -32,6 +32,8 @@ import 'package:google_place/google_place.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:vibration/vibration.dart';
 
+import '../setting_page/setting.dart';
+
 class MapPage extends StatefulWidget {
   //public variable
   static double userLatitude = 0;
@@ -371,101 +373,226 @@ class _MapPageState extends State<MapPage> {
   }
 
   //Search Bar Widget <- SHOULD MOVE TO ANOTHER FILE
+  // Widget build_SearchBar(BuildContext context) {
+  //   return Column(
+  //     children: [
+  //       const SizedBox(height: 100),
+  //       TextField(
+  //         controller: _endSearchFieldController,
+  //         autofocus: false,
+  //         focusNode: endFocusNode,
+  //         style: const TextStyle(fontSize: 24),
+  //         decoration: InputDecoration(
+  //           hintText: "Search Here",
+  //           hintStyle:
+  //               const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
+  //           filled: true,
+  //           fillColor: Colors.grey[200],
+  //           // border: const OutlineInputBorder(
+  //           //   borderRadius: BorderRadius.only(
+  //           //       topLeft: Radius.circular(40),
+  //           //       topRight: Radius.circular(40),
+  //           //       bottomLeft: Radius.circular(10),
+  //           //       bottomRight: Radius.circular(10)),
+  //           //   borderSide: BorderSide(width: 0, style: BorderStyle.none),
+  //           // ),
+  //           border: const OutlineInputBorder(
+  //             borderRadius: BorderRadius.all(
+  //               Radius.circular(10),
+  //             ),
+  //             borderSide: BorderSide(width: 1, style: BorderStyle.solid),
+  //           ),
+  //           isDense: true,
+  //           contentPadding: const EdgeInsets.all(15),
+  //           suffixIcon: _endSearchFieldController.text.isNotEmpty
+  //               ? IconButton(
+  //                   onPressed: () {
+  //                     setState(() {
+  //                       predictions = [];
+  //                       _endSearchFieldController.clear();
+  //                     });
+  //                   },
+  //                   icon: const Icon(Icons.clear_outlined),
+  //                 )
+  //               : null,
+  //         ),
+  //         onChanged: (value) {
+  //           if (_debounce?.isActive ?? false) _debounce!.cancel();
+  //           _debounce = Timer(const Duration(milliseconds: 1000), () {
+  //             if (value.isNotEmpty) {
+  //               autoCompleteSearch(value);
+  //             } else {
+  //               setState(() {
+  //                 predictions = [];
+  //                 destination = null;
+  //               });
+  //             }
+  //           });
+  //         },
+  //       ),
+  //       predictions.isNotEmpty
+  //           ? Expanded(
+  //               child: ListView.builder(
+  //                 padding: EdgeInsets.zero,
+  //                 itemCount: predictions.length,
+  //                 itemBuilder: (context, index) {
+  //                   return GestureDetector(
+  //                     onLongPress: () {
+  //                       print(
+  //                           "res" + predictions[index].description.toString());
+  //                       TextToSpeech.speak(
+  //                           predictions[index].description.toString());
+  //                     },
+  //                     child: Container(
+  //                       color: Colors.white,
+  //                       child: ListTile(
+  //                         leading: const CircleAvatar(
+  //                           child: Icon(
+  //                             Icons.location_on,
+  //                             color: Colors.white,
+  //                           ),
+  //                         ),
+  //                         title: Text(
+  //                           predictions[index].description.toString(),
+  //                         ),
+  //                         onTap: () {
+  //                           TextToSpeech.speak("set your destination to " +
+  //                               predictions[index].description.toString());
+  //                           // print(index);
+  //                           add_destination(index);
+  //                         },
+  //                       ),
+  //                     ),
+  //                   );
+  //                 },
+  //               ),
+  //             )
+  //           : Container(),
+  //     ],
+  //   );
+  // }
+
+  //Searchbar with advance UI and wrapped in container
   Widget build_SearchBar(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 100),
-        TextField(
-          controller: _endSearchFieldController,
-          autofocus: false,
-          focusNode: endFocusNode,
-          style: const TextStyle(fontSize: 24),
-          decoration: InputDecoration(
-            hintText: "Search Here",
-            hintStyle:
-                const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
-            filled: true,
-            fillColor: Colors.grey[200],
-            // border: const OutlineInputBorder(
-            //   borderRadius: BorderRadius.only(
-            //       topLeft: Radius.circular(40),
-            //       topRight: Radius.circular(40),
-            //       bottomLeft: Radius.circular(10),
-            //       bottomRight: Radius.circular(10)),
-            //   borderSide: BorderSide(width: 0, style: BorderStyle.none),
-            // ),
-            border: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
+        Container(
+          height: 40, // Set the height of the container
+          decoration: BoxDecoration(
+            color: Colors.black,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 1,
+                blurRadius: 7,
+                offset: Offset(0, 3), // changes position of shadow
               ),
-              borderSide: BorderSide(width: 1, style: BorderStyle.solid),
-            ),
-            isDense: true,
-            contentPadding: const EdgeInsets.all(15),
-            suffixIcon: _endSearchFieldController.text.isNotEmpty
-                ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        predictions = [];
-                        _endSearchFieldController.clear();
-                      });
-                    },
-                    icon: const Icon(Icons.clear_outlined),
-                  )
-                : null,
+            ],
           ),
-          onChanged: (value) {
-            if (_debounce?.isActive ?? false) _debounce!.cancel();
-            _debounce = Timer(const Duration(milliseconds: 1000), () {
-              if (value.isNotEmpty) {
-                autoCompleteSearch(value);
-              } else {
-                setState(() {
-                  predictions = [];
-                  destination = null;
-                });
-              }
-            });
-          },
         ),
-        predictions.isNotEmpty
-            ? Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: predictions.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onLongPress: () {
-                        print(
-                            "res" + predictions[index].description.toString());
-                        TextToSpeech.speak(
-                            predictions[index].description.toString());
-                      },
-                      child: Container(
-                        color: Colors.white,
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(
-                              Icons.location_on,
-                              color: Colors.white,
-                            ),
-                          ),
-                          title: Text(
-                            predictions[index].description.toString(),
-                          ),
-                          onTap: () {
-                            TextToSpeech.speak("set your destination to " +
-                                predictions[index].description.toString());
-                            // print(index);
-                            add_destination(index);
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+          ),
+          child: Padding(
+            padding:
+            const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      controller: _endSearchFieldController,
+                      autofocus: false,
+                      focusNode: endFocusNode,
+                      style: const TextStyle(fontSize: 24),
+                      decoration: InputDecoration(
+                        hintText: "Search Here",
+                        hintStyle: const TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 22),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.all(15),
+                        prefixIcon: const Icon(Icons.search, size: 32),
+                        suffixIcon: _endSearchFieldController.text.isNotEmpty
+                            ? IconButton(
+                          onPressed: () {
+                            setState(() {
+                              predictions = [];
+                              _endSearchFieldController.clear();
+                            });
                           },
+                          icon: const Icon(Icons.clear_outlined),
+                        )
+                            : null,
+                      ),
+                      onChanged: (value) {
+                        if (_debounce?.isActive ?? false) _debounce!.cancel();
+                        _debounce =
+                            Timer(const Duration(milliseconds: 1000), () {
+                              if (value.isNotEmpty) {
+                                autoCompleteSearch(value);
+                              } else {
+                                setState(() {
+                                  predictions = [];
+                                  destination = null;
+                                });
+                              }
+                            });
+                      },
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Get.to(() => SettingPage());
+                    // Add your settings icon onPressed logic here
+                  },
+                  icon: const Icon(Icons.settings),
+                  color: Colors.grey[800],
+                  iconSize: 37,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (predictions.isNotEmpty)
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: predictions.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onLongPress: () {
+                    print("res" + predictions[index].description.toString());
+                    TextToSpeech.speak(
+                        predictions[index].description.toString());
+                  },
+                  child: Container(
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(
+                          Icons.location_on,
+                          color: Colors.white,
                         ),
                       ),
-                    );
-                  },
-                ),
-              )
-            : Container(),
+                      title: Text(
+                        predictions[index].description.toString(),
+                      ),
+                      onTap: () {
+                        add_destination(index);
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
       ],
     );
   }
