@@ -23,6 +23,13 @@ class _OnboardingViewState extends State<OnboardingView> {
   bool isLastPage = false;
 
   bool isSuccessTryMicrophone = false;
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   TextToSpeech.speak(
+  //       "Welcome To Audio Vision. We will help you and assist you to go to somewhere. Swipe to the right to continue");
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -86,10 +93,12 @@ class _OnboardingViewState extends State<OnboardingView> {
           margin: const EdgeInsets.symmetric(horizontal: 15),
           child: PageView.builder(
               onPageChanged: (index) => setState(() {
-                    if (currentPageIndex != 2 || isSuccessTryMicrophone) {
-                      // TextToSpeech.speak(
-                      //     "You must try Double tap to activate voice command / microphone before continuing to the next page");
-                      // return;
+                    if (currentPageIndex != 0) {
+                      TextToSpeech.speak(
+                          "Welcome To Audio Vision. We will help you and assist you to go to somewhere. Swipe to the right to continue");
+                    } else if (currentPageIndex != 1) {
+                      TextToSpeech.speak(
+                          "We developed a route guidance application with object detection to assist visually impaired people to travel. The object detection feature will help visualize the surroundings, and provide warnings through audio and vibration if there are dangerous objects. Don't worry, we'll be your eyes. Swipe to the right to continue");
                     }
                     isLastPage = controller.items.length - 1 == index;
                     currentPageIndex = index;

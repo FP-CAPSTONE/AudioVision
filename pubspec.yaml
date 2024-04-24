@@ -60,6 +60,7 @@ dependencies:
   flutter_dotenv :
   sensors_plus:
   riverpod: ^1.0.0
+  lottie: 
 
   shared_preferences:
   flutter_compass:
