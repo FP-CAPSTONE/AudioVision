@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/widget/buttom_sheet_detail_ocation.dart';
+import 'package:audiovision/pages/map_page/widget/searching_method.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -29,10 +30,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // ned to change the class name, there are two location service
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:vibration/vibration.dart';
-
 import '../setting_page/setting.dart';
 
 class MapPage extends StatefulWidget {
@@ -111,6 +112,8 @@ class _MapPageState extends State<MapPage> {
   String mapTheme = "";
   bool fromAudioCommand = false;
 
+  Map<String, String> searchLogs = {};
+
   @override
   void initState() {
     // TODO: implement initState
@@ -166,17 +169,25 @@ class _MapPageState extends State<MapPage> {
   void autoCompleteSearch(String value) async {
     try {
       if (value != "") {
-        var result = await googlePlace.autocomplete.get(value).timeout(
-            Duration(seconds: 10)); // Adjust timeout duration as needed
+        var result = await googlePlace.autocomplete
+            .get(value,
+                origin: LatLon(MapPage.userLatitude, MapPage.userLongitude))
+            .timeout(
+                Duration(seconds: 15)); // Adjust timeout duration as needed
 
         if (result != null && result.predictions != null && mounted) {
           setState(() {
             predictions = result.predictions!;
 
             if (predictions.isNotEmpty && fromAudioCommand == true) {
+              SearchMethod.save_search_log(
+                  predictions[0].description.toString(),
+                  predictions[0].placeId.toString());
+
               TextToSpeech.speak("set destination to " +
-                  predictions[0].description.toString());
-              add_destination(0);
+                  predictions[0].description.toString() +
+                  ". double tap the screen. and. say Start navigate to start navigation");
+              add_destination(predictions[0].placeId.toString());
               fromAudioCommand = false;
               _endSearchFieldController.text = "";
               return;
@@ -184,6 +195,8 @@ class _MapPageState extends State<MapPage> {
             TextToSpeech.speak("Hold the screen to read the search result");
           });
         }
+      } else {
+        TextToSpeech.speak("where you want to go?");
       }
     } on TimeoutException catch (e) {
       print("TimeoutException: $e");
@@ -212,20 +225,26 @@ class _MapPageState extends State<MapPage> {
             Expanded(
               child: Stack(
                 children: [
-                  GoogleMapWidget(
-                    mapstyle: mapTheme,
+                  GestureDetector(
+                    onLongPress: () {
+                      TextToSpeech.speak(
+                          "this is a maps. double tap the screen to activate audio command");
+                    },
+                    child: GoogleMapWidget(
+                      mapstyle: mapTheme,
+                    ),
                   ),
                   MapPage.isStartNavigate
                       ? Container()
                       : ShareLocation.isTracking
                           ? Container()
                           : build_SearchBar(context),
-                  destination != null
-                      ? ButtonStartNavigateWidget(
-                          mapController: MapPage.mapController!,
-                          context: context,
-                        )
-                      : Container(),
+                  // destination != null
+                  //     ? ButtonStartNavigateWidget(
+                  //         mapController: MapPage.mapController!,
+                  //         context: context,
+                  //       )
+                  //     : Container(),
                   MapPage.isStartNavigate
                       ? NavigateBarWidget(
                           navigationText: navigationText,
@@ -486,50 +505,91 @@ class _MapPageState extends State<MapPage> {
             child: Row(
               children: [
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      controller: _endSearchFieldController,
-                      autofocus: false,
-                      focusNode: endFocusNode,
-                      style: const TextStyle(fontSize: 24),
-                      decoration: InputDecoration(
-                        hintText: "Search Here",
-                        hintStyle: const TextStyle(
-                            fontWeight: FontWeight.w500, fontSize: 22),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: const EdgeInsets.all(15),
-                        prefixIcon: const Icon(Icons.search, size: 32),
-                        suffixIcon: _endSearchFieldController.text.isNotEmpty
-                            ? IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    predictions = [];
-                                    _endSearchFieldController.clear();
-                                  });
-                                },
-                                icon: const Icon(Icons.clear_outlined),
-                              )
-                            : null,
+                  child: GestureDetector(
+                    onLongPress: () {
+                      TextToSpeech.speak("Search bar");
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce!.cancel();
-                        _debounce =
-                            Timer(const Duration(milliseconds: 1000), () {
-                          if (value.isNotEmpty) {
-                            autoCompleteSearch(value);
-                          } else {
-                            setState(() {
-                              predictions = [];
-                              destination = null;
-                            });
-                          }
-                        });
-                      },
+                      child: TextField(
+                        controller: _endSearchFieldController,
+                        autofocus: false,
+                        focusNode: endFocusNode,
+                        style: const TextStyle(fontSize: 24),
+                        decoration: InputDecoration(
+                          hintText: "Search Here",
+                          hintStyle: const TextStyle(
+                              fontWeight: FontWeight.w500, fontSize: 22),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.all(15),
+                          prefixIcon:
+                              _endSearchFieldController.text.isNotEmpty ||
+                                      searchLogs.isNotEmpty
+                                  ? IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          predictions = [];
+                                          _endSearchFieldController.clear();
+                                          searchLogs = {};
+                                        });
+                                      },
+                                      icon: const Icon(
+                                        Icons.arrow_back_ios_new_outlined,
+                                        size: 25,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.search,
+                                      size: 32,
+                                    ),
+                          // suffixIcon: _endSearchFieldController.text.isNotEmpty
+                          //     ? IconButton(
+                          //         onPressed: () {
+                          //           setState(() {
+                          //             predictions = [];
+                          //             _endSearchFieldController.clear();
+                          //           });
+                          //         },
+                          //         icon: const Icon(Icons.clear_outlined),
+                          //       )
+                          //     : null,
+                        ),
+                        onChanged: (value) {
+                          if (_debounce?.isActive ?? false) _debounce!.cancel();
+                          _debounce =
+                              Timer(const Duration(milliseconds: 1000), () {
+                            if (value.isNotEmpty) {
+                              autoCompleteSearch(value);
+                            } else {
+                              setState(() {
+                                predictions = [];
+                                destination = null;
+                              });
+                            }
+                          });
+                        },
+                        onTap: () async {
+                          TextToSpeech.speak(
+                              "Clicking search bar. search where you want to go. and hold the screen to read the search result. otherwise. you can double tap the screen to activate the audio command to set your destination");
+                          searchLogs = await SearchMethod.getSearchLogs();
+                          // Iterate through the search logs
+                          searchLogs.forEach((log, placeId) {
+                            print("Search Log: $log, Place ID: $placeId");
+                            // Here you can perform any desired actions with the search log and place ID
+                          });
+                          print("search log $searchLogs");
+                          // Iterate through the search logs
+                          searchLogs.forEach((log, placeId) {
+                            print("Search Log: $log, Place ID: $placeId");
+                            // Here you can perform any desired actions with the search log and place ID
+                          });
+                          setState(() {});
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -552,31 +612,154 @@ class _MapPageState extends State<MapPage> {
               padding: EdgeInsets.zero,
               itemCount: predictions.length,
               itemBuilder: (context, index) {
+                String formattedDistance;
+                if (predictions[index].distanceMeters! < 1000) {
+                  // Display distance in meters format
+                  formattedDistance =
+                      predictions[index].distanceMeters.toString() + " m";
+                } else {
+                  // Convert distance from meters to kilometers and format it as "0.0 km"
+                  formattedDistance =
+                      (predictions[index].distanceMeters! / 1000.0)
+                              .toStringAsFixed(1) +
+                          " km";
+                }
+
                 return GestureDetector(
                   onLongPress: () {
                     print("res" + predictions[index].description.toString());
                     TextToSpeech.speak(
                         predictions[index].description.toString());
                   },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.1,
+                    child: Column(
+                      children: [
+                        Container(
+                          color: Colors.white,
+                          child: ListTile(
+                            title: Row(
+                              children: [
+                                Stack(
+                                  children: [
+                                    Column(
+                                      children: [
+                                        CircleAvatar(
+                                          backgroundColor: Colors.white,
+                                          child: Icon(
+                                            Icons.location_on,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        buildDistanceWidget(
+                                            predictions[index].distanceMeters!)
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    predictions[index].description.toString(),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Call this function where you want to save the search log
+                            onTap: () async {
+                              await TextToSpeech.speak("set destination to " +
+                                  predictions[index].description.toString() +
+                                  ". double tap the screen. and. say Start navigate to start navigation");
+                              await SearchMethod.save_search_log(
+                                predictions[index].description.toString(),
+                                predictions[index].placeId.toString(),
+                              );
+                              add_destination(
+                                predictions[index].placeId.toString(),
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          height: 1,
+                          color: Colors.grey.withOpacity(0.5),
+                        ), // Add this line to include a separator
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        if (searchLogs.isNotEmpty && _endSearchFieldController.text == "")
+          Container(
+            color: Colors.white,
+            width: MediaQuery.of(context).size.width * 1,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  right: 10, left: 25, top: 10, bottom: 0),
+              child: Text(
+                "Recent",
+                style: TextStyle(
+                    fontSize: 12, // Adjust the font size as needed
+
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        if (searchLogs.isNotEmpty && _endSearchFieldController.text == "")
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: searchLogs.length,
+              itemBuilder: (context, index) {
+                // Get the key and value from the searchLogs map
+                String log = searchLogs.keys.toList()[index];
+                String placeId = searchLogs.values.toList()[index];
+
+                return GestureDetector(
+                  onLongPress: () {
+                    print("res" + log);
+                    TextToSpeech.speak(log);
+                  },
                   child: Column(
                     children: [
                       Container(
                         color: Colors.white,
                         child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Icon(
-                              Icons.location_on,
-                              color: Colors.black,
-                            ),
+                          title: Row(
+                            children: [
+                              Stack(
+                                children: [
+                                  Column(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        child: Icon(
+                                          Icons.access_time_rounded,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Expanded(
+                                child: Text(
+                                  log,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                          title: Text(
-                            predictions[index].description.toString(),
-                          ),
-                          onTap: () {
-                            TextToSpeech.speak("set destination to " +
-                                predictions[index].description.toString());
-                            add_destination(index);
+
+                          // Call this function where you want to save the search log
+                          onTap: () async {
+                            await TextToSpeech.speak(
+                                "set destination to $log. double tap the screen. and. say Start navigate to start navigation");
+                            await SearchMethod.save_search_log(log, placeId);
+                            add_destination(placeId);
                           },
                         ),
                       ),
@@ -595,15 +778,39 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
+  Widget buildDistanceWidget(int distanceMeters) {
+    if (distanceMeters < 1000) {
+      // Display distance in meters format
+      return Text(
+        distanceMeters.toString() + " m",
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.grey,
+        ),
+      );
+    } else if (distanceMeters < 10000) {
+      // Convert distance from meters to kilometers and format it as "0.0 km"
+      String formattedDistance =
+          (distanceMeters / 1000.0).toStringAsFixed(1) + " km";
+      return Text(
+        formattedDistance,
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.grey,
+        ),
+      );
+    } else {
+      // If it's too far, just show the icon
+      return SizedBox.shrink(); // This returns an empty widget
+    }
+  }
+
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
-  void add_destination(int index) async {
+  void add_destination(String placeId) async {
     MapPage.googleMapDetail['photoReference'] =
         []; // remove all photo in here if any
     final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
         'assets/markers/destination_fill.png', 100);
-
-    final placeId = predictions[index].placeId!;
-    // predictions = [];
 
     final details = await googlePlace.details.get(placeId);
     MapPage.googleMapDetail['name'] = details!.result!.name.toString();
@@ -1068,14 +1275,15 @@ class _MapPageState extends State<MapPage> {
               });
             } else if (_text.contains("stop") || _text.contains("exit")) {
               if (MapPage.isStartNavigate) {
-                MapPage.isStartNavigate = false;
                 TextToSpeech.speak("Exiting navigation");
+                MapPage.isStartNavigate = false;
                 return;
               }
               TextToSpeech.speak(
-                  "To exit navigate, you have to start navigate first");
+                  "To exit navigate. you have to start navigate first");
             } else if (_text.contains("start")) {
-              if (!MapPage.isStartNavigate && predictions.isNotEmpty) {
+              if (!MapPage.isStartNavigate &&
+                  MapPage.destinationCoordinate.latitude != 0) {
                 MapPage.isStartNavigate = true;
                 NavigateMethod().startNavigate(
                   MapPage.mapController,
@@ -1084,6 +1292,10 @@ class _MapPageState extends State<MapPage> {
                 TextToSpeech.speak("Start navigation");
 
                 return;
+              } else {
+                TextToSpeech.speak(
+                    "You are on the navigation right now. your destination is set. to. " +
+                        MapPage.googleMapDetail['name'].toString());
               }
             } else if (_text.contains("in front")) {
               // Iterate through the detection result to count objects in front

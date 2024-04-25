@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:audiovision/utils/text_to_speech.dart';
+import 'package:vibration/vibration.dart';
 
 class OnboardingView extends StatefulWidget {
   const OnboardingView({Key? key}) : super(key: key);
@@ -114,9 +115,6 @@ class _OnboardingViewState extends State<OnboardingView> {
       children: [
         TextButton(
           onPressed: () {
-            if (isSuccessTryMicrophone) {
-              pageController.jumpToPage(controller.items.length - 1);
-            }
             pageController.jumpToPage(2);
           },
           child: const Text("Skip"),
@@ -146,32 +144,43 @@ class _OnboardingViewState extends State<OnboardingView> {
   }
 
   Widget _buildGetStartedButton() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: primaryColor,
-      ),
-      width: MediaQuery.of(context).size.width * 0.9,
-      height: 55,
-      child: TextButton(
-        onPressed: () async {
-          final prefs = await SharedPreferences.getInstance();
-          prefs.setBool("onboarding", true);
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MapPage()),
-          );
-        },
-        child: const Text(
-          "Get started",
-          style: TextStyle(color: Colors.white),
+    return GestureDetector(
+      onLongPress: () {
+        TextToSpeech.speak("Get Started Button");
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: primaryColor,
+        ),
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: 55,
+        child: TextButton(
+          onPressed: () async {
+            TextToSpeech.speak("Let's go");
+            final prefs = await SharedPreferences.getInstance();
+            prefs.setBool("onboarding", true);
+            if (!mounted) return;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => MapPage()),
+            );
+          },
+          child: const Text(
+            "Get started",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildPageContent(int index) {
+    // Call startVibrationTimer when the index is 4 and the timer is not yet started
+    if (index == 4) {
+      Vibration.vibrate();
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -179,6 +188,11 @@ class _OnboardingViewState extends State<OnboardingView> {
         const SizedBox(height: 15),
         GestureDetector(
           onLongPress: () {
+            if (index == 3) {
+              TextToSpeech.speak(
+                  "Nice. you have tried the voice reader. swipe to the right to continue");
+              return;
+            }
             TextToSpeech.speak(controller.items[index].title);
           },
           child: Text(
@@ -189,6 +203,11 @@ class _OnboardingViewState extends State<OnboardingView> {
         const SizedBox(height: 30),
         GestureDetector(
           onLongPress: () {
+            if (index == 3) {
+              TextToSpeech.speak(
+                  "Nice. you have tried the voice reader. swipe to the right to continue");
+              return;
+            }
             TextToSpeech.speak(controller.items[index].descriptions);
           },
           child: Text(
@@ -200,6 +219,11 @@ class _OnboardingViewState extends State<OnboardingView> {
         const SizedBox(height: 30),
         GestureDetector(
           onLongPress: () {
+            if (index == 3) {
+              TextToSpeech.speak(
+                  "Nice. you have tried the voice reader. swipe to the right to continue");
+              return;
+            }
             TextToSpeech.speak(controller.items[index].tag);
           },
           child: Text(
@@ -232,6 +256,10 @@ class _OnboardingViewState extends State<OnboardingView> {
         TextToSpeech.speak(
             "If there are vibrations, it means there is a dangerous object. Be careful");
         break;
+      case 5:
+        TextToSpeech.speak(
+            "Nice. you have finished the tutorial. Ready to go?. Let's make the first step with us. and go on a journey. Let's get started");
+        break;
     }
   }
 
@@ -251,6 +279,7 @@ class _OnboardingViewState extends State<OnboardingView> {
             if (_text.isNotEmpty &&
                 !_text.contains("audio") &&
                 !_text.contains("command")) {
+              isSuccessTryMicrophone = true;
               TextToSpeech.speak(
                   "Nice, you have tried the voice command. swipe to continue");
             } else {
