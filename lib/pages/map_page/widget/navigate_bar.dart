@@ -1,3 +1,4 @@
+import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 
 class NavigateBarWidget extends StatelessWidget {
@@ -15,76 +16,81 @@ class NavigateBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.2,
-      padding: EdgeInsets.only(
-          top: 20.0,
-          left: 20.0,
-          right: 20.0,
-          bottom: 10), // Adjust the padding as needed
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(7)),
-        color: Color.fromARGB(255, 24, 24, 24),
-        // color: Color.fromARGB(255, 255, 255, 255),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // ImageIcon(
-          //   AssetImage('assets/images/directions/dturn-left.png'),
-          // ),
-          // Tab(
-          //   text: 'Image',
-          //   icon: Image.asset(
-          //     'assets/images/directions/turn-left.png',
-          //     height: 44,
-          //     fit: BoxFit.cover,
-          //   ),
-          // ),
-          getDirectionImage(manuever),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.7,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(
-                  child: Text(
-                    distance,
-                    style: TextStyle(color: Colors.white70),
-                    overflow: TextOverflow
-                        .ellipsis, // Optional: specify overflow behavior
+    return GestureDetector(
+      onLongPress: () {
+        TextToSpeech.speak("in" + distance + ", " + instruction);
+      },
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.2,
+        padding: EdgeInsets.only(
+            top: 20.0,
+            left: 20.0,
+            right: 20.0,
+            bottom: 10), // Adjust the padding as needed
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(7)),
+          color: Color.fromARGB(255, 24, 24, 24),
+          // color: Color.fromARGB(255, 255, 255, 255),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // ImageIcon(
+            //   AssetImage('assets/images/directions/dturn-left.png'),
+            // ),
+            // Tab(
+            //   text: 'Image',
+            //   icon: Image.asset(
+            //     'assets/images/directions/turn-left.png',
+            //     height: 44,
+            //     fit: BoxFit.cover,
+            //   ),
+            // ),
+            getDirectionImage(manuever),
+            Container(
+              width: MediaQuery.of(context).size.width * 0.7,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Text(
+                      distance,
+                      style: TextStyle(color: Colors.white70),
+                      overflow: TextOverflow
+                          .ellipsis, // Optional: specify overflow behavior
+                    ),
                   ),
-                ),
-                Flexible(
-                  child: Text(
-                    instruction,
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                    overflow: TextOverflow
-                        .ellipsis, // Optional: specify overflow behavior
+                  Flexible(
+                    child: Text(
+                      instruction,
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                      overflow: TextOverflow
+                          .ellipsis, // Optional: specify overflow behavior
+                    ),
                   ),
-                ),
-              ],
-            ),
-          )
+                ],
+              ),
+            )
 
-          // buildArrowDirectionContainer(manuever, distance, "turn-left"),
-          // Expanded(
-          //   child:
-          //       NowNavigationTextWidget(text: navigationText, fontSize: 18.0),
-          // ),
-          // Container(
-          //   decoration: const BoxDecoration(
-          //     shape: BoxShape.circle,
-          //     color: Color.fromARGB(255, 255, 255, 255),
-          //   ),
-          //   padding: EdgeInsets.all(8.0),
-          //   child: Icon(
-          //     Icons.mic,
-          //     color: Colors.blue[400],
-          //   ),
-          // ),
-        ],
+            // buildArrowDirectionContainer(manuever, distance, "turn-left"),
+            // Expanded(
+            //   child:
+            //       NowNavigationTextWidget(text: navigationText, fontSize: 18.0),
+            // ),
+            // Container(
+            //   decoration: const BoxDecoration(
+            //     shape: BoxShape.circle,
+            //     color: Color.fromARGB(255, 255, 255, 255),
+            //   ),
+            //   padding: EdgeInsets.all(8.0),
+            //   child: Icon(
+            //     Icons.mic,
+            //     color: Colors.blue[400],
+            //   ),
+            // ),
+          ],
+        ),
       ),
     );
   }

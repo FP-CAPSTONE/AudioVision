@@ -13,7 +13,7 @@ class ShareLocation {
 
 //tracking
   static bool isTracking = false;
-  static String? trackingId;
+  static String? trackingEmail;
   static String? trackingUserName;
   static String? trackingDestinationLocationName;
   static LatLng? trackUserCoordinate;
@@ -29,7 +29,7 @@ class ShareLocation {
 
     if (!snapshot.exists) {
       // ID does not exist, set the data
-      dbRef.child(AuthService.userId.toString()).set({
+      dbRef.child(AuthService.userEmail.toString()).set({
         'name': AuthService.userName,
         'userLocation': {
           "lat": userLocation.latitude,
@@ -54,7 +54,7 @@ class ShareLocation {
   static updateUserLocation(LatLng userLocation) {
     print("update shared location");
     // Mengirim data ke Firebase Realtime Database
-    dbRef.child(AuthService.userId.toString()).update({
+    dbRef.child(AuthService.userEmail.toString()).update({
       'userLocation': {
         "lat": userLocation.latitude,
         "long": userLocation.longitude
@@ -63,14 +63,14 @@ class ShareLocation {
   }
 
   static getOtherUserLocation() async {
-    // Check if trackingId is empty
-    if (trackingId == null || trackingId!.isEmpty) {
+    // Check if trackingEmail is empty
+    if (trackingEmail == null || trackingEmail!.isEmpty) {
       print('Tracking ID is empty.');
       // Handle empty tracking ID here (e.g., show an error message)
       return;
     }
 
-    final snapshot = await dbRef.child(trackingId!).get();
+    final snapshot = await dbRef.child(trackingEmail!).get();
 
     if (snapshot.exists) {
       // Data exists, you can access it using snapshot.value
@@ -113,7 +113,7 @@ class ShareLocation {
   static stopTracking() {
     isTracking = false;
 
-    trackingId = null;
+    trackingEmail = null;
     trackUserCoordinate = null;
     trackDestinationCoordinate = null;
     PolylineMethod(stopTracking)

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class GoogleMapWidget extends StatefulWidget {
+  final String mapstyle;
+
+  GoogleMapWidget({required this.mapstyle});
   @override
   _GoogleMapWidgetState createState() => _GoogleMapWidgetState();
 }
@@ -19,10 +22,11 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   Widget _buildMap() {
     return GoogleMap(
       polylines: Set<Polyline>.of(MapPage.polylines.values),
-      mapType: MapType.terrain,
       initialCameraPosition: MapPage.cameraPosition,
       onMapCreated: (controller) {
+        print(widget.mapstyle);
         MapPage.mapController = controller;
+        MapPage.mapController!.setMapStyle(widget.mapstyle); //for map style
         MapPage.mapController!.animateCamera(
           CameraUpdate.newCameraPosition(MapPage.cameraPosition),
         );

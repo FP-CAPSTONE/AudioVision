@@ -70,6 +70,8 @@ dependencies:
   firebase_database:
   cloud_firestore: 
   smooth_page_indicator: ^1.1.0
+  flutter_rating_bar:
+  carousel_slider:
 
 dev_dependencies:
   flutter_test:
@@ -102,17 +104,16 @@ flutter:
     - assets/model/labels.txt
     # - assets/model/mymodel_last_yv8s.tflite
     # - assets/model/my_7yv8n.tflite
-    - assets/model/L_1kyv8n_float32.tflite
+    # - assets/model/L_1kyv8n_float32.tflite
     # - assets/model/last_float16yolov8n7k.tflite
+    - assets/model/yolov8n_float32.tflite
     
     - assets/model/mymodel_seg-n400.tflite
     - .env
     - assets/model/yolov5n.tflite
     - assets/model/yolov8n-seg_float32.tflite
     - assets/model/transfer-1.tflite
-    - assets/maptheme/retro_map.json
-    - assets/maptheme/night_map.json
-    - assets/maptheme/standard_map.json
+    - assets/maptheme/
 
     #asset image
     - assets/image/

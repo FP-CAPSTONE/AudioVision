@@ -56,7 +56,7 @@ class ScanController extends GetxController {
     // Store the subscription returned by accelerometerEvents.listen()
     _accelerometerSubscription =
         accelerometerEvents.listen((AccelerometerEvent event) {
-      print(event);
+      // print(event);
       // if the phone is not facing forward
       if (event.y < 0 && canNotify) {
         Vibration.vibrate();
@@ -111,9 +111,9 @@ class ScanController extends GetxController {
     //flutter vision
     await vision.loadYoloModel(
       labels: 'assets/model/labels.txt',
-      modelPath: 'assets/model/yolov8n-seg_float32.tflite',
+      modelPath: 'assets/model/yolov8n_float32.tflite',
       // modelPath: 'assets/model/transfer-1.tflite',
-      modelVersion: "yolov8seg",
+      modelVersion: "yolov8",
       numThreads: 5,
       quantization: true,
       useGpu: false,
@@ -142,7 +142,7 @@ class ScanController extends GetxController {
 
       if (canNotify) {
         Vibration.vibrate();
-
+        print(detectionResult);
         TextToSpeech.speak(detectionResult[0]['tag']);
 
         // Set canNotify to false to prevent further notifications
