@@ -345,81 +345,105 @@ class _MapPageState extends State<MapPage> {
                                   child: Text('Stop Tracking'),
                                 )
                               : MapPage.destinationCoordinate.latitude == 0
-                                  ? ElevatedButton(
-                                      onPressed: () {
-                                        TextEditingController
-                                            _userEmailController =
-                                            TextEditingController();
-                                        // Show a dialog to input user ID
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text('Enter User ID'),
-                                              content: TextField(
-                                                controller:
-                                                    _userEmailController,
-                                                decoration: InputDecoration(
-                                                  hintText: 'Enter User ID',
-                                                ),
-                                              ),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context)
-                                                        .pop(); // Close the dialog
-                                                  },
-                                                  child: Text('Cancel'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    // Get the entered user ID
-                                                    String userEmail =
-                                                        _userEmailController
-                                                            .text
-                                                            .trim(); // Trim any leading/trailing spaces
-
-                                                    // Check if the entered user ID is empty
-                                                    if (userEmail.isEmpty) {
-                                                      TextToSpeech.speak(
-                                                          "Please enter a User ID.");
-                                                      // Show an error message indicating that the User ID cannot be empty
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(
-                                                              SnackBar(
-                                                        content: const Text(
-                                                            'Please enter a User Email.'),
-                                                      ));
-                                                      return; // Return without further action
-                                                    }
-
-                                                    // Perform actions with the entered user ID
-                                                    print(
-                                                        'User ID entered: $userEmail');
-                                                    ShareLocation
-                                                            .trackingEmail =
-                                                        userEmail;
-                                                    ShareLocation
-                                                        .getOtherUserLocation();
-
-                                                    // Close the dialog
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: Text('OK'),
-                                                ),
-                                              ],
+                                  ? Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                      ),
+                                      width: MediaQuery.of(context).size.width *
+                                          0.9,
+                                      height: 55,
+                                      child: Material(
+                                        // Wrap ElevatedButton with Material
+                                        borderRadius: BorderRadius.circular(
+                                            8), // Apply the same border radius
+                                        color: Color.fromARGB(255, 0, 0,
+                                            0), // Apply the same color
+                                        child: InkWell(
+                                          // Wrap ElevatedButton with InkWell for ripple effect
+                                          borderRadius: BorderRadius.circular(
+                                              8), // Apply the same border radius
+                                          onTap: () {
+                                            TextEditingController
+                                                _userEmailController =
+                                                TextEditingController();
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title:
+                                                      Text('Enter User Email'),
+                                                  content: TextField(
+                                                    controller:
+                                                        _userEmailController,
+                                                    decoration: InputDecoration(
+                                                      hintText:
+                                                          'Enter User Email',
+                                                    ),
+                                                  ),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                      child: Text('Cancel'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        String userEmail =
+                                                            _userEmailController
+                                                                .text
+                                                                .trim();
+                                                        if (userEmail.isEmpty) {
+                                                          // Handle empty email
+                                                          TextToSpeech.speak(
+                                                              "Please enter a User Email.");
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                              content: const Text(
+                                                                  'Please enter a User Email.'),
+                                                            ),
+                                                          );
+                                                          return;
+                                                        }
+                                                        // Perform actions with the entered user ID
+                                                        print(
+                                                            'User ID entered: $userEmail');
+                                                        ShareLocation
+                                                                .trackingEmail =
+                                                            userEmail;
+                                                        ShareLocation
+                                                            .getOtherUserLocation();
+                                                        // Close the dialog
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                      child: Text('OK'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
                                             );
                                           },
-                                        );
-                                      },
-                                      child: const Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(width: 10),
-                                          Text('Tracking Location',
-                                              style: TextStyle(fontSize: 16)),
-                                        ],
+                                          child: const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal:
+                                                    10), // Adjust padding to match the original design
+                                            child: Center(
+                                              child: Text(
+                                                'Tracking Location',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors
+                                                      .white, // Set text color to white
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     )
                                   : Container(),
@@ -534,24 +558,34 @@ class _MapPageState extends State<MapPage> {
                     TextToSpeech.speak(
                         predictions[index].description.toString());
                   },
-                  child: Container(
-                    color: Colors.white,
-                    child: ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(
-                          Icons.location_on,
-                          color: Colors.white,
+                  child: Column(
+                    children: [
+                      Container(
+                        color: Colors.white,
+                        child: ListTile(
+                          leading: const CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons.location_on,
+                              color: Colors.black,
+                            ),
+                          ),
+                          title: Text(
+                            predictions[index].description.toString(),
+                          ),
+                          onTap: () {
+                            TextToSpeech.speak("set destination to " +
+                                predictions[index].description.toString());
+                            add_destination(index);
+                          },
                         ),
                       ),
-                      title: Text(
-                        predictions[index].description.toString(),
-                      ),
-                      onTap: () {
-                        TextToSpeech.speak("set destination to " +
-                            predictions[index].description.toString());
-                        add_destination(index);
-                      },
-                    ),
+                      Container(
+                        width: double.infinity,
+                        height: 1,
+                        color: Colors.grey.withOpacity(0.5),
+                      ), // Add this line to include a separator
+                    ],
                   ),
                 );
               },

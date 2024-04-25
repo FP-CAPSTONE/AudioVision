@@ -25,7 +25,7 @@ class ShareLocation {
   static shareUserLocation(LatLng userLocation, LatLng destinationLocation,
       String destinationLocationName) async {
     isShared = true;
-    final snapshot = await dbRef.child(AuthService.userId.toString()).get();
+    final snapshot = await dbRef.child(AuthService.userEmail.toString()).get();
 
     if (!snapshot.exists) {
       // ID does not exist, set the data
@@ -65,7 +65,7 @@ class ShareLocation {
   static getOtherUserLocation() async {
     // Check if trackingEmail is empty
     if (trackingEmail == null || trackingEmail!.isEmpty) {
-      print('Tracking ID is empty.');
+      print('Tracking EMAIL is empty.');
       // Handle empty tracking ID here (e.g., show an error message)
       return;
     }

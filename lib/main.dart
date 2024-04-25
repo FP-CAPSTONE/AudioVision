@@ -5,6 +5,7 @@ import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,14 +30,15 @@ class MyApp extends StatelessWidget {
     TextToSpeech.speak(
         "Welcome To Audio Vision. We will help you and assist you to go to somewhere. Swipe to the right to continue");
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 21, 20, 22)),
-        useMaterial3: true,
+        colorScheme:
+            ColorScheme.fromSeed(seedColor: Colors.black, primary: Colors.black
+                // ···
+                ),
       ),
-      //home: onboarding ? const MapPage() : const OnboardingView(),
-      home: const OnboardingView(),
+      home: OnboardingView(),
     );
   }
 }
