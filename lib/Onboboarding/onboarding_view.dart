@@ -51,9 +51,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                         }
                         pageController.jumpToPage(2);
                       },
-                      child: currentPageIndex != 2 || isSuccessTryMicrophone
-                          ? const Text("Skip")
-                          : Text("")),
+                      child: const Text("Skip")),
 
                   //Indicator
                   SmoothPageIndicator(
@@ -76,9 +74,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                             duration: const Duration(milliseconds: 600),
                             curve: Curves.easeIn);
                       },
-                      child: currentPageIndex != 2 || isSuccessTryMicrophone
-                          ? const Text("Next")
-                          : Text("")),
+                      child: const Text("Next")),
                 ],
               ),
       ),

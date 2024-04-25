@@ -1,4 +1,5 @@
 import 'package:audiovision/pages/map_page/map.dart';
+import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -90,40 +91,50 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                           ),
                           Row(
                             children: [
-                              Container(
-                                height: 50,
-                                child: ElevatedButton(
-                                    onPressed: () {
-                                      widget.callback();
-                                    },
-                                    style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                        Color.fromARGB(255, 36, 36, 36),
+                              GestureDetector(
+                                onLongPress: () {
+                                  TextToSpeech.speak("Share Button");
+                                },
+                                child: Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        widget.callback(context);
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all<Color>(
+                                          Color.fromARGB(255, 36, 36, 36),
+                                        ),
                                       ),
-                                    ),
-                                    child: Icon(
-                                      Icons.share,
-                                      color: Colors.white,
-                                    )),
+                                      child: Icon(
+                                        Icons.share,
+                                        color: Colors.white,
+                                      )),
+                                ),
                               ),
                               const SizedBox(
                                 width: 5,
                               ),
-                              Container(
-                                height: 50,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    MapPage.isStartNavigate = false;
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Colors.red),
-                                  ),
-                                  child: Text(
-                                    "Exit",
-                                    style: TextStyle(color: Colors.white),
+                              GestureDetector(
+                                onLongPress: () {
+                                  TextToSpeech.speak("Exit Button");
+                                },
+                                child: Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      MapPage.isStartNavigate = false;
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.red),
+                                    ),
+                                    child: Text(
+                                      "Exit",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 ),
                               )
@@ -148,20 +159,25 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                     var maneuver = step['maneuver'] != null
                         ? step['maneuver']
                         : "continue";
-                    return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
+                    return GestureDetector(
+                      onLongPress: () {
+                        TextToSpeech.speak(step['instructions']);
+                      },
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        title: Text(
+                          step['instructions'],
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${step['distance']} - ${step['duration']}',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        leading: getDirectionImage(maneuver),
                       ),
-                      title: Text(
-                        step['instructions'],
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        '${step['distance']} - ${step['duration']}' + maneuver,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      leading: getDirectionImage(maneuver),
                     );
                   },
                 ),

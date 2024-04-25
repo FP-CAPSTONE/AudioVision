@@ -5,6 +5,89 @@ import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
 
 class CameraView {
+  Map<String, Color> classColorMap = {
+    'person': Colors.blue,
+    'bicycle': Colors.red,
+    'car': Colors.green,
+    'motorcycle': Colors.orange,
+    'airplane': Colors.yellow,
+    'bus': Colors.purple,
+    'train': Colors.teal,
+    'truck': Colors.deepOrange,
+    'boat': Colors.indigo,
+    'traffic light': Colors.amber,
+    'fire hydrant': Colors.brown,
+    'stop sign': Colors.redAccent,
+    'parking meter': Colors.lightBlue,
+    'bench': Colors.lime,
+    'bird': Colors.cyan,
+    'cat': Colors.pink,
+    'dog': Colors.deepPurple,
+    'horse': Colors.blueGrey,
+    'sheep': Colors.deepOrangeAccent,
+    'cow': Colors.lightGreen,
+    'elephant': Colors.purpleAccent,
+    'bear': Colors.deepPurpleAccent,
+    'zebra': Colors.yellowAccent,
+    'giraffe': Colors.limeAccent,
+    'backpack': Colors.tealAccent,
+    'umbrella': Colors.blueAccent,
+    'handbag': Colors.redAccent,
+    'tie': Colors.greenAccent,
+    'suitcase': Colors.deepOrangeAccent,
+    'frisbee': Colors.amberAccent,
+    'skis': Colors.indigoAccent,
+    'snowboard': Colors.blueAccent,
+    'sports ball': Colors.redAccent,
+    'kite': Colors.orangeAccent,
+    'baseball bat': Colors.yellowAccent,
+    'baseball glove': Colors.limeAccent,
+    'skateboard': Colors.deepOrangeAccent,
+    'surfboard': Colors.indigoAccent,
+    'tennis racket': Colors.blueAccent,
+    'bottle': Colors.greenAccent,
+    'wine glass': Colors.pinkAccent,
+    'cup': Colors.tealAccent,
+    'fork': Colors.amberAccent,
+    'knife': Colors.deepOrangeAccent,
+    'spoon': Colors.lightGreenAccent,
+    'bowl': Colors.deepPurpleAccent,
+    'banana': Colors.yellowAccent,
+    'apple': Colors.lightGreenAccent,
+    'sandwich': Colors.redAccent,
+    'orange': Colors.orangeAccent,
+    'broccoli': Colors.greenAccent,
+    'carrot': Colors.deepOrangeAccent,
+    'hot dog': Colors.redAccent,
+    'pizza': Colors.orangeAccent,
+    'donut': Colors.pinkAccent,
+    'cake': Colors.purpleAccent,
+    'chair': Colors.tealAccent,
+    'couch': Colors.deepOrangeAccent,
+    'potted plant': Colors.greenAccent,
+    'bed': Colors.blueAccent,
+    'dining table': Colors.redAccent,
+    'toilet': Colors.yellowAccent,
+    'tv': Colors.redAccent,
+    'laptop': Colors.blueAccent,
+    'mouse': Colors.grey,
+    'remote': Colors.indigoAccent,
+    'keyboard': Colors.orangeAccent,
+    'cell phone': Colors.greenAccent,
+    'microwave': Colors.redAccent,
+    'oven': Colors.orangeAccent,
+    'toaster': Colors.yellowAccent,
+    'sink': Colors.blueAccent,
+    'refrigerator': Colors.lightGreenAccent,
+    'book': Colors.deepPurpleAccent,
+    'clock': Colors.orangeAccent,
+    'vase': Colors.yellowAccent,
+    'scissors': Colors.redAccent,
+    'teddy bear': Colors.pinkAccent,
+    'hair drier': Colors.indigoAccent,
+    'toothbrush': Colors.blueAccent,
+  };
+
   Widget cameraView(context) {
     final Size size = MediaQuery.of(context).size;
 
@@ -15,20 +98,29 @@ class CameraView {
         init: ScanController(),
         builder: (controller) {
           return controller.isCameraInitialized.value
-              ? Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    AspectRatio(
-                      aspectRatio:
-                          controller.cameraController!.value.aspectRatio,
-                      child: CameraPreview(controller.cameraController!),
-                    ),
-                    ...displayBoxesAndPolygonsAroundRecognizedObjects(
-                      size,
-                      controller.detectionResult,
-                      controller.cameraImage,
-                    ),
-                  ],
+              ? LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Calculate the aspect ratio of the camera view
+                    double aspectRatio =
+                        constraints.maxWidth / constraints.maxHeight;
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        AspectRatio(
+                          aspectRatio: aspectRatio,
+                          child: CameraPreview(controller.cameraController!),
+                        ),
+                        ...displayBoxesAndPolygonsAroundRecognizedObjects(
+                          Size(
+                              constraints.maxWidth,
+                              constraints
+                                  .maxHeight), // Pass the size to your display function
+                          controller.detectionResult,
+                          controller.cameraImage,
+                        ),
+                      ],
+                    );
+                  },
                 )
               : const Center(
                   child: CircularProgressIndicator(),
@@ -54,21 +146,21 @@ class CameraView {
       // TextToSpeech.speak("${result['tag']}");
       print("resultttttttttttttttttts " + result.toString());
 
-      List<Map<String, double>> polygons = (result['polygons'] as List?)
-              ?.map<Map<String, double>>(
-                  (item) => (item as Map?)?.cast<String, double>() ?? {})
-              .toList() ??
-          [];
+      // List<Map<String, double>> polygons = (result['polygons'] as List?)
+      //         ?.map<Map<String, double>>(
+      //             (item) => (item as Map?)?.cast<String, double>() ?? {})
+      //         .toList() ??
+      //     [];
 
-      List<Offset> points = polygons
-          .map((poly) => Offset(poly['x']! * factorX, poly['y']! * factorY))
-          .toList();
+      // List<Offset> points = polygons
+      //     .map((poly) => Offset(poly['x']! * factorX, poly['y']! * factorY))
+      //     .toList();
 
       return Stack(
         children: [
-          CustomPaint(
-            painter: PolygonPainter(points, Colors.purple, 2.0),
-          ),
+          // CustomPaint(
+          //   painter: PolygonPainter(points, Colors.purple, 2.0),
+          // ),
           Positioned(
             left: result["box"][0] * factorX,
             top: result["box"][1] * factorY,
@@ -77,14 +169,20 @@ class CameraView {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                border: Border.all(color: Colors.pink, width: 2.0),
+                border: Border.all(
+                  color: classColorMap[result['tag']] ??
+                      Colors.grey, // Use pink as default if no color is found
+                  width: 2.0,
+                ),
               ),
               child: Text(
                 "${result['tag']} ${(result['box'][4] * 100).toStringAsFixed(0)}%",
                 style: TextStyle(
-                  background: Paint()..color = colorPick,
+                  background: Paint()
+                    ..color = classColorMap[result['tag']] ??
+                        Colors.grey, // Use grey as default if no color is found
                   color: Colors.white,
-                  fontSize: 18.0,
+                  fontSize: 10.0,
                 ),
               ),
             ),

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
+import 'package:audiovision/pages/map_page/widget/buttom_sheet_detail_ocation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -29,7 +30,10 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 // ned to change the class name, there are two location service
-import 'package:sensors_plus/sensors_plus.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:vibration/vibration.dart';
+
+import '../setting_page/setting.dart';
 
 class MapPage extends StatefulWidget {
   //public variable
@@ -46,6 +50,14 @@ class MapPage extends StatefulWidget {
   static List<dynamic> allSteps = [];
   static Map<String, dynamic> endLocation = {};
 
+  static Map googleMapDetail = {
+    "name": "",
+    "rating": 0,
+    "ratingTotal": 0,
+    "type": [],
+    "openingHours": "",
+    "photoReference": [],
+  };
   static CameraPosition cameraPosition = CameraPosition(
     target: LatLng(
       userLatitude,
@@ -84,7 +96,6 @@ class _MapPageState extends State<MapPage> {
   static LocationService locationService = LocationService();
 
   late StreamSubscription _gyroscopeStreamSubscription;
-  double _compassHeading = 0;
 
   int stepIndex = 0;
   String navigationText = "";
@@ -96,6 +107,9 @@ class _MapPageState extends State<MapPage> {
     PolylineId id = const PolylineId("poly");
     setState(() => MapPage.polylines[id] = newPolylines);
   }
+
+  String mapTheme = "";
+  bool fromAudioCommand = false;
 
   @override
   void initState() {
@@ -114,6 +128,13 @@ class _MapPageState extends State<MapPage> {
     isLogin();
     print("init");
     _initCompass();
+
+    DefaultAssetBundle.of(context)
+        .loadString("assets/maptheme/custom_map.json")
+        // .loadString("assets/maptheme/night_map.json")
+        .then((value) {
+      mapTheme = value;
+    });
     //_checkDeviceOrientation();
   }
 
@@ -125,7 +146,6 @@ class _MapPageState extends State<MapPage> {
         double compassHeading = event.heading ?? 0;
 
         // Check if the difference between the current compass heading and the previous heading is greater than 5 degrees
-        print(compassHeading);
         if ((compassHeading - MapPage.compassHeading).abs() > 10) {
           MapPage.compassHeading = compassHeading;
 
@@ -144,12 +164,33 @@ class _MapPageState extends State<MapPage> {
   }
 
   void autoCompleteSearch(String value) async {
-    var result = await googlePlace.autocomplete.get(value);
-    if (result != null && result.predictions != null && mounted) {
-      // print(result.predictions!.first.description);
-      setState(() {
-        predictions = result.predictions!;
-      });
+    try {
+      if (value != "") {
+        var result = await googlePlace.autocomplete.get(value).timeout(
+            Duration(seconds: 10)); // Adjust timeout duration as needed
+
+        if (result != null && result.predictions != null && mounted) {
+          setState(() {
+            predictions = result.predictions!;
+
+            if (predictions.isNotEmpty && fromAudioCommand == true) {
+              TextToSpeech.speak("set destination to " +
+                  predictions[0].description.toString());
+              add_destination(0);
+              fromAudioCommand = false;
+              _endSearchFieldController.text = "";
+              return;
+            }
+            TextToSpeech.speak("Hold the screen to read the search result");
+          });
+        }
+      }
+    } on TimeoutException catch (e) {
+      print("TimeoutException: $e");
+      // Handle timeout gracefully, such as showing a message to the user
+    } catch (e) {
+      print("Error: $e");
+      // Handle other exceptions if needed
     }
   }
 
@@ -159,6 +200,10 @@ class _MapPageState extends State<MapPage> {
       body: GestureDetector(
         onDoubleTap: () {
           TextToSpeech.speak("Audio command activated, say something");
+          _isListening = false;
+          _text = '';
+          Vibration.vibrate();
+          _listen();
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -167,7 +212,9 @@ class _MapPageState extends State<MapPage> {
             Expanded(
               child: Stack(
                 children: [
-                  GoogleMapWidget(),
+                  GoogleMapWidget(
+                    mapstyle: mapTheme,
+                  ),
                   MapPage.isStartNavigate
                       ? Container()
                       : ShareLocation.isTracking
@@ -187,27 +234,69 @@ class _MapPageState extends State<MapPage> {
                           instruction: instruction,
                         )
                       : Container(),
+                  Center(
+                    child: _isListening
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // SizedBox(
+                              //     height: MediaQuery.of(context).size.height *
+                              //         0.), // Adjust the height as needed
+                              const Icon(
+                                Icons.mic,
+                                size: 50,
+                                color: Colors.red,
+                              ),
+                              SizedBox(
+                                  height:
+                                      10), // Add some spacing between the icon and text
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors
+                                      .grey, // Set your desired background color here
+                                  borderRadius: BorderRadius.circular(
+                                      8), // Optional: Add border radius to make it rounded
+                                ),
+                                padding: const EdgeInsets.all(
+                                    8), // Optional: Add padding around the text
+                                child: Text(
+                                  _text,
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors
+                                          .white), // Set text color if needed
+                                ),
+                              )
+                            ],
+                          )
+                        : SizedBox(),
+                  ),
+
                   MapPage.isStartNavigate
                       ? CustomBottomSheet(
                           callback: shareLocation,
                         )
+                      : Container(),
+                  !MapPage.isStartNavigate &&
+                          MapPage.destinationCoordinate.latitude != 0
+                      ? BottomSheetDetailLocation()
                       : Container(),
                   // NavigateBarWidget(
                   //   navigationText: "navigationText",
                   //   distance: "20 m",
                   //   manuever: "turn-left",
                   // ),
-                  // MapPage.isStartNavigate ? builCamera() : Container(),
+                  MapPage.isStartNavigate ? builCamera() : Container(),
                   // isStartNavigate
                   // ? Align(
                   //     alignment: Alignment.centerRight, child: cameraView())
-                  // : Container()
+                  // : Container(),
 
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
+                      const Expanded(
                         child: Stack(
                           children: [
                             // Your map widgets...
@@ -255,77 +344,85 @@ class _MapPageState extends State<MapPage> {
                                   },
                                   child: Text('Stop Tracking'),
                                 )
-                              : ElevatedButton(
-                                  onPressed: () {
-                                    TextEditingController _userIdController =
-                                        TextEditingController();
-                                    // Show a dialog to input user ID
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text('Enter User ID'),
-                                          content: TextField(
-                                            controller: _userIdController,
-                                            decoration: InputDecoration(
-                                              hintText: 'Enter User ID',
-                                            ),
-                                          ),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context)
-                                                    .pop(); // Close the dialog
-                                              },
-                                              child: Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                // Get the entered user ID
-                                                String userId = _userIdController
-                                                    .text
-                                                    .trim(); // Trim any leading/trailing spaces
+                              : MapPage.destinationCoordinate.latitude == 0
+                                  ? ElevatedButton(
+                                      onPressed: () {
+                                        TextEditingController
+                                            _userEmailController =
+                                            TextEditingController();
+                                        // Show a dialog to input user ID
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('Enter User ID'),
+                                              content: TextField(
+                                                controller:
+                                                    _userEmailController,
+                                                decoration: InputDecoration(
+                                                  hintText: 'Enter User ID',
+                                                ),
+                                              ),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context)
+                                                        .pop(); // Close the dialog
+                                                  },
+                                                  child: Text('Cancel'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    // Get the entered user ID
+                                                    String userEmail =
+                                                        _userEmailController
+                                                            .text
+                                                            .trim(); // Trim any leading/trailing spaces
 
-                                                // Check if the entered user ID is empty
-                                                if (userId.isEmpty) {
-                                                  TextToSpeech.speak(
-                                                      "Please enter a User ID.");
-                                                  // Show an error message indicating that the User ID cannot be empty
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                    content: Text(
-                                                        'Please enter a User ID.'),
-                                                  ));
-                                                  return; // Return without further action
-                                                }
+                                                    // Check if the entered user ID is empty
+                                                    if (userEmail.isEmpty) {
+                                                      TextToSpeech.speak(
+                                                          "Please enter a User ID.");
+                                                      // Show an error message indicating that the User ID cannot be empty
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                              SnackBar(
+                                                        content: const Text(
+                                                            'Please enter a User Email.'),
+                                                      ));
+                                                      return; // Return without further action
+                                                    }
 
-                                                // Perform actions with the entered user ID
-                                                print(
-                                                    'User ID entered: $userId');
-                                                ShareLocation.trackingId =
-                                                    userId;
-                                                ShareLocation
-                                                    .getOtherUserLocation();
+                                                    // Perform actions with the entered user ID
+                                                    print(
+                                                        'User ID entered: $userEmail');
+                                                    ShareLocation
+                                                            .trackingEmail =
+                                                        userEmail;
+                                                    ShareLocation
+                                                        .getOtherUserLocation();
 
-                                                // Close the dialog
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: Text('OK'),
-                                            ),
-                                          ],
+                                                    // Close the dialog
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('OK'),
+                                                ),
+                                              ],
+                                            );
+                                          },
                                         );
                                       },
-                                    );
-                                  },
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(width: 10),
-                                      Text('Tracking Location',
-                                          style: TextStyle(fontSize: 16)),
-                                    ],
-                                  ),
-                                )
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(width: 10),
+                                          Text('Tracking Location',
+                                              style: TextStyle(fontSize: 16)),
+                                        ],
+                                      ),
+                                    )
+                                  : Container(),
                     ],
                   ),
                 ],
@@ -337,182 +434,237 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  //Search Bar Widget <- SHOULD MOVE TO ANOTHER FILE
+  //Searchbar with advance UI and wrapped in container
   Widget build_SearchBar(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 100),
-        TextField(
-          controller: _endSearchFieldController,
-          autofocus: false,
-          focusNode: endFocusNode,
-          style: const TextStyle(fontSize: 24),
-          decoration: InputDecoration(
-            hintText: "Search Here",
-            hintStyle:
-                const TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
-            filled: true,
-            fillColor: Colors.grey[200],
-            // border: const OutlineInputBorder(
-            //   borderRadius: BorderRadius.only(
-            //       topLeft: Radius.circular(40),
-            //       topRight: Radius.circular(40),
-            //       bottomLeft: Radius.circular(10),
-            //       bottomRight: Radius.circular(10)),
-            //   borderSide: BorderSide(width: 0, style: BorderStyle.none),
-            // ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
+        Container(
+          height: 40, // Set the height of the container
+          decoration: BoxDecoration(
+            color: Colors.black,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 1,
+                blurRadius: 7,
+                offset: Offset(0, 3), // changes position of shadow
               ),
-              borderSide: BorderSide(width: 1, style: BorderStyle.solid),
-            ),
-            isDense: true,
-            contentPadding: const EdgeInsets.all(15),
-            suffixIcon: _endSearchFieldController.text.isNotEmpty
-                ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        predictions = [];
-                        _endSearchFieldController.clear();
-                      });
-                    },
-                    icon: const Icon(Icons.clear_outlined),
-                  )
-                : null,
+            ],
           ),
-          onChanged: (value) {
-            if (_debounce?.isActive ?? false) _debounce!.cancel();
-            _debounce = Timer(const Duration(milliseconds: 1000), () {
-              if (value.isNotEmpty) {
-                autoCompleteSearch(value);
-              } else {
-                setState(() {
-                  predictions = [];
-                  destination = null;
-                });
-              }
-            });
-          },
         ),
-        predictions.isNotEmpty
-            ? Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: predictions.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onLongPress: () {
-                        print(
-                            "res" + predictions[index].description.toString());
-                        TextToSpeech.speak(
-                            predictions[index].description.toString());
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+          ),
+          child: Padding(
+            padding:
+                const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      controller: _endSearchFieldController,
+                      autofocus: false,
+                      focusNode: endFocusNode,
+                      style: const TextStyle(fontSize: 24),
+                      decoration: InputDecoration(
+                        hintText: "Search Here",
+                        hintStyle: const TextStyle(
+                            fontWeight: FontWeight.w500, fontSize: 22),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.all(15),
+                        prefixIcon: const Icon(Icons.search, size: 32),
+                        suffixIcon: _endSearchFieldController.text.isNotEmpty
+                            ? IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    predictions = [];
+                                    _endSearchFieldController.clear();
+                                  });
+                                },
+                                icon: const Icon(Icons.clear_outlined),
+                              )
+                            : null,
+                      ),
+                      onChanged: (value) {
+                        if (_debounce?.isActive ?? false) _debounce!.cancel();
+                        _debounce =
+                            Timer(const Duration(milliseconds: 1000), () {
+                          if (value.isNotEmpty) {
+                            autoCompleteSearch(value);
+                          } else {
+                            setState(() {
+                              predictions = [];
+                              destination = null;
+                            });
+                          }
+                        });
                       },
-                      child: Container(
-                        color: Colors.white,
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(
-                              Icons.location_on,
-                              color: Colors.white,
-                            ),
-                          ),
-                          title: Text(
-                            predictions[index].description.toString(),
-                          ),
-                          onTap: () {
-                            add_destination(index);
-                          },
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Get.to(() => SettingPage());
+                    // Add your settings icon onPressed logic here
+                  },
+                  icon: const Icon(Icons.settings),
+                  color: Color.fromARGB(255, 212, 212, 212),
+                  iconSize: 37,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (predictions.isNotEmpty)
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: predictions.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onLongPress: () {
+                    print("res" + predictions[index].description.toString());
+                    TextToSpeech.speak(
+                        predictions[index].description.toString());
+                  },
+                  child: Container(
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(
+                          Icons.location_on,
+                          color: Colors.white,
                         ),
                       ),
-                    );
-                  },
-                ),
-              )
-            : Container(),
+                      title: Text(
+                        predictions[index].description.toString(),
+                      ),
+                      onTap: () {
+                        TextToSpeech.speak("set destination to " +
+                            predictions[index].description.toString());
+                        add_destination(index);
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
       ],
     );
   }
 
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void add_destination(int index) async {
+    MapPage.googleMapDetail['photoReference'] =
+        []; // remove all photo in here if any
     final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
-        'assets/markers/destination-marker.png', 100);
+        'assets/markers/destination_fill.png', 100);
 
     final placeId = predictions[index].placeId!;
+    // predictions = [];
+
     final details = await googlePlace.details.get(placeId);
-    if (details != null && details.result != null && mounted) {
-      if (endFocusNode.hasFocus) {
-        setState(
-          () {
-            destination = details.result;
-            _endSearchFieldController.text = details.result!.name!;
-            MapPage.destinationLocationName = _endSearchFieldController.text;
-            predictions = [];
-            MapPage.markers
-                .removeWhere((marker) => marker.markerId.value == "planceName");
-            //asgin MapPage.destinationCoordinate variable
-            MapPage.destinationCoordinate = LatLng(
-              destination!.geometry!.location!.lat!,
-              destination!.geometry!.location!.lng!,
-            );
-            MapPage.markers.add(
-              Marker(
-                markerId: const MarkerId("planceName"),
-                position: MapPage.destinationCoordinate,
-                icon: BitmapDescriptor.fromBytes(markerIcon),
-                infoWindow: InfoWindow(
-                  title: MapPage.destinationLocationName,
-                ),
-              ),
-            );
-
-            // find the north and south to animate the camera
-            double minLat =
-                MapPage.userLatitude < MapPage.destinationCoordinate.latitude
-                    ? MapPage.userLatitude
-                    : MapPage.destinationCoordinate.latitude;
-            double minLng =
-                MapPage.userLongitude < MapPage.destinationCoordinate.longitude
-                    ? MapPage.userLongitude
-                    : MapPage.destinationCoordinate.longitude;
-            double maxLat =
-                MapPage.userLatitude > MapPage.destinationCoordinate.latitude
-                    ? MapPage.userLatitude
-                    : MapPage.destinationCoordinate.latitude;
-            double maxLng =
-                MapPage.userLongitude > MapPage.destinationCoordinate.longitude
-                    ? MapPage.userLongitude
-                    : MapPage.destinationCoordinate.longitude;
-
-            PolylineMethod(updateUi).getPolyline(
-              LatLng(MapPage.userLatitude, MapPage.userLongitude),
-              MapPage.destinationCoordinate,
-            );
-
-            MapPage.mapController!.animateCamera(
-              CameraUpdate.newLatLngBounds(
-                LatLngBounds(
-                  southwest: LatLng(minLat, minLng),
-                  northeast: LatLng(maxLat, maxLng),
-                ),
-                100, // Padding
-              ),
-            );
-
-            NavigateMethod().getDirection(
-              LatLng(
-                MapPage.userLatitude,
-                MapPage.userLongitude,
-              ),
-              LatLng(
-                MapPage.destinationCoordinate.latitude,
-                MapPage.destinationCoordinate.longitude,
-              ),
-            );
-          },
-        );
+    MapPage.googleMapDetail['name'] = details!.result!.name.toString();
+    MapPage.googleMapDetail['rating'] = details.result!.rating;
+    MapPage.googleMapDetail['ratingTotal'] = details.result!.userRatingsTotal;
+    MapPage.googleMapDetail['types'] = details.result!.types;
+    // MapPage.googleMapDetail['openingHours'] =
+    //     details.result!.openingHours!.periods;
+    if (details.result?.photos != null) {
+      for (var photo in details.result!.photos!) {
+        String? photoReference = photo.photoReference;
+        // Construct the URL using the photo reference
+        String url =
+            'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=' +
+                dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+        MapPage.googleMapDetail['photoReference']
+            .add(photoReference); // Add URLs to the 'images' list
       }
+    }
+    print("kontrol" + details.result!.name.toString());
+    print("kontrol" + details.result!.photos.toString());
+    print("kontrol" + details.result!.rating.toString());
+    print("kontrol" + details.result!.userRatingsTotal.toString());
+    if (details != null && details.result != null && mounted) {
+      setState(
+        () {
+          destination = details.result;
+          _endSearchFieldController.text = details.result!.name!;
+          print(details.result!);
+          print(details.result!);
+          MapPage.destinationLocationName = _endSearchFieldController.text;
+          predictions = [];
+          MapPage.markers
+              .removeWhere((marker) => marker.markerId.value == "planceName");
+          //asgin MapPage.destinationCoordinate variable
+          MapPage.destinationCoordinate = LatLng(
+            destination!.geometry!.location!.lat!,
+            destination!.geometry!.location!.lng!,
+          );
+          MapPage.markers.add(
+            Marker(
+              markerId: const MarkerId("planceName"),
+              position: MapPage.destinationCoordinate,
+              icon: BitmapDescriptor.fromBytes(markerIcon),
+              infoWindow: InfoWindow(
+                title: MapPage.destinationLocationName,
+              ),
+            ),
+          );
+
+          // find the north and south to animate the camera
+          double minLat =
+              MapPage.userLatitude < MapPage.destinationCoordinate.latitude
+                  ? MapPage.userLatitude
+                  : MapPage.destinationCoordinate.latitude;
+          double minLng =
+              MapPage.userLongitude < MapPage.destinationCoordinate.longitude
+                  ? MapPage.userLongitude
+                  : MapPage.destinationCoordinate.longitude;
+          double maxLat =
+              MapPage.userLatitude > MapPage.destinationCoordinate.latitude
+                  ? MapPage.userLatitude
+                  : MapPage.destinationCoordinate.latitude;
+          double maxLng =
+              MapPage.userLongitude > MapPage.destinationCoordinate.longitude
+                  ? MapPage.userLongitude
+                  : MapPage.destinationCoordinate.longitude;
+
+          PolylineMethod(updateUi).getPolyline(
+            LatLng(MapPage.userLatitude, MapPage.userLongitude),
+            MapPage.destinationCoordinate,
+          );
+
+          MapPage.mapController!.animateCamera(
+            CameraUpdate.newLatLngBounds(
+              LatLngBounds(
+                southwest: LatLng(minLat, minLng),
+                northeast: LatLng(maxLat, maxLng),
+              ),
+              100, // Padding
+            ),
+          );
+
+          NavigateMethod().getDirection(
+            LatLng(
+              MapPage.userLatitude,
+              MapPage.userLongitude,
+            ),
+            LatLng(
+              MapPage.destinationCoordinate.latitude,
+              MapPage.destinationCoordinate.longitude,
+            ),
+          );
+        },
+      );
     }
   }
 
@@ -623,7 +775,7 @@ class _MapPageState extends State<MapPage> {
         icon: BitmapDescriptor.fromBytes(
             userMarker), // For example, you can use a blue marker
         infoWindow: InfoWindow(title: "You"),
-        rotation: _compassHeading,
+        rotation: MapPage.compassHeading,
 
         anchor: const Offset(0.5, 0.5),
       ),
@@ -645,7 +797,7 @@ class _MapPageState extends State<MapPage> {
 
   updateUserTrackingMarkerPosition() async {
     final Uint8List userTrackingMarker = await MarkerMethod.getBytesFromAsset(
-        'assets/markers/tracking-user-marker.png', 100);
+        'assets/markers/user_track.png', 100);
     // Check if trackingUserName is not null
     if (ShareLocation.isTracking) {
       // Update marker for user's position or add it if not present
@@ -765,38 +917,57 @@ class _MapPageState extends State<MapPage> {
     await AuthService.isAuthenticated();
   }
 
-  void shareLocation() {
+  void shareLocation(BuildContext context) {
     if (!AuthService.isAuthenticate) {
       Get.to(LoginPage());
       TextToSpeech.speak(
           "You are not logged in. To share your location, you must log in first.");
       return;
     }
+    String userId = AuthService.userEmail.toString();
     TextToSpeech.speak(
-        'Do you want to share your location?. To share your location, Share your ID to other people. your ID is ${AuthService.userId.toString().split("")}');
+        'Do you want to share your location?. To share your location, Share your Email to other people. your email is $userId');
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Share Location?'),
-          content: Text(
-              'Do you want to share your location? To share your location, Share your ID to other people. your ID is ${AuthService.userId}'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(
-                    false); // Return false indicating user doesn't want to share location
-              },
-              child: Text('No'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(
-                    true); // Return true indicating user wants to share location
-              },
-              child: Text('Yes'),
-            ),
-          ],
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Do you want to share your location? To share your location, Share your ID to other people. your ID is $userId',
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text('No'),
+                  ),
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     // Copy the user ID to the clipboard
+                  //     Clipboard.setData(ClipboardData(text: userId));
+                  //     Navigator.of(context).pop(
+                  //         true); // Return true indicating user wants to share location
+                  //   },
+                  //   child: Text('Copy ID'),
+                  // ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: Text('Share'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         );
       },
     ).then((value) {
@@ -809,173 +980,125 @@ class _MapPageState extends State<MapPage> {
       }
     });
   }
+
+  bool _isListening = false;
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  String _text = '';
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() {
+          _isListening = true;
+          fromAudioCommand = true;
+
+          _text = "Listening...";
+          print("Listening...");
+        });
+
+        _speech.listen(onResult: (result) {
+          setState(() {
+            fromAudioCommand = true;
+
+            _text = result.recognizedWords.toLowerCase();
+            print(_text);
+
+            if (_text.contains("go") ||
+                _text.contains("going") ||
+                _text.contains("navigate")) {
+              print("go");
+
+              print("go");
+              fromAudioCommand = true;
+
+              // Split recognized words by space
+              List<String> words = _text.split(" ");
+              // Find the index of the keyword
+              int keywordIndex = words.indexOf("go");
+              if (keywordIndex == -1) {
+                keywordIndex = words.indexOf("going");
+              }
+              if (keywordIndex == -1) {
+                keywordIndex = words.indexOf("navigate");
+              }
+              // Extract the destination word after the keyword
+              String destination = words.sublist(keywordIndex + 1).join(" ");
+              _endSearchFieldController.text = destination;
+              if (_debounce?.isActive ?? false) _debounce!.cancel();
+              _debounce = Timer(const Duration(milliseconds: 1000), () {
+                if (_endSearchFieldController.text.isNotEmpty) {
+                  autoCompleteSearch(_endSearchFieldController.text);
+                  print(fromAudioCommand);
+                }
+              });
+            } else if (_text.contains("stop") || _text.contains("exit")) {
+              if (MapPage.isStartNavigate) {
+                MapPage.isStartNavigate = false;
+                TextToSpeech.speak("Exiting navigation");
+                return;
+              }
+              TextToSpeech.speak(
+                  "To exit navigate, you have to start navigate first");
+            } else if (_text.contains("start")) {
+              if (!MapPage.isStartNavigate && predictions.isNotEmpty) {
+                MapPage.isStartNavigate = true;
+                NavigateMethod().startNavigate(
+                  MapPage.mapController,
+                  MapPage.destinationCoordinate,
+                );
+                TextToSpeech.speak("Start navigation");
+
+                return;
+              }
+            } else if (_text.contains("in front")) {
+              // Iterate through the detection result to count objects in front
+              // int objectsInFront = 0;
+              // for (var detection in detectionResult) {
+              //   // Check if the object's position indicates it's in front
+              //   // You may need to adjust these conditions based on your scenario
+              //   if (detection['box'][1] > SOME_THRESHOLD && detection['box'][2] > SOME_OTHER_THRESHOLD) {
+              //     objectsInFront++;
+              //   }
+              // }
+              TextToSpeech.speak("there are 2 people in front of you");
+            } else {
+              // stop listening
+              _microphoneTimeout1();
+            }
+          });
+        });
+        // stop listening
+        _microphoneTimeout2();
+      } else {
+        print('The user denied the use of speech recognition.');
+      }
+    }
+  }
+
+  // stop listening after 8 seconds
+  void _microphoneTimeout1() {
+    Timer(const Duration(seconds: 10), () {
+      // Reset _isListening 8 seconds
+      setState(() {
+        _isListening = false;
+        _text = ""; // Clear the recognized text
+      });
+      print("Speech recognition timeout");
+    });
+  }
+
+  // stop listening if the user did not say anything
+  void _microphoneTimeout2() {
+    Timer(const Duration(seconds: 8), () {
+      if (_text == "Listening...") {
+        // Reset _isListening if no speech is recognized after 5 seconds
+        setState(() {
+          _isListening = false;
+          _text = ""; // Clear the recognized text
+        });
+        print("Speech recognition timeout");
+      }
+    });
+  }
 }
-
-
-  // void _showBottomSheet(BuildContext context) {
-  //   Map<String, dynamic> totals = _calculateTotals(MapPage.allSteps);
-
-  //   double screenHeight = MediaQuery.of(context).size.height;
-  //   double screenWidth = MediaQuery.of(context).size.width;
-  //   double initialHeight = 0.15; // 20% initial height
-  //   double currentHeight = initialHeight;
-  //   DateTime now = DateTime.now();
-  //   int totalDurationMinutes = totals['totalDuration'];
-  //   DateTime expectedArrivalTime =
-  //       now.add(Duration(minutes: totalDurationMinutes));
-  //   showModalBottomSheet(
-  //     useSafeArea: true,
-  //     elevation: 1,
-  //     isScrollControlled: true,
-  //     barrierColor: const Color.fromARGB(17, 0, 0, 0),
-  //     isDismissible: false,
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return SingleChildScrollView(
-  //         child: StatefulBuilder(
-  //           builder: (BuildContext context, StateSetter setState) {
-  //             return GestureDetector(
-  //               onVerticalDragUpdate: (details) {
-  //                 // Calculate drag direction
-  //                 double dy = details.primaryDelta!;
-  //                 bool isDraggingUpwards = dy < 0;
-
-  //                 // Clamp between 20% and 60%
-  //                 if (isDraggingUpwards) {
-  //                   setState(() {
-  //                     currentHeight = 0.6;
-  //                   });
-  //                 } else {
-  //                   setState(() {
-  //                     currentHeight = 0.15;
-  //                   });
-  //                 }
-  //               },
-  //               child: AnimatedContainer(
-  //                 duration:
-  //                     Duration(milliseconds: 300), // Adjust animation speed
-  //                 width: screenWidth * 0.97, // Set width to 95% of screen width
-  //                 height: screenHeight * currentHeight,
-  //                 decoration: const BoxDecoration(
-  //                   color: Colors.white,
-  //                   borderRadius:
-  //                       BorderRadius.vertical(top: Radius.circular(20)),
-  //                 ),
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.center,
-  //                   children: [
-  //                     SizedBox(
-  //                       height: 10,
-  //                     ),
-  //                     Container(
-  //                       width: 40,
-  //                       height: 3,
-  //                       color: const Color.fromARGB(255, 221, 221, 221),
-  //                     ),
-  //                     Padding(
-  //                       padding: EdgeInsets.only(
-  //                           bottom: 20, left: 20, right: 20, top: 10),
-  //                       child: Stack(
-  //                         alignment: Alignment.center,
-  //                         children: [
-  //                           Row(
-  //                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                             children: [
-  //                               Column(
-  //                                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                                 children: [
-  //                                   Text(
-  //                                     '${totals['totalDuration']} mins ',
-  //                                     style: const TextStyle(
-  //                                       fontSize: 18,
-  //                                       fontWeight: FontWeight.bold,
-  //                                       color: Colors.black,
-  //                                     ),
-  //                                   ),
-  //                                   SizedBox(height: 5),
-  //                                   RichText(
-  //                                     text: TextSpan(
-  //                                       style: const TextStyle(
-  //                                         fontSize: 16,
-  //                                         fontWeight: FontWeight.bold,
-  //                                         color: Colors.black,
-  //                                       ),
-  //                                       children: [
-  //                                         TextSpan(
-  //                                           text:
-  //                                               '${totals['totalDistance'].toStringAsFixed(2)} km . ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
-  //                                           style:
-  //                                               TextStyle(color: Colors.grey),
-  //                                         ),
-  //                                       ],
-  //                                     ),
-  //                                   ),
-  //                                 ],
-  //                               ),
-  //                               Row(
-  //                                 children: [
-  //                                   ElevatedButton(
-  //                                       onPressed: () {
-  //                                         shareLocation();
-  //                                       },
-  //                                       child: Icon(Icons.share)),
-  //                                   const SizedBox(
-  //                                     width: 5,
-  //                                   ),
-  //                                   ElevatedButton(
-  //                                       onPressed: () {
-  //                                         MapPage.isStartNavigate = false;
-                                        
-  //                                       },
-  //                                       child: Text("Exit"))
-  //                                 ],
-  //                               )
-  //                             ],
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                     Container(
-  //                       width: double.infinity,
-  //                       height: 1,
-  //                       color: Colors.grey.withOpacity(0.5),
-  //                     ),
-  //                     Expanded(
-  //                       child: ListView.builder(
-  //                         itemCount: MapPage.allSteps.length,
-  //                         itemBuilder: (context, index) {
-  //                           var step = MapPage.allSteps[index];
-  //                           return ListTile(
-  //                             contentPadding: const EdgeInsets.symmetric(
-  //                               horizontal: 20,
-  //                               vertical: 10,
-  //                             ),
-  //                             title: Text(
-  //                               step['instructions'],
-  //                               style: TextStyle(fontWeight: FontWeight.bold),
-  //                             ),
-  //                             subtitle: Text(
-  //                               '${step['distance']} - ${step['duration']}',
-  //                               style: TextStyle(color: Colors.grey),
-  //                             ),
-  //                             leading: CircleAvatar(
-  //                               backgroundColor: Colors.blue,
-  //                               child: Text(
-  //                                 '${index + 1}',
-  //                                 style: TextStyle(color: Colors.white),
-  //                               ),
-  //                             ),
-  //                           );
-  //                         },
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }

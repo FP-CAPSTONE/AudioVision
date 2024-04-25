@@ -30,7 +30,7 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     DefaultAssetBundle.of(context)
-        .loadString("assets/maptheme/retro_map.json")
+        .loadString("assets/maptheme/night_map.json")
         .then((value) {
       mapTheme = value;
     });
@@ -120,24 +120,24 @@ class _MapScreenState extends State<MapScreen> {
         actions: [
           PopupMenuButton(
               itemBuilder: (context) => [
-                PopupMenuItem(
-                    onTap: () {
-                      _controller.future.then((value) {
-                        DefaultAssetBundle.of(context)
-                            .loadString("assets/maptheme/standard_map.json")
-                            .then((string) {
-                          value.setMapStyle(string);
-                        });
-                      });
-                    },
-                    child: Text("Standard")),
+                    PopupMenuItem(
+                        onTap: () {
+                          _controller.future.then((value) {
+                            DefaultAssetBundle.of(context)
+                                .loadString("assets/maptheme/standard_map.json")
+                                .then((string) {
+                              value.setMapStyle(string);
+                            });
+                          });
+                        },
+                        child: Text("Standard")),
                     PopupMenuItem(
                         onTap: () {
                           _controller.future.then((value) {
                             DefaultAssetBundle.of(context)
                                 .loadString("assets/maptheme/retro_map.json")
                                 .then((string) {
-                                  value.setMapStyle(string);
+                              value.setMapStyle(string);
                             });
                           });
                         },
@@ -151,7 +151,8 @@ class _MapScreenState extends State<MapScreen> {
                               value.setMapStyle(string);
                             });
                           });
-                    }, child: Text("Night")),
+                        },
+                        child: Text("Night")),
                   ])
         ],
         elevation: 5,

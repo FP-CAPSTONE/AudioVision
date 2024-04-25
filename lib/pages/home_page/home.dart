@@ -72,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icon(Icons.settings))
           ],
           title: Text(_title),
-          backgroundColor: Colors.blue,
+          backgroundColor: const Color.fromARGB(255, 24, 24, 24),
         ),
         body: Center(
           child: Column(
