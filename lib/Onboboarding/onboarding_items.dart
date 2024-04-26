@@ -30,6 +30,14 @@ class OnboardingItems {
         tag: " ",
         image: "assets/image/vibration1.gif"),
     OnboardingInfo(
+        title: "User Guide",
+        descriptions:
+            "- Speak going, or go, or navigate to go to your destination \n"
+            "- Speak start navigate to start your route \n"
+            "- Speak stop navigate to stop your route \n",
+        tag: "",
+        image: "assets/image/boardinglogos.jpg"),
+    OnboardingInfo(
         title: "Ready to go?",
         descriptions: "Let's make the first step with us and go on a journey",
         tag: "Let's Get Started",

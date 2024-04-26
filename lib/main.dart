@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextToSpeech.speak(
-        "Welcome To Audio Vision. We will help you and assist you to go to somewhere.");
+        "Welcome To Audio Vision. We will help you and assist you to go to somewhere. swipe to the right to continue");
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',

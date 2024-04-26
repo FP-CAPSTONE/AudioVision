@@ -254,9 +254,16 @@ class _OnboardingViewState extends State<OnboardingView> {
         break;
       case 4:
         TextToSpeech.speak(
-            "If there are vibrations, it means there is a dangerous object. Be careful");
+            "If there are vibrations, it means there is a dangerous object. Be careful. swipe to the right to continue");
         break;
       case 5:
+        TextToSpeech.speak(
+            "- Speak going, or go, or navigate to go to your destination \n"
+            "- Speak start navigate to start your route \n"
+            "- Speak stop navigate to stop your route \n"
+            "Swipe to the right to continue\n");
+        break;
+      case 6:
         TextToSpeech.speak(
             "Nice. you have finished the tutorial. Ready to go?. Let's make the first step with us. and go on a journey. Let's get started");
         break;
