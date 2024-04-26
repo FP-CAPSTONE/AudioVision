@@ -115,7 +115,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       children: [
         TextButton(
           onPressed: () {
-            pageController.jumpToPage(2);
+            pageController.jumpToPage(5);
           },
           child: const Text("Skip"),
         ),
@@ -281,14 +281,14 @@ class _OnboardingViewState extends State<OnboardingView> {
 
         _speech.listen(onResult: (result) {
           setState(() {
-            _text = result.recognizedWords.toLowerCase();
             isSuccessTryMicrophone = true;
+            _text = result.recognizedWords.toLowerCase();
             if (_text.isNotEmpty &&
                 !_text.contains("audio") &&
                 !_text.contains("command")) {
               isSuccessTryMicrophone = true;
               TextToSpeech.speak(
-                  "Nice, you have tried the voice command. swipe to continue");
+                  "Nice, you have tried the voice command. swipe to the right continue");
             } else {
               _microphoneTimeout1();
             }

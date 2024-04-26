@@ -33,10 +33,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: Colors.black, primary: Colors.black
-                // ···
-                ),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.black, primary: Colors.black),
       ),
       home: OnboardingView(),
     );

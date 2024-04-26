@@ -21,7 +21,6 @@ class SearchMethod {
 
   // Function to retrieve the saved search logs
   static Future<Map<String, String>> getSearchLogs() async {
-    print("search log");
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     // Retrieve existing search logs
@@ -38,6 +37,10 @@ class SearchMethod {
       });
     }
 
-    return searchLogs;
+    // Reverse the order of the map entries
+    Map<String, String> reversedSearchLogs =
+        Map.fromEntries(searchLogs.entries.toList().reversed);
+
+    return reversedSearchLogs;
   }
 }

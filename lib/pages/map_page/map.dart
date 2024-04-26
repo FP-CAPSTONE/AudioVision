@@ -1,11 +1,12 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/widget/buttom_sheet_detail_ocation.dart';
-import 'package:audiovision/pages/map_page/widget/searching_method.dart';
+import 'package:audiovision/pages/map_page/method/searching_method.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -186,7 +187,7 @@ class _MapPageState extends State<MapPage> {
 
               TextToSpeech.speak("set destination to " +
                   predictions[0].description.toString() +
-                  ". double tap the screen. and. say Start navigate to start navigation");
+                  ". double tap the screen. and. say Start navigate. to start navigation");
               add_destination(predictions[0].placeId.toString());
               fromAudioCommand = false;
               _endSearchFieldController.text = "";
@@ -384,20 +385,20 @@ class _MapPageState extends State<MapPage> {
                                               8), // Apply the same border radius
                                           onTap: () {
                                             TextEditingController
-                                                _userEmailController =
+                                                _userNameController =
                                                 TextEditingController();
                                             showDialog(
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
                                                   title:
-                                                      Text('Enter User Email'),
+                                                      Text('Tracking Location'),
                                                   content: TextField(
                                                     controller:
-                                                        _userEmailController,
+                                                        _userNameController,
                                                     decoration: InputDecoration(
                                                       hintText:
-                                                          'Enter User Email',
+                                                          'Enter Username',
                                                     ),
                                                   ),
                                                   actions: <Widget>[
@@ -410,30 +411,30 @@ class _MapPageState extends State<MapPage> {
                                                     ),
                                                     TextButton(
                                                       onPressed: () {
-                                                        String userEmail =
-                                                            _userEmailController
+                                                        String userName =
+                                                            _userNameController
                                                                 .text
                                                                 .trim();
-                                                        if (userEmail.isEmpty) {
+                                                        if (userName.isEmpty) {
                                                           // Handle empty email
                                                           TextToSpeech.speak(
-                                                              "Please enter a User Email.");
+                                                              "Please enter the user name.");
                                                           ScaffoldMessenger.of(
                                                                   context)
                                                               .showSnackBar(
                                                             SnackBar(
                                                               content: const Text(
-                                                                  'Please enter a User Email.'),
+                                                                  'Please enter the Username.'),
                                                             ),
                                                           );
                                                           return;
                                                         }
                                                         // Perform actions with the entered user ID
                                                         print(
-                                                            'User ID entered: $userEmail');
+                                                            'User ID entered: $userName');
                                                         ShareLocation
-                                                                .trackingEmail =
-                                                            userEmail;
+                                                                .trackingUserName =
+                                                            userName;
                                                         ShareLocation
                                                             .getOtherUserLocation();
                                                         // Close the dialog
@@ -447,7 +448,7 @@ class _MapPageState extends State<MapPage> {
                                               },
                                             );
                                           },
-                                          child: const Padding(
+                                          child: Padding(
                                             padding: EdgeInsets.symmetric(
                                                 horizontal:
                                                     10), // Adjust padding to match the original design
@@ -455,7 +456,11 @@ class _MapPageState extends State<MapPage> {
                                               child: Text(
                                                 'Tracking Location',
                                                 style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.045,
                                                   color: Colors
                                                       .white, // Set text color to white
                                                 ),
@@ -518,34 +523,40 @@ class _MapPageState extends State<MapPage> {
                         controller: _endSearchFieldController,
                         autofocus: false,
                         focusNode: endFocusNode,
-                        style: const TextStyle(fontSize: 24),
+                        style: TextStyle(
+                            fontSize:
+                                MediaQuery.of(context).size.width * 0.057),
                         decoration: InputDecoration(
                           hintText: "Search Here",
-                          hintStyle: const TextStyle(
-                              fontWeight: FontWeight.w500, fontSize: 22),
+                          hintStyle: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.057),
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: const EdgeInsets.all(15),
-                          prefixIcon:
-                              _endSearchFieldController.text.isNotEmpty ||
-                                      searchLogs.isNotEmpty
-                                  ? IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          predictions = [];
-                                          _endSearchFieldController.clear();
-                                          searchLogs = {};
-                                        });
-                                      },
-                                      icon: const Icon(
-                                        Icons.arrow_back_ios_new_outlined,
-                                        size: 25,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.search,
-                                      size: 32,
-                                    ),
+                          prefixIcon: _endSearchFieldController
+                                      .text.isNotEmpty ||
+                                  searchLogs.isNotEmpty
+                              ? IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      predictions = [];
+                                      _endSearchFieldController.clear();
+                                      searchLogs = {};
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.arrow_back_ios_new_outlined,
+                                    size: MediaQuery.of(context).size.width *
+                                        0.06,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.search,
+                                  size:
+                                      MediaQuery.of(context).size.width * 0.08,
+                                ),
                           // suffixIcon: _endSearchFieldController.text.isNotEmpty
                           //     ? IconButton(
                           //         onPressed: () {
@@ -574,7 +585,7 @@ class _MapPageState extends State<MapPage> {
                         },
                         onTap: () async {
                           TextToSpeech.speak(
-                              "Clicking search bar. search where you want to go. and hold the screen to read the search result. otherwise. you can double tap the screen to activate the audio command to set your destination");
+                              "Clicking search bar. search where you want to go. and hold the screen to read the search result. otherwise. you can double tap the screen to activate the audio command. say.   'navigate destination' or 'going destination' to set your destination");
                           searchLogs = await SearchMethod.getSearchLogs();
                           // Iterate through the search logs
                           searchLogs.forEach((log, placeId) {
@@ -600,7 +611,7 @@ class _MapPageState extends State<MapPage> {
                   },
                   icon: const Icon(Icons.settings),
                   color: Color.fromARGB(255, 212, 212, 212),
-                  iconSize: 37,
+                  iconSize: MediaQuery.of(context).size.width * 0.1,
                 ),
               ],
             ),
@@ -612,81 +623,95 @@ class _MapPageState extends State<MapPage> {
               padding: EdgeInsets.zero,
               itemCount: predictions.length,
               itemBuilder: (context, index) {
-                String formattedDistance;
-                if (predictions[index].distanceMeters! < 1000) {
-                  // Display distance in meters format
-                  formattedDistance =
-                      predictions[index].distanceMeters.toString() + " m";
-                } else {
-                  // Convert distance from meters to kilometers and format it as "0.0 km"
-                  formattedDistance =
-                      (predictions[index].distanceMeters! / 1000.0)
-                              .toStringAsFixed(1) +
-                          " km";
-                }
-
                 return GestureDetector(
                   onLongPress: () {
                     print("res" + predictions[index].description.toString());
                     TextToSpeech.speak(
                         predictions[index].description.toString());
                   },
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.1,
-                    child: Column(
-                      children: [
-                        Container(
-                          color: Colors.white,
-                          child: ListTile(
-                            title: Row(
-                              children: [
-                                Stack(
+                  child: Column(
+                    children: [
+                      Container(
+                        color: Colors.white,
+                        child: ListTile(
+                          title: Row(
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.15,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Column(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: Colors.white,
-                                          child: Icon(
-                                            Icons.location_on,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        buildDistanceWidget(
-                                            predictions[index].distanceMeters!)
-                                      ],
+                                    const Icon(
+                                      Icons.location_on,
+                                      color: Colors.black,
                                     ),
+                                    if (predictions[index].distanceMeters !=
+                                        null)
+                                      buildDistanceWidget(
+                                          predictions[index].distanceMeters!)
                                   ],
                                 ),
-                                Expanded(
-                                  child: Text(
-                                    predictions[index].description.toString(),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      predictions[index]
+                                          .terms!
+                                          .first
+                                          .value
+                                          .toString(),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.04),
+                                    ),
+                                    if (predictions[index].terms != null &&
+                                        predictions[index].terms!.length > 1)
+                                      Text(
+                                        predictions[index]
+                                            .terms![1]
+                                            .value
+                                            .toString(),
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.03, // Adjust the multiplier as needed
+                                          color: Colors.grey[600],
+                                        ),
+                                      )
+                                  ],
                                 ),
-                              ],
-                            ),
-                            // Call this function where you want to save the search log
-                            onTap: () async {
-                              await TextToSpeech.speak("set destination to " +
-                                  predictions[index].description.toString() +
-                                  ". double tap the screen. and. say Start navigate to start navigation");
-                              await SearchMethod.save_search_log(
-                                predictions[index].description.toString(),
-                                predictions[index].placeId.toString(),
-                              );
-                              add_destination(
-                                predictions[index].placeId.toString(),
-                              );
-                            },
+                              ),
+                            ],
                           ),
+                          // Call this function where you want to save the search log
+                          onTap: () async {
+                            TextToSpeech.speak("set destination to " +
+                                predictions[index].description.toString() +
+                                ". double tap the screen. and. say Start navigate. to start navigation");
+                            await SearchMethod.save_search_log(
+                              predictions[index].terms!.first.value.toString(),
+                              predictions[index].placeId.toString(),
+                            );
+                            add_destination(
+                              predictions[index].placeId.toString(),
+                            );
+                          },
                         ),
-                        Container(
-                          width: double.infinity,
-                          height: 1,
-                          color: Colors.grey.withOpacity(0.5),
-                        ), // Add this line to include a separator
-                      ],
-                    ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: 1,
+                        color: Colors.grey.withOpacity(0.5),
+                      ), // Add this line to include a separator
+                    ],
                   ),
                 );
               },
@@ -702,7 +727,8 @@ class _MapPageState extends State<MapPage> {
               child: Text(
                 "Recent",
                 style: TextStyle(
-                    fontSize: 12, // Adjust the font size as needed
+                    fontSize: MediaQuery.of(context).size.width *
+                        0.034, // Adjust the font size as needed
 
                     fontWeight: FontWeight.bold),
               ),
@@ -716,6 +742,7 @@ class _MapPageState extends State<MapPage> {
               itemBuilder: (context, index) {
                 // Get the key and value from the searchLogs map
                 String log = searchLogs.keys.toList()[index];
+                List arrayLog = searchLogs.keys.toList()[index].split(",");
                 String placeId = searchLogs.values.toList()[index];
 
                 return GestureDetector(
@@ -730,25 +757,46 @@ class _MapPageState extends State<MapPage> {
                         child: ListTile(
                           title: Row(
                             children: [
-                              Stack(
-                                children: [
-                                  Column(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: Colors.white,
-                                        child: Icon(
-                                          Icons.access_time_rounded,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              Container(
+                                padding: EdgeInsets.only(
+                                    right: MediaQuery.of(context).size.width *
+                                        0.03),
+                                child: Icon(
+                                  Icons.access_time_rounded,
+                                  color: Colors.black,
+                                  size:
+                                      MediaQuery.of(context).size.width * 0.075,
+                                ),
                               ),
                               Expanded(
-                                child: Text(
-                                  log,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      arrayLog.first,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.04),
+                                    ),
+                                    if (arrayLog.length > 1)
+                                      Text(
+                                        RegExp(r'\s+(.*)')
+                                                .firstMatch(arrayLog[1])
+                                                ?.group(1) ??
+                                            '', // Take all text after first space
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.03,
+                                          color: Colors.grey[600],
+                                        ),
+                                      )
+                                  ],
                                 ),
                               ),
                             ],
@@ -756,8 +804,8 @@ class _MapPageState extends State<MapPage> {
 
                           // Call this function where you want to save the search log
                           onTap: () async {
-                            await TextToSpeech.speak(
-                                "set destination to $log. double tap the screen. and. say Start navigate to start navigation");
+                            TextToSpeech.speak(
+                                "set destination to $log. double tap the screen. and. say Start navigate. to start navigation");
                             await SearchMethod.save_search_log(log, placeId);
                             add_destination(placeId);
                           },
@@ -784,7 +832,7 @@ class _MapPageState extends State<MapPage> {
       return Text(
         distanceMeters.toString() + " m",
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 10,
           color: Colors.grey,
         ),
       );
@@ -795,7 +843,7 @@ class _MapPageState extends State<MapPage> {
       return Text(
         formattedDistance,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 10,
           color: Colors.grey,
         ),
       );
@@ -1165,9 +1213,9 @@ class _MapPageState extends State<MapPage> {
           "You are not logged in. To share your location, you must log in first.");
       return;
     }
-    String userId = AuthService.userEmail.toString();
+    String userName = AuthService.userName.toString();
     TextToSpeech.speak(
-        'Do you want to share your location?. To share your location, Share your Email to other people. your email is $userId');
+        'Do you want to share your location?. To share your location, Share your Email to other people. your username is $userName.split("")');
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1178,7 +1226,7 @@ class _MapPageState extends State<MapPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Do you want to share your location? To share your location, Share your ID to other people. your ID is $userId',
+                'Do you want to share your location? To share your location, Share your username to other people. your username is $userName',
               ),
               SizedBox(height: 10),
               Row(
@@ -1193,7 +1241,7 @@ class _MapPageState extends State<MapPage> {
                   // ElevatedButton(
                   //   onPressed: () {
                   //     // Copy the user ID to the clipboard
-                  //     Clipboard.setData(ClipboardData(text: userId));
+                  //     Clipboard.setData(ClipboardData(text: userName));
                   //     Navigator.of(context).pop(
                   //         true); // Return true indicating user wants to share location
                   //   },
@@ -1289,12 +1337,13 @@ class _MapPageState extends State<MapPage> {
                   MapPage.mapController,
                   MapPage.destinationCoordinate,
                 );
-                TextToSpeech.speak("Start navigation");
+                TextToSpeech.speak("Start navigation to " +
+                    MapPage.googleMapDetail['name'].toString());
 
                 return;
               } else {
                 TextToSpeech.speak(
-                    "You are on the navigation right now. your destination is set. to. " +
+                    "You are already navigating. Your destination is set to " +
                         MapPage.googleMapDetail['name'].toString());
               }
             } else if (_text.contains("in front")) {
@@ -1308,6 +1357,31 @@ class _MapPageState extends State<MapPage> {
               //   }
               // }
               TextToSpeech.speak("there are 2 people in front of you");
+            } else if (_text.contains("share")) {
+              if (MapPage.destinationCoordinate.latitude != 0) {
+                if (MapPage.isStartNavigate) {
+                  if (AuthService.isAuthenticate) {
+                    final String? userName = AuthService.userName;
+                    TextToSpeech.speak(
+                        "Start sharing your location. You need to give your username to other people $userName so they can track your location");
+
+                    ShareLocation.shareUserLocation(
+                      LatLng(MapPage.userLatitude, MapPage.userLongitude),
+                      MapPage.destinationCoordinate,
+                      MapPage.destinationLocationName,
+                    );
+                  } else {
+                    TextToSpeech.speak(
+                        "In order to share your location, you need to login first. Navigating to the login page");
+                    Get.to(LoginPage());
+                  }
+                } else {
+                  TextToSpeech.speak(
+                      "In order to share location, you need to start navigation. To start navigation, say 'start navigate'.");
+                }
+                TextToSpeech.speak(
+                    "In order to share your location, you need to set your destination. To set the destination, you need to search for it using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+              }
             } else {
               // stop listening
               _microphoneTimeout1();
@@ -1324,7 +1398,7 @@ class _MapPageState extends State<MapPage> {
 
   // stop listening after 8 seconds
   void _microphoneTimeout1() {
-    Timer(const Duration(seconds: 10), () {
+    Timer(const Duration(seconds: 9), () {
       // Reset _isListening 8 seconds
       setState(() {
         _isListening = false;
@@ -1336,7 +1410,7 @@ class _MapPageState extends State<MapPage> {
 
   // stop listening if the user did not say anything
   void _microphoneTimeout2() {
-    Timer(const Duration(seconds: 8), () {
+    Timer(const Duration(seconds: 6), () {
       if (_text == "Listening...") {
         // Reset _isListening if no speech is recognized after 5 seconds
         setState(() {

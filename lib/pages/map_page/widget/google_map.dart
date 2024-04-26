@@ -24,13 +24,11 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
       polylines: Set<Polyline>.of(MapPage.polylines.values),
       initialCameraPosition: MapPage.cameraPosition,
       onMapCreated: (controller) {
-        print(widget.mapstyle);
         MapPage.mapController = controller;
-        MapPage.mapController!.setMapStyle(widget.mapstyle); //for map style
+        MapPage.mapController!.setMapStyle(widget.mapstyle);
         MapPage.mapController!.animateCamera(
           CameraUpdate.newCameraPosition(MapPage.cameraPosition),
         );
-        // controller.setMapStyle(Utils.mapStyles);
       },
       markers: MapPage.markers,
     );

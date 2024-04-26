@@ -56,7 +56,9 @@ class NavigateBarWidget extends StatelessWidget {
                   Flexible(
                     child: Text(
                       distance,
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: MediaQuery.of(context).size.width * 0.04),
                       overflow: TextOverflow
                           .ellipsis, // Optional: specify overflow behavior
                     ),
@@ -64,7 +66,9 @@ class NavigateBarWidget extends StatelessWidget {
                   Flexible(
                     child: Text(
                       instruction,
-                      style: TextStyle(color: Colors.white, fontSize: 20),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: MediaQuery.of(context).size.width * 0.048),
                       overflow: TextOverflow
                           .ellipsis, // Optional: specify overflow behavior
                     ),
