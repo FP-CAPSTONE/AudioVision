@@ -51,7 +51,8 @@ class AuthService {
       print("login testt" + email);
       var response = await http.post(
         Uri.parse("${apiUrl}auth/login"),
-        body: jsonEncode({"email": email, "password": password}),
+        body:
+            jsonEncode({"email": email + "@example.com", "password": password}),
         // body: jsonEncode({
         //   "username": email,
         //   "password": password
@@ -107,7 +108,11 @@ class AuthService {
     try {
       var response = await http.post(
         Uri.parse("${apiUrl}auth/register"),
-        body: jsonEncode({"name": name, "email": email, "password": password}),
+        body: jsonEncode({
+          "name": name,
+          "email": email + "@example.com",
+          "password": password,
+        }),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

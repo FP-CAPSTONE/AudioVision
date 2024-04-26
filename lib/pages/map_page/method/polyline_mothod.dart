@@ -46,7 +46,7 @@ class PolylineMethod {
       jointType: JointType.bevel,
       patterns: <PatternItem>[
         PatternItem.dot, // 10 pixels dashed line
-        PatternItem.gap(50), // 5 pixels gap
+        PatternItem.gap(20), // 5 pixels gap
       ],
       zIndex: 2,
       startCap: Cap.buttCap,

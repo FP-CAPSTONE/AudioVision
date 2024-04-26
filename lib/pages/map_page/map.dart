@@ -1379,8 +1379,9 @@ class _MapPageState extends State<MapPage> {
                   TextToSpeech.speak(
                       "In order to share location, you need to start navigation. To start navigation, say 'start navigate'.");
                 }
+              } else {
                 TextToSpeech.speak(
-                    "In order to share your location, you need to set your destination. To set the destination, you need to search for it using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+                    "In order to share your location, you need to set your destination. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
               }
             } else {
               // stop listening

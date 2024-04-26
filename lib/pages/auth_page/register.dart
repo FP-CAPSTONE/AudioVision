@@ -25,7 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     await AuthService.register(
       _nameController.text.toString(),
-      _nameController.text.toString() + '@example.com',
+      _nameController.text.toString(),
       _passwordController.text.toString(),
     );
 

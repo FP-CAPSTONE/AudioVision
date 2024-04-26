@@ -88,6 +88,7 @@ class ShareLocation {
           LatLng(userLocationData['lat'], userLocationData['long']);
       trackDestinationCoordinate = LatLng(
           destinationLocationData['lat'], destinationLocationData['long']);
+
       print(snapshot.value);
       final Uint8List markerDestination = await MarkerMethod.getBytesFromAsset(
           'assets/markers/destination-marker.png', 100);
@@ -104,6 +105,34 @@ class ShareLocation {
       );
 
       isTracking = true;
+
+      // find the north and south to animate the camera
+      double minLat =
+          trackUserCoordinate!.latitude < trackDestinationCoordinate!.latitude
+              ? trackUserCoordinate!.latitude
+              : trackDestinationCoordinate!.latitude;
+      double minLng =
+          trackUserCoordinate!.longitude < trackDestinationCoordinate!.longitude
+              ? trackUserCoordinate!.longitude
+              : trackDestinationCoordinate!.longitude;
+      double maxLat =
+          trackUserCoordinate!.latitude > trackDestinationCoordinate!.latitude
+              ? trackUserCoordinate!.latitude
+              : trackDestinationCoordinate!.latitude;
+      double maxLng =
+          trackUserCoordinate!.longitude > trackDestinationCoordinate!.longitude
+              ? trackUserCoordinate!.longitude
+              : trackDestinationCoordinate!.longitude;
+
+      MapPage.mapController!.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          LatLngBounds(
+            southwest: LatLng(minLat, minLng),
+            northeast: LatLng(maxLat, maxLng),
+          ),
+          100, // Padding
+        ),
+      );
     } else {
       TextToSpeech.speak(
           'There is no shared data location name with ${ShareLocation.trackingUserName}');
