@@ -115,7 +115,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       children: [
         TextButton(
           onPressed: () {
-            pageController.jumpToPage(5);
+            pageController.jumpToPage(2);
           },
           child: const Text("Skip"),
         ),
@@ -166,9 +166,11 @@ class _OnboardingViewState extends State<OnboardingView> {
               MaterialPageRoute(builder: (context) => MapPage()),
             );
           },
-          child: const Text(
-            "Get started",
-            style: TextStyle(color: Colors.white),
+          child: Text(
+            "Get Started",
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: MediaQuery.of(context).size.width * 0.06),
           ),
         ),
       ),
@@ -197,7 +199,9 @@ class _OnboardingViewState extends State<OnboardingView> {
           },
           child: Text(
             controller.items[index].title,
-            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.07,
+                fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 30),
@@ -212,7 +216,9 @@ class _OnboardingViewState extends State<OnboardingView> {
           },
           child: Text(
             controller.items[index].descriptions,
-            style: const TextStyle(color: Colors.grey, fontSize: 16),
+            style: TextStyle(
+                color: Colors.grey,
+                fontSize: MediaQuery.of(context).size.width * 0.04),
             textAlign: TextAlign.center,
           ),
         ),
@@ -228,7 +234,9 @@ class _OnboardingViewState extends State<OnboardingView> {
           },
           child: Text(
             controller.items[index].tag,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.05,
+                fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
         ),
@@ -258,9 +266,10 @@ class _OnboardingViewState extends State<OnboardingView> {
         break;
       case 5:
         TextToSpeech.speak(
-            "- Speak going, or go, or navigate to go to your destination \n"
-            "- Speak start navigate to start your route \n"
-            "- Speak stop navigate to stop your route \n"
+            "- Say going, or go, or navigate to go to your destination \n"
+            "- Say start navigate to start your route \n"
+            "- Say stop navigate to stop your route \n"
+            "- Say share location to share your location \n"
             "Swipe to the right to continue\n");
         break;
       case 6:
@@ -281,14 +290,14 @@ class _OnboardingViewState extends State<OnboardingView> {
 
         _speech.listen(onResult: (result) {
           setState(() {
-            isSuccessTryMicrophone = true;
             _text = result.recognizedWords.toLowerCase();
+            isSuccessTryMicrophone = true;
             if (_text.isNotEmpty &&
                 !_text.contains("audio") &&
                 !_text.contains("command")) {
               isSuccessTryMicrophone = true;
               TextToSpeech.speak(
-                  "Nice, you have tried the voice command. swipe to the right continue");
+                  "Nice, you have tried the voice command. swipe to continue");
             } else {
               _microphoneTimeout1();
             }

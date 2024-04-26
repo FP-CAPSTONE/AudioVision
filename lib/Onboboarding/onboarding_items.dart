@@ -32,9 +32,10 @@ class OnboardingItems {
     OnboardingInfo(
         title: "User Guide",
         descriptions:
-            "- Speak going, or go, or navigate to go to your destination \n"
-            "- Speak start navigate to start your route \n"
-            "- Speak stop navigate to stop your route \n",
+            "- Say going, or go, or navigate to go to your destination \n"
+            "- Say start navigate to start your route \n"
+            "- Say stop navigate to stop your route \n"
+            "- Say share location to share your location \n",
         tag: "",
         image: "assets/image/boardinglogos.jpg"),
     OnboardingInfo(
