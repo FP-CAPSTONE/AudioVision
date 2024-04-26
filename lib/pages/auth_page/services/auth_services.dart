@@ -9,7 +9,7 @@ import 'dart:convert';
 
 class AuthService {
   static String? userName;
-  static String? userEmail;
+  // static String? userEmail;
   static String? userId;
 
   static bool isAuthenticate = false;
@@ -32,7 +32,7 @@ class AuthService {
       final token = userData['token'];
       userName = userData['userName'];
       userId = userData['userId'].toString();
-      userEmail = userData['userEmail'].toString();
+      // userEmail = userData['userEmail'].toString();
 
       isAuthenticate = token != null;
 
@@ -133,7 +133,11 @@ class AuthService {
         });
 
         prefs.setString('userData', userData);
+
+        isAuthenticated();
+
         TextToSpeech.speak('Registration Success, Account create successfuly');
+        Get.to(MapPage());
       } else {
         TextToSpeech.speak('Registration Faild');
       }

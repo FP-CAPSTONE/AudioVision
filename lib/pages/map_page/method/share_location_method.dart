@@ -4,6 +4,7 @@ import 'package:audiovision/pages/auth_page/services/auth_services.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
+import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart'; // Import the services library for clipboard functionality
@@ -13,7 +14,6 @@ class ShareLocation {
 
 //tracking
   static bool isTracking = false;
-  static String? trackingEmail;
   static String? trackingUserName;
   static String? trackingDestinationLocationName;
   static LatLng? trackUserCoordinate;
@@ -25,11 +25,11 @@ class ShareLocation {
   static shareUserLocation(LatLng userLocation, LatLng destinationLocation,
       String destinationLocationName) async {
     isShared = true;
-    final snapshot = await dbRef.child(AuthService.userEmail.toString()).get();
+    final snapshot = await dbRef.child(AuthService.userName.toString()).get();
 
     if (!snapshot.exists) {
       // ID does not exist, set the data
-      dbRef.child(AuthService.userEmail.toString()).set({
+      dbRef.child(AuthService.userName.toString()).set({
         'name': AuthService.userName,
         'userLocation': {
           "lat": userLocation.latitude,
@@ -53,7 +53,7 @@ class ShareLocation {
 
   static updateUserLocation(LatLng userLocation) {
     // Mengirim data ke Firebase Realtime Database
-    dbRef.child(AuthService.userEmail.toString()).update({
+    dbRef.child(AuthService.userName.toString()).update({
       'userLocation': {
         "lat": userLocation.latitude,
         "long": userLocation.longitude
@@ -62,14 +62,14 @@ class ShareLocation {
   }
 
   static getOtherUserLocation() async {
-    // Check if trackingEmail is empty
-    if (trackingEmail == null || trackingEmail!.isEmpty) {
+    // Check if trackingUserName is empty
+    if (trackingUserName == null || trackingUserName!.isEmpty) {
       print('Tracking EMAIL is empty.');
       // Handle empty tracking ID here (e.g., show an error message)
       return;
     }
 
-    final snapshot = await dbRef.child(trackingEmail!).get();
+    final snapshot = await dbRef.child(trackingUserName!).get();
 
     if (snapshot.exists) {
       // Data exists, you can access it using snapshot.value
@@ -105,15 +105,13 @@ class ShareLocation {
 
       isTracking = true;
     } else {
+      TextToSpeech.speak(
+          'There is no shared data location name with ${ShareLocation.trackingUserName}');
       print('No data available.');
     }
   }
 
   static stopTracking() {
-    isTracking = false;
-
-    trackingEmail = null;
-    trackUserCoordinate = null;
     trackDestinationCoordinate = null;
     PolylineMethod(stopTracking)
         .clearPolyline(); // stop tracking did not use in clearPolyline method
@@ -126,5 +124,9 @@ class ShareLocation {
     MapPage.markers.removeWhere(
       (marker) => marker.markerId.value == "Tracking Destination",
     );
+    isTracking = false;
+
+    trackingUserName = null;
+    trackUserCoordinate = null;
   }
 }

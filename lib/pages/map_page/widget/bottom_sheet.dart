@@ -2,6 +2,7 @@ import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CustomBottomSheet extends StatefulWidget {
   final Function callback;
@@ -135,6 +136,41 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                       MediaQuery.of(context).size.width * 0.15,
                                   child: ElevatedButton(
                                     onPressed: () {
+                                      // find the north and south to animate the camera
+                                      double minLat = MapPage.userLatitude <
+                                              MapPage.destinationCoordinate
+                                                  .latitude
+                                          ? MapPage.userLatitude
+                                          : MapPage
+                                              .destinationCoordinate.latitude;
+                                      double minLng = MapPage.userLongitude <
+                                              MapPage.destinationCoordinate
+                                                  .longitude
+                                          ? MapPage.userLongitude
+                                          : MapPage
+                                              .destinationCoordinate.longitude;
+                                      double maxLat = MapPage.userLatitude >
+                                              MapPage.destinationCoordinate
+                                                  .latitude
+                                          ? MapPage.userLatitude
+                                          : MapPage
+                                              .destinationCoordinate.latitude;
+                                      double maxLng = MapPage.userLongitude >
+                                              MapPage.destinationCoordinate
+                                                  .longitude
+                                          ? MapPage.userLongitude
+                                          : MapPage
+                                              .destinationCoordinate.longitude;
+
+                                      MapPage.mapController!.animateCamera(
+                                        CameraUpdate.newLatLngBounds(
+                                          LatLngBounds(
+                                            southwest: LatLng(minLat, minLng),
+                                            northeast: LatLng(maxLat, maxLng),
+                                          ),
+                                          100, // Padding
+                                        ),
+                                      );
                                       MapPage.isStartNavigate = false;
                                     },
                                     style: ButtonStyle(

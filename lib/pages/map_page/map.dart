@@ -385,20 +385,20 @@ class _MapPageState extends State<MapPage> {
                                               8), // Apply the same border radius
                                           onTap: () {
                                             TextEditingController
-                                                _userEmailController =
+                                                _userNameController =
                                                 TextEditingController();
                                             showDialog(
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
                                                   title:
-                                                      Text('Enter User Email'),
+                                                      Text('Tracking Location'),
                                                   content: TextField(
                                                     controller:
-                                                        _userEmailController,
+                                                        _userNameController,
                                                     decoration: InputDecoration(
                                                       hintText:
-                                                          'Enter User Email',
+                                                          'Enter Username',
                                                     ),
                                                   ),
                                                   actions: <Widget>[
@@ -411,30 +411,30 @@ class _MapPageState extends State<MapPage> {
                                                     ),
                                                     TextButton(
                                                       onPressed: () {
-                                                        String userEmail =
-                                                            _userEmailController
+                                                        String userName =
+                                                            _userNameController
                                                                 .text
                                                                 .trim();
-                                                        if (userEmail.isEmpty) {
+                                                        if (userName.isEmpty) {
                                                           // Handle empty email
                                                           TextToSpeech.speak(
-                                                              "Please enter a User Email.");
+                                                              "Please enter the user name.");
                                                           ScaffoldMessenger.of(
                                                                   context)
                                                               .showSnackBar(
                                                             SnackBar(
                                                               content: const Text(
-                                                                  'Please enter a User Email.'),
+                                                                  'Please enter the Username.'),
                                                             ),
                                                           );
                                                           return;
                                                         }
                                                         // Perform actions with the entered user ID
                                                         print(
-                                                            'User ID entered: $userEmail');
+                                                            'User ID entered: $userName');
                                                         ShareLocation
-                                                                .trackingEmail =
-                                                            userEmail;
+                                                                .trackingUserName =
+                                                            userName;
                                                         ShareLocation
                                                             .getOtherUserLocation();
                                                         // Close the dialog
@@ -585,7 +585,7 @@ class _MapPageState extends State<MapPage> {
                         },
                         onTap: () async {
                           TextToSpeech.speak(
-                              "Clicking search bar. search where you want to go. and hold the screen to read the search result. otherwise. you can double tap the screen to activate the audio command to set your destination");
+                              "Clicking search bar. search where you want to go. and hold the screen to read the search result. otherwise. you can double tap the screen to activate the audio command. say.   'navigate destination' or 'going destination' to set your destination");
                           searchLogs = await SearchMethod.getSearchLogs();
                           // Iterate through the search logs
                           searchLogs.forEach((log, placeId) {
@@ -1213,9 +1213,9 @@ class _MapPageState extends State<MapPage> {
           "You are not logged in. To share your location, you must log in first.");
       return;
     }
-    String userId = AuthService.userEmail.toString();
+    String userName = AuthService.userName.toString();
     TextToSpeech.speak(
-        'Do you want to share your location?. To share your location, Share your Email to other people. your email is $userId');
+        'Do you want to share your location?. To share your location, Share your Email to other people. your username is $userName.split("")');
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1226,7 +1226,7 @@ class _MapPageState extends State<MapPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Do you want to share your location? To share your location, Share your ID to other people. your ID is $userId',
+                'Do you want to share your location? To share your location, Share your username to other people. your username is $userName',
               ),
               SizedBox(height: 10),
               Row(
@@ -1241,7 +1241,7 @@ class _MapPageState extends State<MapPage> {
                   // ElevatedButton(
                   //   onPressed: () {
                   //     // Copy the user ID to the clipboard
-                  //     Clipboard.setData(ClipboardData(text: userId));
+                  //     Clipboard.setData(ClipboardData(text: userName));
                   //     Navigator.of(context).pop(
                   //         true); // Return true indicating user wants to share location
                   //   },
@@ -1337,12 +1337,13 @@ class _MapPageState extends State<MapPage> {
                   MapPage.mapController,
                   MapPage.destinationCoordinate,
                 );
-                TextToSpeech.speak("Start navigation");
+                TextToSpeech.speak("Start navigation to " +
+                    MapPage.googleMapDetail['name'].toString());
 
                 return;
               } else {
                 TextToSpeech.speak(
-                    "You are on the navigation right now. your destination is set. to. " +
+                    "You are already navigating. Your destination is set to " +
                         MapPage.googleMapDetail['name'].toString());
               }
             } else if (_text.contains("in front")) {
@@ -1356,6 +1357,31 @@ class _MapPageState extends State<MapPage> {
               //   }
               // }
               TextToSpeech.speak("there are 2 people in front of you");
+            } else if (_text.contains("share")) {
+              if (MapPage.destinationCoordinate.latitude != 0) {
+                if (MapPage.isStartNavigate) {
+                  if (AuthService.isAuthenticate) {
+                    final String? userName = AuthService.userName;
+                    TextToSpeech.speak(
+                        "Start sharing your location. You need to give your username to other people $userName so they can track your location");
+
+                    ShareLocation.shareUserLocation(
+                      LatLng(MapPage.userLatitude, MapPage.userLongitude),
+                      MapPage.destinationCoordinate,
+                      MapPage.destinationLocationName,
+                    );
+                  } else {
+                    TextToSpeech.speak(
+                        "In order to share your location, you need to login first. Navigating to the login page");
+                    Get.to(LoginPage());
+                  }
+                } else {
+                  TextToSpeech.speak(
+                      "In order to share location, you need to start navigation. To start navigation, say 'start navigate'.");
+                }
+                TextToSpeech.speak(
+                    "In order to share your location, you need to set your destination. To set the destination, you need to search for it using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+              }
             } else {
               // stop listening
               _microphoneTimeout1();
@@ -1372,7 +1398,7 @@ class _MapPageState extends State<MapPage> {
 
   // stop listening after 8 seconds
   void _microphoneTimeout1() {
-    Timer(const Duration(seconds: 10), () {
+    Timer(const Duration(seconds: 9), () {
       // Reset _isListening 8 seconds
       setState(() {
         _isListening = false;
@@ -1384,7 +1410,7 @@ class _MapPageState extends State<MapPage> {
 
   // stop listening if the user did not say anything
   void _microphoneTimeout2() {
-    Timer(const Duration(seconds: 8), () {
+    Timer(const Duration(seconds: 6), () {
       if (_text == "Listening...") {
         // Reset _isListening if no speech is recognized after 5 seconds
         setState(() {

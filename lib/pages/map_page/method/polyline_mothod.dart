@@ -36,12 +36,21 @@ class PolylineMethod {
   }
 
   void addPolyLine() {
+    print(polylineCoordinates.toString());
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
       color: Color.fromARGB(255, 73, 73, 73),
       points: polylineCoordinates,
       width: 5,
+      jointType: JointType.bevel,
+      patterns: <PatternItem>[
+        PatternItem.dot, // 10 pixels dashed line
+        PatternItem.gap(50), // 5 pixels gap
+      ],
+      zIndex: 2,
+      startCap: Cap.buttCap,
+      endCap: Cap.squareCap,
     );
     callback(polyline);
   }

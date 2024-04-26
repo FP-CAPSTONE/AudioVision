@@ -9,8 +9,8 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   TextEditingController _nameController = TextEditingController(text: "boben");
-  TextEditingController _emailController =
-      TextEditingController(text: "abdul.saipi@student.president.ac.id");
+  // TextEditingController _emailController =
+  //     TextEditingController(text: "abdul.saipi@student.president.ac.id");
   TextEditingController _passwordController =
       TextEditingController(text: "passwordsaya");
 
@@ -25,7 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     await AuthService.register(
       _nameController.text.toString(),
-      _emailController.text.toString(),
+      _nameController.text.toString() + '@example.com',
       _passwordController.text.toString(),
     );
 
@@ -44,65 +44,69 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Register', style: TextStyle(fontSize: 24, color: Colors.black)),
+                Text('Register',
+                    style: TextStyle(fontSize: 24, color: Colors.black)),
                 SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                labelText: 'Name',
-                labelStyle: TextStyle(color: Colors.black),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-              ),
+                    labelText: 'Username',
+                    labelStyle: TextStyle(color: Colors.black),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: TextStyle(color: Colors.black),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-              ),
-                ),
+                //   TextFormField(
+                //     controller: _emailController,
+                //     decoration: InputDecoration(
+                //   labelText: 'Email',
+                //   labelStyle: TextStyle(color: Colors.black),
+                //   focusedBorder: OutlineInputBorder(
+                //     borderSide: BorderSide(color: Colors.black),
+                //   ),
+                //   enabledBorder: OutlineInputBorder(
+                //     borderSide: BorderSide(color: Colors.black),
+                //   ),
+                // ),
+                //   ),
                 SizedBox(height: 10),
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
-                labelText: 'Password',
-                labelStyle: TextStyle(color: Colors.black),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-              ),
+                    labelText: 'Password',
+                    labelStyle: TextStyle(color: Colors.black),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                  ),
                   obscureText: true,
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   child: Text('Register'),
-                  style: ElevatedButton.styleFrom(primary: Colors.black, onPrimary: Colors.white),
-            ),
+                  style: ElevatedButton.styleFrom(
+                      primary: Colors.black, onPrimary: Colors.white),
+                ),
                 SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
                   },
                   child: Text(
-                'Already have an account? Click here to Login.',
-                style: TextStyle(color: Colors.black, decoration: TextDecoration.underline),
-              ),
+                    'Already have an account? Click here to Login.',
+                    style: TextStyle(
+                        color: Colors.black,
+                        decoration: TextDecoration.underline),
+                  ),
                 ),
               ],
             ),
