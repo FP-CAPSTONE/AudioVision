@@ -64,8 +64,9 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                             children: [
                               Text(
                                 '${totals['totalDuration']} mins ',
-                                style: const TextStyle(
-                                  fontSize: 18,
+                                style: TextStyle(
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.05,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -81,8 +82,13 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                   children: [
                                     TextSpan(
                                       text:
-                                          '${totals['totalDistance'].toStringAsFixed(2)} km . ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
-                                      style: TextStyle(color: Colors.grey),
+                                          '${totals['totalDistance'].toStringAsFixed(2)} km • ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
+                                      style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.04),
                                     ),
                                   ],
                                 ),
@@ -96,7 +102,8 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                   TextToSpeech.speak("Share Button");
                                 },
                                 child: Container(
-                                  height: 50,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.15,
                                   child: ElevatedButton(
                                       onPressed: () {
                                         widget.callback(context);
@@ -110,6 +117,9 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                       child: Icon(
                                         Icons.share,
                                         color: Colors.white,
+                                        size:
+                                            MediaQuery.of(context).size.width *
+                                                0.08,
                                       )),
                                 ),
                               ),
@@ -121,7 +131,8 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                   TextToSpeech.speak("Exit Button");
                                 },
                                 child: Container(
-                                  height: 50,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.15,
                                   child: ElevatedButton(
                                     onPressed: () {
                                       MapPage.isStartNavigate = false;
@@ -133,7 +144,12 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                     ),
                                     child: Text(
                                       "Exit",
-                                      style: TextStyle(color: Colors.white),
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.04),
                                     ),
                                   ),
                                 ),
@@ -170,11 +186,17 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                         ),
                         title: Text(
                           step['instructions'],
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.043),
                         ),
                         subtitle: Text(
                           '${step['distance']} - ${step['duration']}',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(
+                              color: Colors.grey,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.038),
                         ),
                         leading: getDirectionImage(maneuver),
                       ),
@@ -275,7 +297,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
       child: Tab(
         icon: Image.asset(
           imagePath,
-          height: 35,
+          height: MediaQuery.of(context).size.width * 0.12,
           color: Colors.black,
         ),
       ),

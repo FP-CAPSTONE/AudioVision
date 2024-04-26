@@ -52,7 +52,6 @@ class ShareLocation {
   }
 
   static updateUserLocation(LatLng userLocation) {
-    print("update shared location");
     // Mengirim data ke Firebase Realtime Database
     dbRef.child(AuthService.userEmail.toString()).update({
       'userLocation': {

@@ -105,7 +105,6 @@ class AuthService {
 
   static register(String name, email, password) async {
     try {
-      print("register function run");
       var response = await http.post(
         Uri.parse("${apiUrl}auth/register"),
         body: jsonEncode({"name": name, "email": email, "password": password}),
@@ -135,11 +134,8 @@ class AuthService {
 
         prefs.setString('userData', userData);
         TextToSpeech.speak('Registration Success, Account create successfuly');
-
-        print("Account create successfuly");
       } else {
         TextToSpeech.speak('Registration Faild');
-        print("Failed");
       }
     } catch (e) {
       print(e.toString());
@@ -148,7 +144,6 @@ class AuthService {
 
   static Future<void> logOut() async {
     final pref = await SharedPreferences.getInstance();
-    print("logout");
 
     Get.to(LoginPage());
     await pref.clear();

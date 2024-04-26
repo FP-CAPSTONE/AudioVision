@@ -36,7 +36,7 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
                   width: 40,
                   height: 3,
@@ -63,8 +63,10 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                                   },
                                   child: Text(
                                     MapPage.googleMapDetail['name'],
-                                    style: const TextStyle(
-                                        fontSize: 15,
+                                    style: TextStyle(
+                                        fontSize:
+                                            MediaQuery.of(context).size.width *
+                                                0.042,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black,
                                         overflow: TextOverflow.ellipsis),
@@ -78,14 +80,21 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                                             Text(
                                               MapPage.googleMapDetail['rating']
                                                   .toString(),
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.grey,
-                                                  fontSize: 10),
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.028),
                                             ),
                                             const SizedBox(width: 5),
                                             RatingBar.builder(
-                                              itemSize: 18,
+                                              itemSize: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.045,
                                               initialRating: MapPage
                                                   .googleMapDetail['rating'],
                                               direction: Axis.horizontal,
@@ -102,25 +111,28 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                                             ),
                                             const SizedBox(width: 5),
                                             Text(
-                                              "(" +
-                                                  MapPage.googleMapDetail[
-                                                          'ratingTotal']
-                                                      .toString() +
-                                                  ")".toString(),
-                                              style: const TextStyle(
+                                              "(${MapPage.googleMapDetail['ratingTotal']})",
+                                              style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.grey,
-                                                  fontSize: 10),
+                                                  fontSize:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.028),
                                             )
                                           ],
                                         ),
                                       )
-                                    : const Text(
+                                    : Text(
                                         "No reviews",
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: Colors.grey,
-                                            fontSize: 10),
+                                            fontSize: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.03),
                                       ),
                               ],
                             ),
@@ -130,7 +142,7 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                               TextToSpeech.speak("Start Button");
                             },
                             child: Container(
-                              height: 50,
+                              height: MediaQuery.of(context).size.height * 0.07,
                               child: ElevatedButton(
                                 onPressed: () {
                                   NavigateMethod().startNavigate(
@@ -146,7 +158,11 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                                 ),
                                 child: Text(
                                   "Start",
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize:
+                                          MediaQuery.of(context).size.width *
+                                              0.04),
                                 ),
                               ),
                             ),
