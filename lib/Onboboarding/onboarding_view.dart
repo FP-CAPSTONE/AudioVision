@@ -44,8 +44,10 @@ class _OnboardingViewState extends State<OnboardingView> {
       body: GestureDetector(
         onDoubleTap: () {
           if (currentPageIndex == 2) {
-            _listen();
             TextToSpeech.speak("Audio command activated, say something");
+            Timer(Duration(seconds: 2), () {
+              _listen();
+            });
           }
         },
         child: Stack(

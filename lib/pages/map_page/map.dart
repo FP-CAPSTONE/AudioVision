@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/widget/buttom_sheet_detail_ocation.dart';
 import 'package:audiovision/pages/map_page/method/searching_method.dart';
+import 'package:audiovision/pages/map_page/widget/panel_widget.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -32,6 +33,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 // ned to change the class name, there are two location service
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:vibration/vibration.dart';
@@ -41,9 +43,9 @@ class MapPage extends StatefulWidget {
   //public variable
   static double userLatitude = 0;
   static double userLongitude = 0;
-  static LatLng userPreviousCoordinate = const LatLng(0, 0);
+  static LatLng userPreviousCoordinate = LatLng(0, 0);
 
-  static LatLng destinationCoordinate = const LatLng(0, 0);
+  static LatLng destinationCoordinate = LatLng(0, 0);
 
   static bool isStartNavigate = false;
 
@@ -75,6 +77,7 @@ class MapPage extends StatefulWidget {
   static String destinationLocationName = "";
 
   static double compassHeading = 0;
+  static int distance = 0;
 
   const MapPage({super.key});
 
@@ -84,6 +87,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   final _endSearchFieldController = TextEditingController();
+  final panelController = PanelController();
 
   DetailsResult? destination;
 
@@ -210,277 +214,316 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    double panelHeightClosed = MediaQuery.of(context).size.height * 0.0;
+    final panelHeightOpen = MediaQuery.of(context).size.height * 0.3;
+
     return Scaffold(
-      body: GestureDetector(
-        onDoubleTap: () {
-          TextToSpeech.speak("Audio command activated, say something");
-          _isListening = false;
-          _text = '';
-          Vibration.vibrate();
+      body: SlidingUpPanel(
+        defaultPanelState: PanelState.CLOSED,
+        controller: panelController,
+        minHeight: panelHeightClosed,
+        maxHeight: panelHeightOpen,
+        body: GestureDetector(
+          onDoubleTap: () {
+            TextToSpeech.speak("Audio command activated, say something");
+            _isListening = false;
+            _text = '';
+            Vibration.vibrate();
 
-          Timer(Duration(seconds: 2), () {
-            _listen();
-          });
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  GestureDetector(
-                    onLongPress: () {
-                      TextToSpeech.speak(
-                          "this is a maps. double tap the screen to activate audio command");
-                    },
-                    child: GoogleMapWidget(
-                      mapstyle: mapTheme,
-                    ),
-                  ),
-                  MapPage.isStartNavigate
-                      ? Container()
-                      : ShareLocation.isTracking
-                          ? Container()
-                          : build_SearchBar(context),
-                  // destination != null
-                  //     ? ButtonStartNavigateWidget(
-                  //         mapController: MapPage.mapController!,
-                  //         context: context,
-                  //       )
-                  //     : Container(),
-                  MapPage.isStartNavigate
-                      ? NavigateBarWidget(
-                          navigationText: navigationText,
-                          distance: distanceToNextStep,
-                          manuever: maneuver,
-                          instruction: instruction,
-                        )
-                      : Container(),
-                  Center(
-                    child: _isListening
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // SizedBox(
-                              //     height: MediaQuery.of(context).size.height *
-                              //         0.), // Adjust the height as needed
-                              const Icon(
-                                Icons.mic,
-                                size: 50,
-                                color: Colors.red,
-                              ),
-                              SizedBox(
-                                  height:
-                                      10), // Add some spacing between the icon and text
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors
-                                      .grey, // Set your desired background color here
-                                  borderRadius: BorderRadius.circular(
-                                      8), // Optional: Add border radius to make it rounded
-                                ),
-                                padding: const EdgeInsets.all(
-                                    8), // Optional: Add padding around the text
-                                child: Text(
-                                  _text,
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors
-                                          .white), // Set text color if needed
-                                ),
-                              )
-                            ],
-                          )
-                        : SizedBox(),
-                  ),
-
-                  MapPage.isStartNavigate
-                      ? CustomBottomSheet(
-                          callback: shareLocation,
-                        )
-                      : Container(),
-                  !MapPage.isStartNavigate &&
-                          MapPage.destinationCoordinate.latitude != 0
-                      ? BottomSheetDetailLocation()
-                      : Container(),
-                  // NavigateBarWidget(
-                  //   navigationText: "navigationText",
-                  //   distance: "20 m",
-                  //   manuever: "turn-left",
-                  // ),
-                  MapPage.isStartNavigate ? builCamera() : Container(),
-                  // isStartNavigate
-                  // ? Align(
-                  //     alignment: Alignment.centerRight, child: cameraView())
-                  // : Container(),
-
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Expanded(
-                        child: Stack(
-                          children: [
-                            // Your map widgets...
-                          ],
-                        ),
+            Timer(Duration(seconds: 2), () {
+              _listen();
+            });
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    GestureDetector(
+                      onLongPress: () {
+                        TextToSpeech.speak(
+                            "this is a maps. double tap the screen to activate audio command");
+                      },
+                      child: GoogleMapWidget(
+                        mapstyle: mapTheme,
                       ),
-                      // Button to show bottom sheet
-
-                      MapPage.isStartNavigate
-                          ? Container()
-                          : ShareLocation.isTracking
-                              ? ElevatedButton(
-                                  onPressed: () {
-                                    // Show confirmation dialog to stop tracking
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text("Stop Tracking"),
-                                          content: Text(
-                                              "Are you sure you want to stop tracking?"),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              child: Text("Cancel"),
-                                              onPressed: () {
-                                                Navigator.of(context)
-                                                    .pop(); // Close the dialog
-                                              },
-                                            ),
-                                            TextButton(
-                                              child: Text("Stop"),
-                                              onPressed: () {
-                                                // stop tracking
-
-                                                ShareLocation.stopTracking();
-
-                                                Navigator.of(context)
-                                                    .pop(); // Close the dialog
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                  child: Text('Stop Tracking'),
+                    ),
+                    MapPage.isStartNavigate
+                        ? Container()
+                        : ShareLocation.isTracking
+                            ? Container()
+                            : build_SearchBar(context),
+                    // destination != null
+                    //     ? ButtonStartNavigateWidget(
+                    //         mapController: MapPage.mapController!,
+                    //         context: context,
+                    //       )
+                    //     : Container(),
+                    MapPage.isStartNavigate
+                        ? NavigateBarWidget(
+                            navigationText: navigationText,
+                            distance: distanceToNextStep,
+                            manuever: maneuver,
+                            instruction: instruction,
+                          )
+                        : Container(),
+                    Center(
+                      child: _isListening
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // SizedBox(
+                                //     height: MediaQuery.of(context).size.height *
+                                //         0.), // Adjust the height as needed
+                                const Icon(
+                                  Icons.mic,
+                                  size: 50,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(
+                                    height:
+                                        10), // Add some spacing between the icon and text
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors
+                                        .grey, // Set your desired background color here
+                                    borderRadius: BorderRadius.circular(
+                                        8), // Optional: Add border radius to make it rounded
+                                  ),
+                                  padding: const EdgeInsets.all(
+                                      8), // Optional: Add padding around the text
+                                  child: Text(
+                                    _text,
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors
+                                            .white), // Set text color if needed
+                                  ),
                                 )
-                              : MapPage.destinationCoordinate.latitude == 0
-                                  ? Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: Color.fromARGB(255, 0, 0, 0),
-                                      ),
-                                      width: MediaQuery.of(context).size.width *
-                                          0.9,
-                                      height: 55,
-                                      child: Material(
-                                        // Wrap ElevatedButton with Material
-                                        borderRadius: BorderRadius.circular(
-                                            8), // Apply the same border radius
-                                        color: Color.fromARGB(255, 0, 0,
-                                            0), // Apply the same color
-                                        child: InkWell(
-                                          // Wrap ElevatedButton with InkWell for ripple effect
+                              ],
+                            )
+                          : SizedBox(),
+                    ),
+
+                    MapPage.isStartNavigate
+                        ? CustomBottomSheet(
+                            callback: shareLocation,
+                          )
+                        : Container(),
+                    !MapPage.isStartNavigate &&
+                            MapPage.destinationCoordinate.latitude != 0
+                        ? BottomSheetDetailLocation()
+                        : Container(),
+                    // NavigateBarWidget(
+                    //   navigationText: "navigationText",
+                    //   distance: "20 m",
+                    //   manuever: "turn-left",
+                    // ),
+                    MapPage.isStartNavigate ? builCamera() : Container(),
+                    // isStartNavigate
+                    // ? Align(
+                    //     alignment: Alignment.centerRight, child: cameraView())
+                    // : Container(),
+
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Expanded(
+                          child: Stack(
+                            children: [
+                              // Your map widgets...
+                            ],
+                          ),
+                        ),
+                        // Button to show bottom sheet
+
+                        MapPage.isStartNavigate
+                            ? Container()
+                            : ShareLocation.isTracking
+                                ? ElevatedButton(
+                                    onPressed: () {
+                                      // Show confirmation dialog to stop tracking
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text("Stop Tracking"),
+                                            content: Text(
+                                                "Are you sure you want to stop tracking?"),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                child: Text("Cancel"),
+                                                onPressed: () {
+                                                  Navigator.of(context)
+                                                      .pop(); // Close the dialog
+                                                },
+                                              ),
+                                              TextButton(
+                                                child: Text("Stop"),
+                                                onPressed: () {
+                                                  // stop tracking
+
+                                                  ShareLocation.stopTracking();
+
+                                                  Navigator.of(context)
+                                                      .pop(); // Close the dialog
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Text('Stop Tracking'),
+                                  )
+                                : MapPage.destinationCoordinate.latitude == 0
+                                    ? Container(
+                                        margin: EdgeInsets.only(
+                                            bottom: panelHeightClosed + 2),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: Color.fromARGB(255, 0, 0, 0),
+                                        ),
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.9,
+                                        height: 55,
+                                        child: Material(
+                                          // Wrap ElevatedButton with Material
                                           borderRadius: BorderRadius.circular(
                                               8), // Apply the same border radius
-                                          onTap: () {
-                                            TextEditingController
-                                                _userNameController =
-                                                TextEditingController();
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title:
-                                                      Text('Tracking Location'),
-                                                  content: TextField(
-                                                    controller:
-                                                        _userNameController,
-                                                    decoration: InputDecoration(
-                                                      hintText:
-                                                          'Enter Username',
+                                          color: Color.fromARGB(255, 0, 0,
+                                              0), // Apply the same color
+                                          child: InkWell(
+                                            // Wrap ElevatedButton with InkWell for ripple effect
+                                            borderRadius: BorderRadius.circular(
+                                                8), // Apply the same border radius
+                                            onTap: () {
+                                              TextEditingController
+                                                  _userNameController =
+                                                  TextEditingController();
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: Text(
+                                                        'Tracking Location'),
+                                                    content: TextField(
+                                                      controller:
+                                                          _userNameController,
+                                                      decoration:
+                                                          InputDecoration(
+                                                        hintText:
+                                                            'Enter Username',
+                                                      ),
                                                     ),
+                                                    actions: <Widget>[
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        child: Text('Cancel'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          String userName =
+                                                              _userNameController
+                                                                  .text
+                                                                  .trim();
+                                                          if (userName
+                                                              .isEmpty) {
+                                                            // Handle empty email
+                                                            TextToSpeech.speak(
+                                                                "Please enter the user name.");
+                                                            ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                              SnackBar(
+                                                                content: const Text(
+                                                                    'Please enter the Username.'),
+                                                              ),
+                                                            );
+                                                            return;
+                                                          } else {
+                                                            panelHeightClosed =
+                                                                MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .height *
+                                                                    0.09;
+                                                            panelController
+                                                                .open();
+                                                          }
+                                                          // Perform actions with the entered user ID
+                                                          print(
+                                                              'User ID entered: $userName');
+                                                          ShareLocation
+                                                                  .trackingUserName =
+                                                              userName;
+                                                          ShareLocation
+                                                              .getOtherUserLocation();
+                                                          // Close the dialog
+                                                          Navigator.of(context)
+                                                              .pop();
+
+                                                          setState(() {
+                                                            panelHeightClosed =
+                                                                MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .height *
+                                                                    0.09;
+                                                          });
+                                                        },
+                                                        child: Text('OK'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal:
+                                                      10), // Adjust padding to match the original design
+                                              child: Center(
+                                                child: Text(
+                                                  'Tracking Location',
+                                                  style: TextStyle(
+                                                    fontSize:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.045,
+                                                    color: Colors
+                                                        .white, // Set text color to white
                                                   ),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                      child: Text('Cancel'),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        String userName =
-                                                            _userNameController
-                                                                .text
-                                                                .trim();
-                                                        if (userName.isEmpty) {
-                                                          // Handle empty email
-                                                          TextToSpeech.speak(
-                                                              "Please enter the user name.");
-                                                          ScaffoldMessenger.of(
-                                                                  context)
-                                                              .showSnackBar(
-                                                            SnackBar(
-                                                              content: const Text(
-                                                                  'Please enter the Username.'),
-                                                            ),
-                                                          );
-                                                          return;
-                                                        }
-                                                        // Perform actions with the entered user ID
-                                                        print(
-                                                            'User ID entered: $userName');
-                                                        ShareLocation
-                                                                .trackingUserName =
-                                                            userName;
-                                                        ShareLocation
-                                                            .getOtherUserLocation();
-                                                        // Close the dialog
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                      child: Text('OK'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal:
-                                                    10), // Adjust padding to match the original design
-                                            child: Center(
-                                              child: Text(
-                                                'Tracking Location',
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .width *
-                                                          0.045,
-                                                  color: Colors
-                                                      .white, // Set text color to white
                                                 ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    )
-                                  : Container(),
-                    ],
-                  ),
-                ],
+                                      )
+                                    : Container(),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        panelBuilder: (controller) => PanelWidget(
+          controller: controller,
+          panelController: panelController,
+        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
     );
   }
@@ -547,6 +590,10 @@ class _MapPageState extends State<MapPage> {
                                       predictions = [];
                                       _endSearchFieldController.clear();
                                       searchLogs = {};
+                                      MapPage.destinationCoordinate = LatLng(
+                                        0,
+                                        0,
+                                      );
                                     });
                                   },
                                   icon: Icon(
@@ -1143,6 +1190,7 @@ class _MapPageState extends State<MapPage> {
         print(MapPage.allSteps);
 
         int roundedDistance = distanceToStep.ceil();
+        MapPage.distance = roundedDistance;
 
         // Assuming there's a threshold distance to trigger the notification
         double thresholdDistance = 100; // meters
@@ -1156,7 +1204,7 @@ class _MapPageState extends State<MapPage> {
           distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
           print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
           print("In $roundedDistance metersss $maneuver");
-          TextToSpeech.speak("In $roundedDistance meters $maneuver");
+          TextToSpeech.speak("In $roundedDistance meters $instruction");
           stepIndex++;
         }
 
@@ -1363,6 +1411,21 @@ class _MapPageState extends State<MapPage> {
               //   }
               // }
               TextToSpeech.speak("there are 2 people in front of you");
+            } else if (_text.contains("next")) {
+              if (MapPage.isStartNavigate) {
+                TextToSpeech.speak("your step next step is." +
+                    MapPage.distance.toString() +
+                    "meters, $instruction");
+              } else {}
+            } else if (_text.contains("current") ||
+                _text.contains("destination")) {
+              if (MapPage.destinationLocationName != "") {
+                TextToSpeech.speak("your current destination is set to " +
+                    MapPage.destinationLocationName);
+              } else {
+                TextToSpeech.speak(
+                    "You do destination is null. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+              }
             } else if (_text.contains("share")) {
               if (MapPage.destinationCoordinate.latitude != 0) {
                 if (MapPage.isStartNavigate) {

@@ -61,6 +61,8 @@ dependencies:
   sensors_plus:
   riverpod: ^1.0.0
   lottie: 
+  sliding_up_panel: ^2.0.0+1
+  url_launcher: ^6.2.6
 
   shared_preferences:
   flutter_compass:

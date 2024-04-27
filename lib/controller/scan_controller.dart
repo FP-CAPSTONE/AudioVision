@@ -132,6 +132,24 @@ class ScanController extends GetxController {
       confThreshold: 0.5,
       classThreshold: 0.6,
     );
+// Define an array containing all dangerous object tags found on footpaths
+    List<String> dangerousObjects = [
+      'person',
+      'bicycle',
+      'car',
+      'motorcycle',
+      'bus',
+      'truck',
+      'traffic light',
+      'fire hydrant',
+      'stop sign',
+      'parking meter',
+      'bench',
+      'chair',
+      'refrigerator',
+      'bed',
+      'couch',
+    ];
 
     print("kont" + image.toString() + result.toString());
     if (result.isNotEmpty) {
@@ -140,18 +158,26 @@ class ScanController extends GetxController {
       //example result
       // [{box: [0.0, 763.1640625, 357.9225158691406, 1116.581787109375, 0.5627957582473755], tag: Stop}]
 
-      if (canNotify) {
-        Vibration.vibrate();
-        print(detectionResult);
-        TextToSpeech.speak(detectionResult[0]['tag']);
+      for (var detectedObject in detectionResult) {
+        var detectedTag = detectedObject['tag'];
+        if (canNotify && dangerousObjects.contains(detectedTag)) {
+          // Trigger notification only if canNotify is true and the detected object is one of the dangerous objects
+          Vibration.vibrate();
+          print(detectionResult);
+          TextToSpeech.speak(
+              "Watch out! there is A ${detectedTag} in front of you. ");
 
-        // Set canNotify to false to prevent further notifications
-        canNotify = false;
+          // Set canNotify to false to prevent further notifications
+          canNotify = false;
 
-        // Reset canNotify after a delay
-        Future.delayed(Duration(seconds: 5), () {
-          canNotify = true;
-        });
+          // Reset canNotify after a delay
+          Future.delayed(Duration(seconds: 5), () {
+            canNotify = true;
+          });
+
+          // Break the loop since we've already triggered the notification for one dangerous object
+          break;
+        }
       }
     }
     update();
