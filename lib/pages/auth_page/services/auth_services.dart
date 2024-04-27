@@ -49,21 +49,12 @@ class AuthService {
       print("login testt" + email);
       var response = await http.post(
         Uri.parse("${apiUrl}auth/login"),
-<<<<<<< HEAD
-        body:
-            jsonEncode({"email": email + "@example.com", "password": password}),
-        // body: jsonEncode({
-        //   "username": email,
-        //   "password": password
-        // }), // example deummy json server
-=======
         body: jsonEncode({"email": email, "password": password}),
->>>>>>> rafi
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-      
+
       if (response.statusCode == 200) {
         TextToSpeech.speak('Login successful');
 

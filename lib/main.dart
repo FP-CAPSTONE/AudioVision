@@ -30,19 +30,12 @@ class MyApp extends StatelessWidget {
     TextToSpeech.speak(
         "Welcome To Audio Vision. We will help you and assist you to go to somewhere. swipe to the right to continue");
     return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'AudioVision',
-      theme: ThemeData(
-<<<<<<< HEAD
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.black, primary: Colors.black),
-=======
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: Colors.black, primary: Colors.black
+        debugShowCheckedModeBanner: false,
+        title: 'AudioVision',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.black, primary: Colors.black),
         ),
->>>>>>> rafi
-      ),
-      home: onboarding ? MapPage() : OnboardingView()
-    );
+        home: onboarding ? MapPage() : OnboardingView());
   }
 }
