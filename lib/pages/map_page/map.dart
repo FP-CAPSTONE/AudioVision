@@ -1187,23 +1187,17 @@ class _MapPageState extends State<MapPage> {
           MapPage.allSteps[stepIndex]['end_lat'],
           MapPage.allSteps[stepIndex]['end_long'],
         );
-        print(MapPage.allSteps);
 
         int roundedDistance = distanceToStep.ceil();
         MapPage.distance = roundedDistance;
 
         // Assuming there's a threshold distance to trigger the notification
         double thresholdDistance = 100; // meters
-        print("WOYYYYYYYYYYYYYYYYYYYYYYYY");
-        print(MapPage.allSteps);
-        print(distanceToStep);
         if (distanceToStep <= thresholdDistance) {
           maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
           instruction =
               MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
           distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
-          print("MASIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-          print("In $roundedDistance metersss $maneuver");
           TextToSpeech.speak("In $roundedDistance meters $instruction");
           stepIndex++;
         }
@@ -1220,14 +1214,10 @@ class _MapPageState extends State<MapPage> {
         MapPage.destinationCoordinate.latitude,
         MapPage.destinationCoordinate.longitude,
       );
-      print(userAndDestinationDistance);
-
+      
       if (userAndDestinationDistance <= 30) {
         setState(() {
           MapPage.isStartNavigate = false;
-          print(
-              "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
-          print("CONGRATULATIONS, YOU HAVE REACEHED THE DESTINATION");
           stepIndex = 0;
           MapPage.markers
               .removeWhere((marker) => marker.markerId.value == "planceName");
@@ -1242,8 +1232,6 @@ class _MapPageState extends State<MapPage> {
     double endLatitude,
     double endLongitude,
   ) async {
-    print(startLatitude);
-    print(startLongitude);
     double distanceInMeters = await Geolocator.distanceBetween(
       startLatitude,
       startLongitude,

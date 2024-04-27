@@ -9,15 +9,15 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart'; // Import the services library for clipboard functionality
 
-class ShareLocation {
-  static late DatabaseReference dbRef;
+  class ShareLocation {
+    static late DatabaseReference dbRef;
 
-//tracking
-  static bool isTracking = false;
-  static String? trackingUserName;
-  static String? trackingDestinationLocationName;
-  static LatLng? trackUserCoordinate;
-  static LatLng? trackDestinationCoordinate;
+  //tracking
+    static bool isTracking = false;
+    static String? trackingUserName;
+    static String? trackingDestinationLocationName;
+    static LatLng? trackUserCoordinate;
+    static LatLng? trackDestinationCoordinate;
 
 // update shared data
   static bool isShared = false;
@@ -98,34 +98,8 @@ class ShareLocation {
 
       isTracking = true;
 
-      // find the north and south to animate the camera
-      double minLat =
-          trackUserCoordinate!.latitude < trackDestinationCoordinate!.latitude
-              ? trackUserCoordinate!.latitude
-              : trackDestinationCoordinate!.latitude;
-      double minLng =
-          trackUserCoordinate!.longitude < trackDestinationCoordinate!.longitude
-              ? trackUserCoordinate!.longitude
-              : trackDestinationCoordinate!.longitude;
-      double maxLat =
-          trackUserCoordinate!.latitude > trackDestinationCoordinate!.latitude
-              ? trackUserCoordinate!.latitude
-              : trackDestinationCoordinate!.latitude;
-      double maxLng =
-          trackUserCoordinate!.longitude > trackDestinationCoordinate!.longitude
-              ? trackUserCoordinate!.longitude
-              : trackDestinationCoordinate!.longitude;
-
-      MapPage.mapController!.animateCamera(
-        CameraUpdate.newLatLngBounds(
-          LatLngBounds(
-            southwest: LatLng(minLat, minLng),
-            northeast: LatLng(maxLat, maxLng),
-          ),
-          100, // Padding
-        ),
-      );
-    } else {
+ 
+    } else {  
       TextToSpeech.speak(
           'There is no shared data location name with ${ShareLocation.trackingUserName}');
       print('No data available.');

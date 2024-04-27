@@ -17,7 +17,7 @@ class NavigateMethod {
           zoom: 17,
           // bearing: _heading,
         ),
-      ),
+      ),  
     );
 
     MapPage.isStartNavigate = true;
