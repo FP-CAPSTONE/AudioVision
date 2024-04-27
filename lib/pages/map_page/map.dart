@@ -217,7 +217,10 @@ class _MapPageState extends State<MapPage> {
           _isListening = false;
           _text = '';
           Vibration.vibrate();
-          _listen();
+
+          Timer(Duration(seconds: 2), () {
+            _listen();
+          });
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1329,22 +1332,25 @@ class _MapPageState extends State<MapPage> {
               }
               TextToSpeech.speak(
                   "To exit navigate. you have to start navigate first");
-            } else if (_text.contains("start")) {
-              if (!MapPage.isStartNavigate &&
-                  MapPage.destinationCoordinate.latitude != 0) {
-                MapPage.isStartNavigate = true;
-                NavigateMethod().startNavigate(
-                  MapPage.mapController,
-                  MapPage.destinationCoordinate,
-                );
-                TextToSpeech.speak("Start navigation to " +
-                    MapPage.googleMapDetail['name'].toString());
-
-                return;
+            } else if (_text.contains("start navigate")) {
+              if (MapPage.destinationCoordinate.latitude != 0) {
+                if (!MapPage.isStartNavigate) {
+                  MapPage.isStartNavigate = true;
+                  NavigateMethod().startNavigate(
+                    MapPage.mapController,
+                    MapPage.destinationCoordinate,
+                  );
+                  TextToSpeech.speak("Start navigation to " +
+                      MapPage.googleMapDetail['name'].toString());
+                  return;
+                } else {
+                  TextToSpeech.speak(
+                      "You are already navigating. Your destination is set to " +
+                          MapPage.googleMapDetail['name'].toString());
+                }
               } else {
                 TextToSpeech.speak(
-                    "You are already navigating. Your destination is set to " +
-                        MapPage.googleMapDetail['name'].toString());
+                    "to start navigate. you have to set your destination first. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
               }
             } else if (_text.contains("in front")) {
               // Iterate through the detection result to count objects in front
