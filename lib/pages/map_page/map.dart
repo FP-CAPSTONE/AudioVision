@@ -1228,6 +1228,8 @@ class _MapPageState extends State<MapPage> {
           print(
               "CONGRATULATIONSSSSSSSSSSSSSSSS YOU HAVE REACEHED THE DESTINATION");
           print("CONGRATULATIONS, YOU HAVE REACEHED THE DESTINATION");
+          TextToSpeech.speak(
+              "CONGRATULATIONS, YOU HAVE REACEHED THE DESTINATION");
           stepIndex = 0;
           MapPage.markers
               .removeWhere((marker) => marker.markerId.value == "planceName");
@@ -1416,7 +1418,10 @@ class _MapPageState extends State<MapPage> {
                 TextToSpeech.speak("your step next step is." +
                     MapPage.distance.toString() +
                     "meters, $instruction");
-              } else {}
+              } else {
+                TextToSpeech.speak(
+                    "you are not start navigate yet. to start navigate. say 'start navigate'");
+              }
             } else if (_text.contains("current") ||
                 _text.contains("destination")) {
               if (MapPage.destinationLocationName != "") {
