@@ -44,41 +44,25 @@ class AuthService {
   }
 
   static String apiUrl = "https://audiovision-413417.as.r.appspot.com/";
-  // static String apiUrl = "http://10.35.117.223/";
-  // static String apiUrl = "https://dummyjson.com/";
   static login(String email, password) async {
     try {
       print("login testt" + email);
       var response = await http.post(
         Uri.parse("${apiUrl}auth/login"),
         body: jsonEncode({"email": email, "password": password}),
-        // body: jsonEncode({
-        //   "username": email,
-        //   "password": password
-        // }), // example deummy json server
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-      print(response.toString() + "login testt" + email);
-      print(response);
-      print(email);
-
+      
       if (response.statusCode == 200) {
         TextToSpeech.speak('Login successful');
 
         var data = jsonDecode(response.body.toString());
-        print(data);
-
         var loginResult = data['loginResult'];
         var userId = loginResult['userId'];
         var name = loginResult['name'];
         var token = loginResult['token'];
-
-        // dummy json sevrer response
-        // var userId = data['id'];
-        // var name = data['username'];
-        // var token = data['token'];
 
         final prefs = await SharedPreferences.getInstance();
         final userData = json.encode({

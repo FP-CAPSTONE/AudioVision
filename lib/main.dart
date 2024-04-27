@@ -31,14 +31,13 @@ class MyApp extends StatelessWidget {
         "Welcome To Audio Vision. We will help you and assist you to go to somewhere.");
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'AudioVision',
       theme: ThemeData(
         colorScheme:
             ColorScheme.fromSeed(seedColor: Colors.black, primary: Colors.black
-                // ···
-                ),
+        ),
       ),
-      home: OnboardingView(),
+      home: onboarding ? MapPage() : OnboardingView()
     );
   }
 }

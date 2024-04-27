@@ -133,7 +133,7 @@ class ScanController extends GetxController {
       classThreshold: 0.6,
     );
 
-    print("kont" + image.toString() + result.toString());
+    // print("kont" + image.toString() + result.toString());
     if (result.isNotEmpty) {
       detectionResult = result;
       // print(result);

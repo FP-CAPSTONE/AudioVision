@@ -21,7 +21,6 @@ class ShareLocation {
 
 // update shared data
   static bool isShared = false;
-
   static shareUserLocation(LatLng userLocation, LatLng destinationLocation,
       String destinationLocationName) async {
     isShared = true;
@@ -41,18 +40,10 @@ class ShareLocation {
           "long": destinationLocation.longitude
         },
       });
-    } else {
-      // ID already exists, handle accordingly (optional)
-      print('ID already exists in the database.');
-    }
-
-    print("share location !!");
-
-    // print('Updating location data: $locationData');
+    }  
   }
 
   static updateUserLocation(LatLng userLocation) {
-    print("update shared location");
     // Mengirim data ke Firebase Realtime Database
     dbRef.child(AuthService.userEmail.toString()).update({
       'userLocation': {
