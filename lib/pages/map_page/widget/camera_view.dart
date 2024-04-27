@@ -142,25 +142,9 @@ class CameraView {
     Color colorPick = const Color.fromARGB(255, 50, 233, 30);
 
     return detectionResult.map<Widget>((result) {
-      // Specify return type as Widget
-      // TextToSpeech.speak("${result['tag']}");
-      print("resultttttttttttttttttts " + result.toString());
-
-      // List<Map<String, double>> polygons = (result['polygons'] as List?)
-      //         ?.map<Map<String, double>>(
-      //             (item) => (item as Map?)?.cast<String, double>() ?? {})
-      //         .toList() ??
-      //     [];
-
-      // List<Offset> points = polygons
-      //     .map((poly) => Offset(poly['x']! * factorX, poly['y']! * factorY))
-      //     .toList();
-
-      return Stack(
+            return Stack(
         children: [
-          // CustomPaint(
-          //   painter: PolygonPainter(points, Colors.purple, 2.0),
-          // ),
+          
           Positioned(
             left: result["box"][0] * factorX,
             top: result["box"][1] * factorY,
@@ -221,3 +205,22 @@ class PolygonPainter extends CustomPainter {
     return true;
   }
 }
+
+
+// Specify return type as Widget
+      // TextToSpeech.speak("${result['tag']}");
+      
+
+      // List<Map<String, double>> polygons = (result['polygons'] as List?)
+      //         ?.map<Map<String, double>>(
+      //             (item) => (item as Map?)?.cast<String, double>() ?? {})
+      //         .toList() ??
+      //     [];
+
+      // List<Offset> points = polygons
+      //     .map((poly) => Offset(poly['x']! * factorX, poly['y']! * factorY))
+      //     .toList();
+
+// CustomPaint(
+          //   painter: PolygonPainter(points, Colors.purple, 2.0),
+          // ),
