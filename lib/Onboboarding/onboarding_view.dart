@@ -271,7 +271,7 @@ class _OnboardingViewState extends State<OnboardingView> {
             "- Say going, or go, or navigate to go to your destination \n"
             "- Say start navigate to start your route \n"
             "- Say stop navigate to stop your route \n"
-            "- Say share location to share your location \n"
+            "- Say share to share your location \n"
             "Swipe to the right to continue\n");
         break;
       case 6:

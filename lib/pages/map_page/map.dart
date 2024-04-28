@@ -1214,7 +1214,7 @@ class _MapPageState extends State<MapPage> {
         MapPage.destinationCoordinate.latitude,
         MapPage.destinationCoordinate.longitude,
       );
-      
+
       if (userAndDestinationDistance <= 30) {
         setState(() {
           MapPage.isStartNavigate = false;
