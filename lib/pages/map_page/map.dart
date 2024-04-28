@@ -1177,6 +1177,8 @@ class _MapPageState extends State<MapPage> {
   String maneuver = "";
   String distance = "";
   String instruction = "";
+  bool canNotify = true;
+
   void routeGuidance() async {
     if (MapPage.isStartNavigate) {
       if (stepIndex < MapPage.allSteps.length) {
@@ -1193,13 +1195,40 @@ class _MapPageState extends State<MapPage> {
 
         // Assuming there's a threshold distance to trigger the notification
         double thresholdDistance = 100; // meters
-        if (distanceToStep <= thresholdDistance) {
-          maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
-          instruction =
-              MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
-          distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
-          TextToSpeech.speak("In $roundedDistance meters $instruction");
-          stepIndex++;
+        double thresholdDistance2 = 50; // meters
+        double thresholdDistance3 = 20; // meters
+        double thresholdDistance4 = 10; // meters
+        if (canNotify) {
+          canNotify = false;
+          if (distanceToStep <= thresholdDistance) {
+            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+            instruction =
+                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+            TextToSpeech.speak("In $roundedDistance meters $instruction");
+          } else if (distanceToStep <= thresholdDistance2) {
+            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+            instruction =
+                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+            TextToSpeech.speak("In $roundedDistance meters $instruction");
+          } else if (distanceToStep <= thresholdDistance3) {
+            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+            instruction =
+                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+            TextToSpeech.speak("In $roundedDistance meters $instruction");
+          } else if (distanceToStep <= thresholdDistance4) {
+            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+            instruction =
+                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+            TextToSpeech.speak("In $roundedDistance meters $instruction");
+            stepIndex++;
+          }
+          Future.delayed(Duration(seconds: 10), () {
+            canNotify = true;
+          });
         }
 
         setState(() {
@@ -1404,7 +1433,10 @@ class _MapPageState extends State<MapPage> {
                 TextToSpeech.speak("your step next step is." +
                     MapPage.distance.toString() +
                     "meters, $instruction");
-              } else {}
+              } else {
+                TextToSpeech.speak(
+                    "you need to start navigation first. To start navigation, say 'start navigate'.");
+              }
             } else if (_text.contains("current") ||
                 _text.contains("destination")) {
               if (MapPage.destinationLocationName != "") {
