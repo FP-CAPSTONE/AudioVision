@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextToSpeech.speak(
-        "Welcome To Audio Vision. We will help you and assist you to go to somewhere. swipe to the right to continue");
+        "Welcome To Audio Vision. We will help you and assist you to go to somewhere.");
     return GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'AudioVision',
@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.black, primary: Colors.black),
         ),
-        home: onboarding ? MapPage() : OnboardingView());
+        // home: onboarding ? MapPage() : OnboardingView());
+        home: OnboardingView());
   }
 }

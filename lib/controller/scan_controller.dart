@@ -14,9 +14,9 @@ class ScanController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
-    _checkDeviceOrientation();
+    gyroscope();
     initCamera();
-    initTFLite();
+    initModel();
   }
 
   @override
@@ -50,7 +50,7 @@ class ScanController extends GetxController {
   var isCameraInitialized = false.obs;
 
   // Check accelerometer data to determine device orientation
-  void _checkDeviceOrientation() {
+  void gyroscope() {
     bool canNotify = true; // Flag to control notification frequency
 
     // Store the subscription returned by accelerometerEvents.listen()
@@ -102,7 +102,7 @@ class ScanController extends GetxController {
   }
 
   // // load the model
-  initTFLite() async {
+  initModel() async {
     print("LOAD THE MODEL !");
 
     await vision.loadYoloModel(
@@ -146,7 +146,12 @@ class ScanController extends GetxController {
       confThreshold: 0.5,
       classThreshold: 0.6,
     );
+    notifyUser(result);
 
+    update();
+  }
+
+  notifyUser(var result) {
     // print("kont" + image.toString() + result.toString());
     if (result.isNotEmpty) {
       detectionResult = result;
@@ -176,6 +181,5 @@ class ScanController extends GetxController {
         }
       }
     }
-    update();
   }
 }

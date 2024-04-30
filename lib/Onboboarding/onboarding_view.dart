@@ -45,7 +45,7 @@ class _OnboardingViewState extends State<OnboardingView> {
         onDoubleTap: () {
           if (currentPageIndex == 2) {
             TextToSpeech.speak("Audio command activated, say something");
-            Timer(Duration(seconds: 2), () {
+            Timer(Duration(seconds: 3), () {
               _listen();
             });
           }
@@ -156,7 +156,7 @@ class _OnboardingViewState extends State<OnboardingView> {
           color: primaryColor,
         ),
         width: MediaQuery.of(context).size.width * 0.9,
-        height: 55,
+        height: MediaQuery.of(context).size.height * 0.1,
         child: TextButton(
           onPressed: () async {
             TextToSpeech.speak("Let's go");

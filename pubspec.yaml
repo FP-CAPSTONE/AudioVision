@@ -111,11 +111,11 @@ flutter:
     # - assets/model/last_float16yolov8n7k.tflite
     - assets/model/yolov8n_float32.tflite
     
-    - assets/model/mymodel_seg-n400.tflite
+    # - assets/model/mymodel_seg-n400.tflite
     - .env
-    - assets/model/yolov5n.tflite
-    - assets/model/yolov8n-seg_float32.tflite
-    - assets/model/transfer-1.tflite
+    # - assets/model/yolov5n.tflite
+    # - assets/model/yolov8n-seg_float32.tflite
+    # - assets/model/transfer-1.tflite
     - assets/maptheme/
 
     #asset image

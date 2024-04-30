@@ -9,15 +9,15 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart'; // Import the services library for clipboard functionality
 
-  class ShareLocation {
-    static late DatabaseReference dbRef;
+class ShareLocation {
+  static late DatabaseReference dbRef;
 
   //tracking
-    static bool isTracking = false;
-    static String? trackingUserName;
-    static String? trackingDestinationLocationName;
-    static LatLng? trackUserCoordinate;
-    static LatLng? trackDestinationCoordinate;
+  static bool isTracking = false;
+  static String? trackingUserName;
+  static String? trackingDestinationLocationName;
+  static LatLng? trackUserCoordinate;
+  static LatLng? trackDestinationCoordinate;
 
 // update shared data
   static bool isShared = false;
@@ -40,10 +40,10 @@ import 'package:flutter/services.dart'; // Import the services library for clipb
           "long": destinationLocation.longitude
         },
       });
-    }  
+    }
   }
 
-  static updateUserLocation(LatLng userLocation) {
+  static updateUserLocationToFirebase(LatLng userLocation) {
     // Mengirim data ke Firebase Realtime Database
     dbRef.child(AuthService.userName.toString()).update({
       'userLocation': {
@@ -97,9 +97,7 @@ import 'package:flutter/services.dart'; // Import the services library for clipb
       );
 
       isTracking = true;
-
- 
-    } else {  
+    } else {
       TextToSpeech.speak(
           'There is no shared data location name with ${ShareLocation.trackingUserName}');
       print('No data available.');

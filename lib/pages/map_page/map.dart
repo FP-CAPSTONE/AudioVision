@@ -192,7 +192,7 @@ class _MapPageState extends State<MapPage> {
               TextToSpeech.speak("set destination to " +
                   predictions[0].description.toString() +
                   ". double tap the screen. and. say Start navigate. to start navigation");
-              add_destination(predictions[0].placeId.toString());
+              addDestination(predictions[0].placeId.toString());
               fromAudioCommand = false;
               _endSearchFieldController.text = "";
               return;
@@ -230,8 +230,8 @@ class _MapPageState extends State<MapPage> {
             _text = '';
             Vibration.vibrate();
 
-            Timer(Duration(seconds: 2), () {
-              _listen();
+            Timer(Duration(seconds: 3), () {
+              audioCommand();
             });
           },
           child: Column(
@@ -391,7 +391,9 @@ class _MapPageState extends State<MapPage> {
                                         width:
                                             MediaQuery.of(context).size.width *
                                                 0.9,
-                                        height: 55,
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.1,
                                         child: Material(
                                           // Wrap ElevatedButton with Material
                                           borderRadius: BorderRadius.circular(
@@ -412,7 +414,14 @@ class _MapPageState extends State<MapPage> {
                                                     (BuildContext context) {
                                                   return AlertDialog(
                                                     title: Text(
-                                                        'Tracking Location'),
+                                                      'Tracking Location',
+                                                      style: TextStyle(
+                                                          fontSize: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.034),
+                                                    ),
                                                     content: TextField(
                                                       controller:
                                                           _userNameController,
@@ -500,7 +509,7 @@ class _MapPageState extends State<MapPage> {
                                                         MediaQuery.of(context)
                                                                 .size
                                                                 .width *
-                                                            0.045,
+                                                            0.06,
                                                     color: Colors
                                                         .white, // Set text color to white
                                                   ),
@@ -750,7 +759,7 @@ class _MapPageState extends State<MapPage> {
                               predictions[index].terms!.first.value.toString(),
                               predictions[index].placeId.toString(),
                             );
-                            add_destination(
+                            addDestination(
                               predictions[index].placeId.toString(),
                             );
                           },
@@ -857,7 +866,7 @@ class _MapPageState extends State<MapPage> {
                             TextToSpeech.speak(
                                 "set destination to $log. double tap the screen. and. say Start navigate. to start navigation");
                             await SearchMethod.save_search_log(log, placeId);
-                            add_destination(placeId);
+                            addDestination(placeId);
                           },
                         ),
                       ),
@@ -904,7 +913,7 @@ class _MapPageState extends State<MapPage> {
   }
 
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
-  void add_destination(String placeId) async {
+  void addDestination(String placeId) async {
     MapPage.googleMapDetail['photoReference'] =
         []; // remove all photo in here if any
     final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
@@ -1076,7 +1085,7 @@ class _MapPageState extends State<MapPage> {
       }
 
       if (ShareLocation.isShared) {
-        ShareLocation.updateUserLocation(
+        ShareLocation.updateUserLocationToFirebase(
             LatLng(MapPage.userLatitude, MapPage.userLongitude));
       }
 
@@ -1183,53 +1192,8 @@ class _MapPageState extends State<MapPage> {
     if (MapPage.isStartNavigate) {
       if (stepIndex < MapPage.allSteps.length) {
         print(stepIndex);
-        double distanceToStep = await calculateDistance(
-          MapPage.userLatitude,
-          MapPage.userLongitude,
-          MapPage.allSteps[stepIndex]['end_lat'],
-          MapPage.allSteps[stepIndex]['end_long'],
-        );
 
-        int roundedDistance = distanceToStep.ceil();
-        MapPage.distance = roundedDistance;
-
-        // Assuming there's a threshold distance to trigger the notification
-        double thresholdDistance = 100; // meters
-        double thresholdDistance2 = 50; // meters
-        double thresholdDistance3 = 20; // meters
-        double thresholdDistance4 = 10; // meters
-        if (canNotify) {
-          canNotify = false;
-          if (distanceToStep <= thresholdDistance) {
-            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
-            instruction =
-                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
-            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
-            TextToSpeech.speak("In $roundedDistance meters $instruction");
-          } else if (distanceToStep <= thresholdDistance2) {
-            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
-            instruction =
-                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
-            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
-            TextToSpeech.speak("In $roundedDistance meters $instruction");
-          } else if (distanceToStep <= thresholdDistance3) {
-            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
-            instruction =
-                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
-            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
-            TextToSpeech.speak("In $roundedDistance meters $instruction");
-          } else if (distanceToStep <= thresholdDistance4) {
-            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
-            instruction =
-                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
-            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
-            TextToSpeech.speak("In $roundedDistance meters $instruction");
-            stepIndex++;
-          }
-          Future.delayed(Duration(seconds: 10), () {
-            canNotify = true;
-          });
-        }
+        auditoryGuidance();
 
         setState(() {
           navigationText = maneuver;
@@ -1255,6 +1219,52 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  auditoryGuidance() async {
+    double distanceToStep = await calculateDistance(
+      MapPage.userLatitude,
+      MapPage.userLongitude,
+      MapPage.allSteps[stepIndex]['end_lat'],
+      MapPage.allSteps[stepIndex]['end_long'],
+    );
+
+    int roundedDistance = distanceToStep.ceil();
+    MapPage.distance = roundedDistance;
+
+    // Assuming there's a threshold distance to trigger the notification
+    double thresholdDistance = 100; // meters
+    double thresholdDistance2 = 50; // meters
+    double thresholdDistance3 = 20; // meters
+    double thresholdDistance4 = 10; // meters
+    if (canNotify) {
+      canNotify = false;
+      if (distanceToStep <= thresholdDistance) {
+        maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+        instruction = MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+        distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+        TextToSpeech.speak("In $roundedDistance meters $instruction");
+      } else if (distanceToStep <= thresholdDistance2) {
+        maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+        instruction = MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+        distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+        TextToSpeech.speak("In $roundedDistance meters $instruction");
+      } else if (distanceToStep <= thresholdDistance3) {
+        maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+        instruction = MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+        distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+        TextToSpeech.speak("In $roundedDistance meters $instruction");
+      } else if (distanceToStep <= thresholdDistance4) {
+        maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+        instruction = MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+        distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+        TextToSpeech.speak("In $roundedDistance meters $instruction");
+        stepIndex++;
+      }
+      Future.delayed(Duration(seconds: 10), () {
+        canNotify = true;
+      });
+    }
+  }
+
   Future<double> calculateDistance(
     double startLatitude,
     double startLongitude,
@@ -1275,12 +1285,6 @@ class _MapPageState extends State<MapPage> {
   }
 
   void shareLocation(BuildContext context) {
-    if (!AuthService.isAuthenticate) {
-      Get.to(LoginPage());
-      TextToSpeech.speak(
-          "You are not logged in. To share your location, you must log in first.");
-      return;
-    }
     String userName = AuthService.userName.toString();
     TextToSpeech.speak(
         'Do you want to share your location?. To share your location, Share your Email to other people. your username is $userName.split("")');
@@ -1329,11 +1333,17 @@ class _MapPageState extends State<MapPage> {
       },
     ).then((value) {
       if (value == true) {
-        ShareLocation.shareUserLocation(
-          LatLng(MapPage.userLatitude, MapPage.userLongitude),
-          MapPage.destinationCoordinate,
-          MapPage.destinationLocationName,
-        );
+        if (AuthService.isAuthenticate) {
+          ShareLocation.shareUserLocation(
+            LatLng(MapPage.userLatitude, MapPage.userLongitude),
+            MapPage.destinationCoordinate,
+            MapPage.destinationLocationName,
+          );
+        } else {
+          Get.to(LoginPage());
+          TextToSpeech.speak(
+              "You are not logged in. To share your location, you must log in first.");
+        }
       }
     });
   }
@@ -1342,7 +1352,7 @@ class _MapPageState extends State<MapPage> {
   final stt.SpeechToText _speech = stt.SpeechToText();
   String _text = '';
 
-  void _listen() async {
+  void audioCommand() async {
     if (!_isListening) {
       bool available = await _speech.initialize();
       if (available) {
@@ -1397,7 +1407,7 @@ class _MapPageState extends State<MapPage> {
               }
               TextToSpeech.speak(
                   "To exit navigate. you have to start navigate first");
-            } else if (_text.contains("start navigate")) {
+            } else if (_text.contains("start") || _text.contains("navigate")) {
               if (MapPage.destinationCoordinate.latitude != 0) {
                 if (!MapPage.isStartNavigate) {
                   MapPage.isStartNavigate = true;
@@ -1428,7 +1438,7 @@ class _MapPageState extends State<MapPage> {
               //   }
               // }
               TextToSpeech.speak("there are 2 people in front of you");
-            } else if (_text.contains("next")) {
+            } else if (_text.contains("next") || _text.contains("step")) {
               if (MapPage.isStartNavigate) {
                 TextToSpeech.speak("your step next step is." +
                     MapPage.distance.toString() +
@@ -1438,7 +1448,8 @@ class _MapPageState extends State<MapPage> {
                     "you need to start navigation first. To start navigation, say 'start navigate'.");
               }
             } else if (_text.contains("current") ||
-                _text.contains("destination")) {
+                _text.contains("destination") ||
+                _text.contains("location")) {
               if (MapPage.destinationLocationName != "") {
                 TextToSpeech.speak("your current destination is set to " +
                     MapPage.destinationLocationName);
