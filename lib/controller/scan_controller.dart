@@ -85,17 +85,21 @@ class ScanController extends GetxController {
       await cameraController!.initialize().then((value) {
         detectionResult = [];
         cameraController!.startImageStream((image) {
-          cameraCount++;
-          print("cameraCountr" + cameraCount.toString());
+          // detect an object every 10 framse
+          if (cameraCount % 10 == 10) {
+            cameraCount++;
+            print("cameraCountr" + cameraCount.toString());
 
-          cameraImage = image;
-          objectDetector(image);
+            cameraImage = image;
+            objectDetector(image);
+          }
           update();
         });
       });
       isCameraInitialized(true);
       update();
     } else {
+      print("Permission denied");
     }
   }
 
@@ -111,19 +115,9 @@ class ScanController extends GetxController {
       quantization: true,
       useGpu: false,
     );
+    print("MODEL LOAD SUCCESSFULLY");
   }
 
-  // do the object detection each frame got from the
-  objectDetector(CameraImage image) async {
-    // using flutter vision
-    var result = await vision.yoloOnFrame(
-      bytesList: image.planes.map((plane) => plane.bytes).toList(),
-      imageHeight: image.height,
-      imageWidth: image.width,
-      iouThreshold: 0.5,
-      confThreshold: 0.5,
-      classThreshold: 0.6,
-    );
 // Define an array containing all dangerous object tags found on footpaths
   List<String> dangerousObjects = [
     'person',
@@ -156,17 +150,17 @@ class ScanController extends GetxController {
     );
     notifyUser(result);
 
-<<<<<<< HEAD
     update();
   }
 
   notifyUser(var result) {
     // print("kont" + image.toString() + result.toString());
-=======
-    
->>>>>>> 95ab714abce4add3762d526ef53d68805f65d6bc
     if (result.isNotEmpty) {
       detectionResult = result;
+      // print(result);
+      //example result
+      // [{box: [0.0, 763.1640625, 357.9225158691406, 1116.581787109375, 0.5627957582473755], tag: Stop}]
+
       for (var detectedObject in detectionResult) {
         var detectedTag = detectedObject['tag'];
         if (canNotify && dangerousObjects.contains(detectedTag)) {
@@ -190,5 +184,4 @@ class ScanController extends GetxController {
       }
     }
   }
-}
 }
