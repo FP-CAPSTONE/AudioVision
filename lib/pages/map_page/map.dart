@@ -1365,141 +1365,146 @@ class _MapPageState extends State<MapPage> {
           _isListening = true;
           fromAudioCommand = true;
 
+          commandResult();
+
           _text = "Listening...";
           print("Listening...");
         });
 
-        _speech.listen(onResult: (result) {
-          setState(() {
-            fromAudioCommand = true;
-
-            _text = result.recognizedWords.toLowerCase();
-            print(_text);
-
-            if (_text.contains("go") ||
-                _text.contains("going") ||
-                _text.contains("navigate")) {
-              print("go");
-
-              print("go");
-              fromAudioCommand = true;
-
-              // Split recognized words by space
-              List<String> words = _text.split(" ");
-              // Find the index of the keyword
-              int keywordIndex = words.indexOf("go");
-              if (keywordIndex == -1) {
-                keywordIndex = words.indexOf("going");
-              }
-              if (keywordIndex == -1) {
-                keywordIndex = words.indexOf("navigate");
-              }
-              // Extract the destination word after the keyword
-              String destination = words.sublist(keywordIndex + 1).join(" ");
-              _endSearchFieldController.text = destination;
-              if (_debounce?.isActive ?? false) _debounce!.cancel();
-              _debounce = Timer(const Duration(milliseconds: 1000), () {
-                if (_endSearchFieldController.text.isNotEmpty) {
-                  autoCompleteSearch(_endSearchFieldController.text);
-                  print(fromAudioCommand);
-                }
-              });
-            } else if (_text.contains("stop") || _text.contains("exit")) {
-              if (MapPage.isStartNavigate) {
-                TextToSpeech.speak("Exiting navigation");
-                MapPage.isStartNavigate = false;
-                return;
-              }
-              TextToSpeech.speak(
-                  "To exit navigate. you have to start navigate first");
-            } else if (_text.contains("start") || _text.contains("navigate")) {
-              if (MapPage.destinationCoordinate.latitude != 0) {
-                if (!MapPage.isStartNavigate) {
-                  MapPage.isStartNavigate = true;
-                  NavigateMethod().startNavigate(
-                    MapPage.mapController,
-                    MapPage.destinationCoordinate,
-                  );
-                  TextToSpeech.speak("Start navigation to " +
-                      MapPage.googleMapDetail['name'].toString());
-                  return;
-                } else {
-                  TextToSpeech.speak(
-                      "You are already navigating. Your destination is set to " +
-                          MapPage.googleMapDetail['name'].toString());
-                }
-              } else {
-                TextToSpeech.speak(
-                    "to start navigate. you have to set your destination first. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
-              }
-            } else if (_text.contains("in front")) {
-              // Iterate through the detection result to count objects in front
-              // int objectsInFront = 0;
-              // for (var detection in detectionResult) {
-              //   // Check if the object's position indicates it's in front
-              //   // You may need to adjust these conditions based on your scenario
-              //   if (detection['box'][1] > SOME_THRESHOLD && detection['box'][2] > SOME_OTHER_THRESHOLD) {
-              //     objectsInFront++;
-              //   }
-              // }
-              TextToSpeech.speak("there are 2 people in front of you");
-            } else if (_text.contains("next") || _text.contains("step")) {
-              if (MapPage.isStartNavigate) {
-                TextToSpeech.speak("your step next step is." +
-                    MapPage.distance.toString() +
-                    "meters, $instruction");
-              } else {
-                TextToSpeech.speak(
-                    "you need to start navigation first. To start navigation, say 'start navigate'.");
-              }
-            } else if (_text.contains("current") ||
-                _text.contains("destination") ||
-                _text.contains("location")) {
-              if (MapPage.destinationLocationName != "") {
-                TextToSpeech.speak("your current destination is set to " +
-                    MapPage.destinationLocationName);
-              } else {
-                TextToSpeech.speak(
-                    "You do destination is null. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
-              }
-            } else if (_text.contains("share")) {
-              if (MapPage.destinationCoordinate.latitude != 0) {
-                if (MapPage.isStartNavigate) {
-                  if (AuthService.isAuthenticate) {
-                    final String? userName = AuthService.userName;
-                    TextToSpeech.speak(
-                        "Start sharing your location. You need to give your username to other people $userName so they can track your location");
-
-                    ShareLocation.shareUserLocation(
-                      LatLng(MapPage.userLatitude, MapPage.userLongitude),
-                      MapPage.destinationCoordinate,
-                      MapPage.destinationLocationName,
-                    );
-                  } else {
-                    TextToSpeech.speak(
-                        "In order to share your location, you need to login first. Navigating to the login page");
-                    Get.to(LoginPage());
-                  }
-                } else {
-                  TextToSpeech.speak(
-                      "In order to share location, you need to start navigation. To start navigation, say 'start navigate'.");
-                }
-              } else {
-                TextToSpeech.speak(
-                    "In order to share your location, you need to set your destination. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
-              }
-            } else {
-              // stop listening
-              _microphoneTimeout1();
-            }
-          });
-        });
         // stop listening
         _microphoneTimeout2();
       } else {
         print('The user denied the use of speech recognition.');
       }
     }
+  }
+
+  commandResult() {
+    _speech.listen(onResult: (result) {
+      setState(() {
+        fromAudioCommand = true;
+
+        _text = result.recognizedWords.toLowerCase();
+        print(_text);
+
+        if (_text.contains("go") ||
+            _text.contains("going") ||
+            _text.contains("navigate")) {
+          print("go");
+
+          print("go");
+          fromAudioCommand = true;
+
+          // Split recognized words by space
+          List<String> words = _text.split(" ");
+          // Find the index of the keyword
+          int keywordIndex = words.indexOf("go");
+          if (keywordIndex == -1) {
+            keywordIndex = words.indexOf("going");
+          }
+          if (keywordIndex == -1) {
+            keywordIndex = words.indexOf("navigate");
+          }
+          // Extract the destination word after the keyword
+          String destination = words.sublist(keywordIndex + 1).join(" ");
+          _endSearchFieldController.text = destination;
+          if (_debounce?.isActive ?? false) _debounce!.cancel();
+          _debounce = Timer(const Duration(milliseconds: 1000), () {
+            if (_endSearchFieldController.text.isNotEmpty) {
+              autoCompleteSearch(_endSearchFieldController.text);
+              print(fromAudioCommand);
+            }
+          });
+        } else if (_text.contains("stop") || _text.contains("exit")) {
+          if (MapPage.isStartNavigate) {
+            TextToSpeech.speak("Exiting navigation");
+            MapPage.isStartNavigate = false;
+            return;
+          }
+          TextToSpeech.speak(
+              "To exit navigate. you have to start navigate first");
+        } else if (_text.contains("start") || _text.contains("navigate")) {
+          if (MapPage.destinationCoordinate.latitude != 0) {
+            if (!MapPage.isStartNavigate) {
+              MapPage.isStartNavigate = true;
+              NavigateMethod().startNavigate(
+                MapPage.mapController,
+                MapPage.destinationCoordinate,
+              );
+              TextToSpeech.speak("Start navigation to " +
+                  MapPage.googleMapDetail['name'].toString());
+              return;
+            } else {
+              TextToSpeech.speak(
+                  "You are already navigating. Your destination is set to " +
+                      MapPage.googleMapDetail['name'].toString());
+            }
+          } else {
+            TextToSpeech.speak(
+                "to start navigate. you have to set your destination first. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+          }
+        } else if (_text.contains("in front")) {
+          // Iterate through the detection result to count objects in front
+          // int objectsInFront = 0;
+          // for (var detection in detectionResult) {
+          //   // Check if the object's position indicates it's in front
+          //   // You may need to adjust these conditions based on your scenario
+          //   if (detection['box'][1] > SOME_THRESHOLD && detection['box'][2] > SOME_OTHER_THRESHOLD) {
+          //     objectsInFront++;
+          //   }
+          // }
+          TextToSpeech.speak("there are 2 people in front of you");
+        } else if (_text.contains("next") || _text.contains("step")) {
+          if (MapPage.isStartNavigate) {
+            TextToSpeech.speak("your step next step is." +
+                MapPage.distance.toString() +
+                "meters, $instruction");
+          } else {
+            TextToSpeech.speak(
+                "you need to start navigation first. To start navigation, say 'start navigate'.");
+          }
+        } else if (_text.contains("current") ||
+            _text.contains("destination") ||
+            _text.contains("location")) {
+          if (MapPage.destinationLocationName != "") {
+            TextToSpeech.speak("your current destination is set to " +
+                MapPage.destinationLocationName);
+          } else {
+            TextToSpeech.speak(
+                "You do destination is null. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+          }
+        } else if (_text.contains("share")) {
+          if (MapPage.destinationCoordinate.latitude != 0) {
+            if (MapPage.isStartNavigate) {
+              if (AuthService.isAuthenticate) {
+                final String? userName = AuthService.userName;
+                TextToSpeech.speak(
+                    "Start sharing your location. You need to give your username to other people $userName so they can track your location");
+
+                ShareLocation.shareUserLocation(
+                  LatLng(MapPage.userLatitude, MapPage.userLongitude),
+                  MapPage.destinationCoordinate,
+                  MapPage.destinationLocationName,
+                );
+              } else {
+                TextToSpeech.speak(
+                    "In order to share your location, you need to login first. Navigating to the login page");
+                Get.to(LoginPage());
+              }
+            } else {
+              TextToSpeech.speak(
+                  "In order to share location, you need to start navigation. To start navigation, say 'start navigate'.");
+            }
+          } else {
+            TextToSpeech.speak(
+                "In order to share your location, you need to set your destination. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+          }
+        } else {
+          // stop listening
+          _microphoneTimeout1();
+        }
+      });
+    });
   }
 
   // stop listening after 8 seconds
