@@ -56,22 +56,27 @@ class ScanController extends GetxController {
     // Store the subscription returned by accelerometerEvents.listen()
     _accelerometerSubscription =
         accelerometerEvents.listen((AccelerometerEvent event) {
+      notifyGyro(event);
+
       // print(event);
-      // if the phone is not facing forward
-      if (event.y < 0 && canNotify) {
-        Vibration.vibrate();
-
-        TextToSpeech.speak("Please hold your phone upright.");
-
-        // Set canNotify to false to prevent further notifications
-        canNotify = false;
-
-        // Reset canNotify after a delay
-        Future.delayed(Duration(seconds: 5), () {
-          canNotify = true;
-        });
-      }
     });
+  }
+
+  notifyGyro(event) {
+    // if the phone is not facing forward
+    if (event.y < 0 && canNotify) {
+      Vibration.vibrate();
+
+      TextToSpeech.speak("Please hold your phone upright.");
+
+      // Set canNotify to false to prevent further notifications
+      canNotify = false;
+
+      // Reset canNotify after a delay
+      Future.delayed(Duration(seconds: 5), () {
+        canNotify = true;
+      });
+    }
   }
 
   // camera init to sending each frame to the model (set 10fps)
