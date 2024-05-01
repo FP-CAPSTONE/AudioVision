@@ -86,21 +86,17 @@ class ScanController extends GetxController {
         detectionResult = [];
         cameraController!.startImageStream((image) {
           cameraCount++;
-          print("cameraCountr" + cameraCount.toString());
           // run object detection each 10 fps
           // if (cameraCount % 10 == 0) {
 
           cameraImage = image;
           objectDetector(image);
-
           update();
-          // }=
         });
       });
       isCameraInitialized(true);
       update();
     } else {
-      print("Permission denied");
     }
   }
 
@@ -118,7 +114,6 @@ class ScanController extends GetxController {
       quantization: true,
       useGpu: false,
     );
-    print("MODEL LOAD SUCCESSFULLY");
   }
 
   // do the object detection each frame got from the
@@ -132,6 +127,7 @@ class ScanController extends GetxController {
       confThreshold: 0.5,
       classThreshold: 0.6,
     );
+    
 // Define an array containing all dangerous object tags found on footpaths
     List<String> dangerousObjects = [
       'person',
@@ -151,13 +147,9 @@ class ScanController extends GetxController {
       'couch',
     ];
 
-    // print("kont" + image.toString() + result.toString());
+    
     if (result.isNotEmpty) {
       detectionResult = result;
-      // print(result);
-      //example result
-      // [{box: [0.0, 763.1640625, 357.9225158691406, 1116.581787109375, 0.5627957582473755], tag: Stop}]
-
       for (var detectedObject in detectionResult) {
         var detectedTag = detectedObject['tag'];
         if (canNotify && dangerousObjects.contains(detectedTag)) {

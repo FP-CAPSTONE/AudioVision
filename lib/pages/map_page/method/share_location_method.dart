@@ -44,7 +44,7 @@ import 'package:flutter/services.dart'; // Import the services library for clipb
   }
 
   static updateUserLocation(LatLng userLocation) {
-    // Mengirim data ke Firebase Realtime Database
+    
     dbRef.child(AuthService.userName.toString()).update({
       'userLocation': {
         "lat": userLocation.latitude,
@@ -56,7 +56,6 @@ import 'package:flutter/services.dart'; // Import the services library for clipb
   static getOtherUserLocation() async {
     // Check if trackingUserName is empty
     if (trackingUserName == null || trackingUserName!.isEmpty) {
-      print('Tracking EMAIL is empty.');
       // Handle empty tracking ID here (e.g., show an error message)
       return;
     }
