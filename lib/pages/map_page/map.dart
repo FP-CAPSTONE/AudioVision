@@ -912,6 +912,7 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  late DetailsResponse details;
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void addDestination(String placeId) async {
     MapPage.googleMapDetail['photoReference'] =
@@ -919,28 +920,7 @@ class _MapPageState extends State<MapPage> {
     final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
         'assets/markers/destination_fill.png', 100);
 
-    final details = await googlePlace.details.get(placeId);
-    MapPage.googleMapDetail['name'] = details!.result!.name.toString();
-    MapPage.googleMapDetail['rating'] = details.result!.rating;
-    MapPage.googleMapDetail['ratingTotal'] = details.result!.userRatingsTotal;
-    MapPage.googleMapDetail['types'] = details.result!.types;
-    // MapPage.googleMapDetail['openingHours'] =
-    //     details.result!.openingHours!.periods;
-    if (details.result?.photos != null) {
-      for (var photo in details.result!.photos!) {
-        String? photoReference = photo.photoReference;
-        // Construct the URL using the photo reference
-        String url =
-            'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=' +
-                dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
-        MapPage.googleMapDetail['photoReference']
-            .add(photoReference); // Add URLs to the 'images' list
-      }
-    }
-    print("kontrol" + details.result!.name.toString());
-    print("kontrol" + details.result!.photos.toString());
-    print("kontrol" + details.result!.rating.toString());
-    print("kontrol" + details.result!.userRatingsTotal.toString());
+    getPlaceDetail(placeId);
     if (details != null && details.result != null && mounted) {
       setState(
         () {
@@ -1014,6 +994,31 @@ class _MapPageState extends State<MapPage> {
         },
       );
     }
+  }
+
+  getPlaceDetail(String placeId) async {
+    details = (await googlePlace.details.get(placeId))!;
+    MapPage.googleMapDetail['name'] = details.result!.name.toString();
+    MapPage.googleMapDetail['rating'] = details.result!.rating;
+    MapPage.googleMapDetail['ratingTotal'] = details.result!.userRatingsTotal;
+    MapPage.googleMapDetail['types'] = details.result!.types;
+    // MapPage.googleMapDetail['openingHours'] =
+    //     details.result!.openingHours!.periods;
+    if (details.result?.photos != null) {
+      for (var photo in details.result!.photos!) {
+        String? photoReference = photo.photoReference;
+        // Construct the URL using the photo reference
+        String url =
+            'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=' +
+                dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+        MapPage.googleMapDetail['photoReference']
+            .add(photoReference); // Add URLs to the 'images' list
+      }
+    }
+    print("kontrol" + details.result!.name.toString());
+    print("kontrol" + details.result!.photos.toString());
+    print("kontrol" + details.result!.rating.toString());
+    print("kontrol" + details.result!.userRatingsTotal.toString());
   }
 
   // void _checkDeviceOrientation() {
