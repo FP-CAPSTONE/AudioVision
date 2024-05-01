@@ -183,3 +183,4 @@ class ScanController extends GetxController {
     update();
   }
 }
+}
