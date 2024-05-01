@@ -56,7 +56,6 @@ class ShareLocation {
   static getOtherUserLocation() async {
     // Check if trackingUserName is empty
     if (trackingUserName == null || trackingUserName!.isEmpty) {
-      print('Tracking EMAIL is empty.');
       // Handle empty tracking ID here (e.g., show an error message)
       return;
     }
