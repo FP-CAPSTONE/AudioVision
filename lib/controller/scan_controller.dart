@@ -86,8 +86,7 @@ class ScanController extends GetxController {
         detectionResult = [];
         cameraController!.startImageStream((image) {
           cameraCount++;
-          // run object detection each 10 fps
-          // if (cameraCount % 10 == 0) {
+          print("cameraCountr" + cameraCount.toString());
 
           cameraImage = image;
           objectDetector(image);
@@ -104,11 +103,9 @@ class ScanController extends GetxController {
   initTFLite() async {
     print("LOAD THE MODEL !");
 
-    //flutter vision
     await vision.loadYoloModel(
       labels: 'assets/model/labels.txt',
-      modelPath: 'assets/model/yolov8n_float32.tflite',
-      // modelPath: 'assets/model/transfer-1.tflite',
+      modelPath: 'assets/model/best_float32.tflite',
       modelVersion: "yolov8",
       numThreads: 5,
       quantization: true,
@@ -127,25 +124,36 @@ class ScanController extends GetxController {
       confThreshold: 0.5,
       classThreshold: 0.6,
     );
-    
 // Define an array containing all dangerous object tags found on footpaths
-    List<String> dangerousObjects = [
-      'person',
-      'bicycle',
-      'car',
-      'motorcycle',
-      'bus',
-      'truck',
-      'traffic light',
-      'fire hydrant',
-      'stop sign',
-      'parking meter',
-      'bench',
-      'chair',
-      'refrigerator',
-      'bed',
-      'couch',
-    ];
+  List<String> dangerousObjects = [
+    'person',
+    'bicycle',
+    'car',
+    'motorcycle',
+    'bus',
+    'truck',
+    'traffic light',
+    'fire hydrant',
+    'stop sign',
+    'parking meter',
+    'bench',
+    'chair',
+    'refrigerator',
+    'bed',
+    'couch',
+  ];
+
+  // do the object detection each frame got from the
+  objectDetector(CameraImage image) async {
+    // using flutter vision
+    var result = await vision.yoloOnFrame(
+      bytesList: image.planes.map((plane) => plane.bytes).toList(),
+      imageHeight: image.height,
+      imageWidth: image.width,
+      iouThreshold: 0.5,
+      confThreshold: 0.5,
+      classThreshold: 0.6,
+    );
 
     
     if (result.isNotEmpty) {
