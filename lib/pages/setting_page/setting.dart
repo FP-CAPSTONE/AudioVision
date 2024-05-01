@@ -1,4 +1,5 @@
 import 'package:audiovision/pages/home_page/home.dart';
+import 'package:audiovision/pages/map_page/map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,7 +45,7 @@ class _SettingPageState extends State<SettingPage> {
             style: TextStyle(fontSize: _fontSize * 1.3 ?? 16.0)),
         leading: IconButton(
           onPressed: () {
-            Get.to(() => HomeScreen());
+            Get.to(() => MapPage());
           },
           icon: Icon(Icons.arrow_back),
         ),

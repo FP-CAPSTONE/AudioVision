@@ -30,7 +30,12 @@ class PanelWidget extends StatelessWidget {
               Expanded(
                 child: CircleAvatar(
                   radius: 20,
-                  child: Icon(Icons.account_circle, size: 30),
+                  child: Icon(
+                    Icons.account_circle,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                  backgroundColor: Colors.black,
                 ),
               ),
               SizedBox(width: 8),
@@ -41,7 +46,7 @@ class PanelWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      ShareLocation.trackingUserName!,
+                      "algi",
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontSize: 16,
@@ -118,9 +123,7 @@ class PanelWidget extends StatelessWidget {
                 ),
                 Expanded(
                   child: ListTile(
-                    title: Text(ShareLocation.trackingDestinationLocationName!
-                        .split(",")
-                        .first),
+                    title: Text("President University"),
                   ),
                 ),
               ],

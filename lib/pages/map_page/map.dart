@@ -1177,6 +1177,8 @@ class _MapPageState extends State<MapPage> {
   String maneuver = "";
   String distance = "";
   String instruction = "";
+  bool canNotify = true;
+
   void routeGuidance() async {
     if (MapPage.isStartNavigate) {
       if (stepIndex < MapPage.allSteps.length) {
@@ -1193,13 +1195,40 @@ class _MapPageState extends State<MapPage> {
 
         // Assuming there's a threshold distance to trigger the notification
         double thresholdDistance = 100; // meters
-        if (distanceToStep <= thresholdDistance) {
-          maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
-          instruction =
-              MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
-          distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
-          TextToSpeech.speak("In $roundedDistance meters $instruction");
-          stepIndex++;
+        double thresholdDistance2 = 50; // meters
+        double thresholdDistance3 = 20; // meters
+        double thresholdDistance4 = 10; // meters
+        if (canNotify) {
+          canNotify = false;
+          if (distanceToStep <= thresholdDistance) {
+            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+            instruction =
+                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+            TextToSpeech.speak("In $roundedDistance meters $instruction");
+          } else if (distanceToStep <= thresholdDistance2) {
+            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+            instruction =
+                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+            TextToSpeech.speak("In $roundedDistance meters $instruction");
+          } else if (distanceToStep <= thresholdDistance3) {
+            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+            instruction =
+                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+            TextToSpeech.speak("In $roundedDistance meters $instruction");
+          } else if (distanceToStep <= thresholdDistance4) {
+            maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+            instruction =
+                MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+            distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+            TextToSpeech.speak("In $roundedDistance meters $instruction");
+            stepIndex++;
+          }
+          Future.delayed(Duration(seconds: 10), () {
+            canNotify = true;
+          });
         }
 
         setState(() {
@@ -1214,7 +1243,7 @@ class _MapPageState extends State<MapPage> {
         MapPage.destinationCoordinate.latitude,
         MapPage.destinationCoordinate.longitude,
       );
-      
+
       if (userAndDestinationDistance <= 30) {
         setState(() {
           MapPage.isStartNavigate = false;
@@ -1360,6 +1389,89 @@ class _MapPageState extends State<MapPage> {
                   print(fromAudioCommand);
                 }
               });
+            } else if (_text.contains("stop") || _text.contains("exit")) {
+              if (MapPage.isStartNavigate) {
+                TextToSpeech.speak("Exiting navigation");
+                MapPage.isStartNavigate = false;
+                return;
+              }
+              TextToSpeech.speak(
+                  "To exit navigate. you have to start navigate first");
+            } else if (_text.contains("start navigate")) {
+              if (MapPage.destinationCoordinate.latitude != 0) {
+                if (!MapPage.isStartNavigate) {
+                  MapPage.isStartNavigate = true;
+                  NavigateMethod().startNavigate(
+                    MapPage.mapController,
+                    MapPage.destinationCoordinate,
+                  );
+                  TextToSpeech.speak("Start navigation to " +
+                      MapPage.googleMapDetail['name'].toString());
+                  return;
+                } else {
+                  TextToSpeech.speak(
+                      "You are already navigating. Your destination is set to " +
+                          MapPage.googleMapDetail['name'].toString());
+                }
+              } else {
+                TextToSpeech.speak(
+                    "to start navigate. you have to set your destination first. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+              }
+            } else if (_text.contains("in front")) {
+              // Iterate through the detection result to count objects in front
+              // int objectsInFront = 0;
+              // for (var detection in detectionResult) {
+              //   // Check if the object's position indicates it's in front
+              //   // You may need to adjust these conditions based on your scenario
+              //   if (detection['box'][1] > SOME_THRESHOLD && detection['box'][2] > SOME_OTHER_THRESHOLD) {
+              //     objectsInFront++;
+              //   }
+              // }
+              TextToSpeech.speak("there are 2 people in front of you");
+            } else if (_text.contains("next")) {
+              if (MapPage.isStartNavigate) {
+                TextToSpeech.speak("your step next step is." +
+                    MapPage.distance.toString() +
+                    "meters, $instruction");
+              } else {
+                TextToSpeech.speak(
+                    "you need to start navigation first. To start navigation, say 'start navigate'.");
+              }
+            } else if (_text.contains("current") ||
+                _text.contains("destination")) {
+              if (MapPage.destinationLocationName != "") {
+                TextToSpeech.speak("your current destination is set to " +
+                    MapPage.destinationLocationName);
+              } else {
+                TextToSpeech.speak(
+                    "You do destination is null. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+              }
+            } else if (_text.contains("share")) {
+              if (MapPage.destinationCoordinate.latitude != 0) {
+                if (MapPage.isStartNavigate) {
+                  if (AuthService.isAuthenticate) {
+                    final String? userName = AuthService.userName;
+                    TextToSpeech.speak(
+                        "Start sharing your location. You need to give your username to other people $userName so they can track your location");
+
+                    ShareLocation.shareUserLocation(
+                      LatLng(MapPage.userLatitude, MapPage.userLongitude),
+                      MapPage.destinationCoordinate,
+                      MapPage.destinationLocationName,
+                    );
+                  } else {
+                    TextToSpeech.speak(
+                        "In order to share your location, you need to login first. Navigating to the login page");
+                    Get.to(LoginPage());
+                  }
+                } else {
+                  TextToSpeech.speak(
+                      "In order to share location, you need to start navigation. To start navigation, say 'start navigate'.");
+                }
+              } else {
+                TextToSpeech.speak(
+                    "In order to share your location, you need to set your destination. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+              }
             } else {
               // stop listening
               _microphoneTimeout1();
