@@ -75,6 +75,7 @@ dependencies:
   smooth_page_indicator: ^1.1.0
   flutter_rating_bar:
   carousel_slider:
+  avatar_glow:
 
 dev_dependencies:
   flutter_test:

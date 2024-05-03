@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:camera/camera.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -59,6 +60,22 @@ class ScanController extends GetxController {
       notifyGyro(event);
 
       // print(event);
+    });
+  }
+
+  void captureFrame() async {
+    final XFile? image = await cameraController?.takePicture();
+    // Process the captured image and upload it to Firebase
+    uploadImageToFirebase(image!);
+  }
+
+  void uploadImageToFirebase(XFile imageFile) {
+    final DatabaseReference databaseRef =
+        FirebaseDatabase.instance.reference().child('camera_frames');
+    databaseRef.push().set({
+      'image_url': imageFile
+          .path, // Example: Store image URL or base64 encoded image data
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
   }
 

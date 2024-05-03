@@ -8,6 +8,7 @@ import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/widget/buttom_sheet_detail_ocation.dart';
 import 'package:audiovision/pages/map_page/method/searching_method.dart';
 import 'package:audiovision/pages/map_page/widget/panel_widget.dart';
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -125,7 +126,8 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     Firebase.initializeApp();
 
-    String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+    String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
+    // String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString(); // udah gabisa
     googlePlace = GooglePlace(apiKey);
 
     endFocusNode = FocusNode();
@@ -174,16 +176,13 @@ class _MapPageState extends State<MapPage> {
   void autoCompleteSearch(String value) async {
     try {
       if (value != "") {
-        var result = await googlePlace.autocomplete
-            .get(value,
-                origin: LatLon(MapPage.userLatitude, MapPage.userLongitude))
-            .timeout(
-                Duration(seconds: 15)); // Adjust timeout duration as needed
+        var result = await googlePlace.autocomplete.get(value,
+            origin: LatLon(MapPage.userLatitude, MapPage.userLongitude));
 
         if (result != null && result.predictions != null && mounted) {
           setState(() {
             predictions = result.predictions!;
-
+            print(predictions);
             if (predictions.isNotEmpty && fromAudioCommand == true) {
               SearchMethod.save_search_log(
                   predictions[0].description.toString(),
@@ -277,10 +276,17 @@ class _MapPageState extends State<MapPage> {
                                 // SizedBox(
                                 //     height: MediaQuery.of(context).size.height *
                                 //         0.), // Adjust the height as needed
-                                const Icon(
-                                  Icons.mic,
-                                  size: 50,
-                                  color: Colors.red,
+                                AvatarGlow(
+                                  animate: true,
+                                  glowColor: Colors.grey,
+                                  duration: const Duration(milliseconds: 1000),
+                                  glowCount: 2,
+                                  // glowRadiusFactor: 0.7,
+                                  child: Icon(
+                                    Icons.mic,
+                                    size: 50,
+                                    color: Colors.red,
+                                  ),
                                 ),
                                 SizedBox(
                                     height:
@@ -912,7 +918,8 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  late DetailsResponse details;
+  DetailsResponse details = DetailsResponse();
+
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void addDestination(String placeId) async {
     MapPage.googleMapDetail['photoReference'] =
@@ -1010,7 +1017,7 @@ class _MapPageState extends State<MapPage> {
         // Construct the URL using the photo reference
         String url =
             'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=' +
-                dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+                dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
         MapPage.googleMapDetail['photoReference']
             .add(photoReference); // Add URLs to the 'images' list
       }
@@ -1371,7 +1378,7 @@ class _MapPageState extends State<MapPage> {
           print("Listening...");
         });
 
-        // stop listening
+        // // stop listening
         _microphoneTimeout2();
       } else {
         print('The user denied the use of speech recognition.');
@@ -1500,8 +1507,13 @@ class _MapPageState extends State<MapPage> {
                 "In order to share your location, you need to set your destination. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
           }
         } else {
-          // stop listening
-          _microphoneTimeout1();
+          if (_text != "Listening...") {
+            if (_debounce?.isActive ?? false) _debounce!.cancel();
+            _debounce = Timer(const Duration(milliseconds: 1000), () {
+              // stop listening
+              _microphoneTimeout1();
+            });
+          }
         }
       });
     });
@@ -1509,27 +1521,39 @@ class _MapPageState extends State<MapPage> {
 
   // stop listening after 8 seconds
   void _microphoneTimeout1() {
-    Timer(const Duration(seconds: 9), () {
+    Timer(const Duration(seconds: 1), () {
+      fromAudioCommand = true;
+
+      _endSearchFieldController.text = _text;
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 1000), () {
+        if (_endSearchFieldController.text.isNotEmpty) {
+          autoCompleteSearch(_endSearchFieldController.text);
+          print(fromAudioCommand);
+        }
+      });
+      print(fromAudioCommand);
       // Reset _isListening 8 seconds
       setState(() {
         _isListening = false;
         _text = ""; // Clear the recognized text
       });
+      _speech.stop();
+
       print("Speech recognition timeout");
     });
   }
 
   // stop listening if the user did not say anything
   void _microphoneTimeout2() {
-    Timer(const Duration(seconds: 6), () {
-      if (_text == "Listening...") {
-        // Reset _isListening if no speech is recognized after 5 seconds
-        setState(() {
-          _isListening = false;
-          _text = ""; // Clear the recognized text
-        });
-        print("Speech recognition timeout");
-      }
+    Timer(const Duration(seconds: 8), () {
+      // Reset _isListening if no speech is recognized after 5 seconds
+      setState(() {
+        _isListening = false;
+        _text = ""; // Clear the recognized text
+      });
+      _speech.stop();
+      print("Speech recognition timeout");
     });
   }
 }

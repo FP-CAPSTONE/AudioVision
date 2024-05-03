@@ -67,7 +67,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   _getPolyline() async {
-    final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+    final String key = dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         key,
         PointLatLng(

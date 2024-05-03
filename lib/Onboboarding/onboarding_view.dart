@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:audiovision/Components/color.dart';
 import 'package:audiovision/Onboboarding/onboarding_items.dart';
@@ -76,10 +77,17 @@ class _OnboardingViewState extends State<OnboardingView> {
                         // SizedBox(
                         //     height: MediaQuery.of(context).size.height *
                         //         0.), // Adjust the height as needed
-                        const Icon(
-                          Icons.mic,
-                          size: 50,
-                          color: Colors.red,
+                        AvatarGlow(
+                          animate: true,
+                          glowColor: Colors.grey,
+                          duration: const Duration(milliseconds: 2000),
+                          glowCount: 2,
+                          // glowRadiusFactor: 0.7,
+                          child: Icon(
+                            Icons.mic,
+                            size: 50,
+                            color: Colors.red,
+                          ),
                         ),
                         SizedBox(
                             height:
@@ -117,7 +125,7 @@ class _OnboardingViewState extends State<OnboardingView> {
       children: [
         TextButton(
           onPressed: () {
-            pageController.jumpToPage(2);
+            pageController.jumpToPage(6);
           },
           child: const Text("Skip"),
         ),
@@ -281,6 +289,8 @@ class _OnboardingViewState extends State<OnboardingView> {
     }
   }
 
+  Timer? _debounce;
+
   void _listen() async {
     if (!_isListening) {
       bool available = await _speech.initialize();
@@ -301,7 +311,13 @@ class _OnboardingViewState extends State<OnboardingView> {
               TextToSpeech.speak(
                   "Nice, you have tried the voice command. swipe to continue");
             } else {
-              _microphoneTimeout1();
+              if (_text != "Listening...") {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 1000), () {
+                  // stop listening
+                  _microphoneTimeout1();
+                });
+              }
             }
           });
         });
@@ -313,7 +329,7 @@ class _OnboardingViewState extends State<OnboardingView> {
   }
 
   void _microphoneTimeout1() {
-    Timer(const Duration(seconds: 12), () {
+    Timer(const Duration(seconds: 2), () {
       setState(() {
         _isListening = false;
         _text = "";

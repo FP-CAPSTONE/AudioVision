@@ -36,7 +36,7 @@ class _SelectScreenState extends State<SelectScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+    String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
     googlePlace = GooglePlace(apiKey);
 
     startFocusNode = FocusNode();

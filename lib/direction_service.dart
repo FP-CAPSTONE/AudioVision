@@ -19,7 +19,7 @@ class DirectionServcie {
   final String ttsLanguage = 'id';
   FlutterTts flutterTts = FlutterTts();
   // maps config
-  final String key = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+  final String key = dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
   DirectionServcie() {
     // Initialize FlutterTts with the specified language
     flutterTts.setLanguage(ttsLanguage);

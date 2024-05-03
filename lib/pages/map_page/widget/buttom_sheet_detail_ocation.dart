@@ -263,7 +263,7 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
             10), // Adjust the value for the desired roundness of the image
         child: Image.network(
           "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoRef&key=" +
-              dotenv.env['GOOGLE_MAPS_API_KEYS'].toString(),
+              dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString(),
           fit: BoxFit.cover,
         ),
       ),
