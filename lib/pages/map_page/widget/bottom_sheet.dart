@@ -1,4 +1,5 @@
 import 'package:audiovision/pages/map_page/map.dart';
+import 'package:audiovision/pages/map_page/method/navigate_method.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -172,6 +173,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                         ),
                                       );
                                       MapPage.isStartNavigate = false;
+                                      NavigateMethod.resetBrightness();
                                     },
                                     style: ButtonStyle(
                                       backgroundColor:

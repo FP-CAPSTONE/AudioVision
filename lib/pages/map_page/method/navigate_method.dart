@@ -5,11 +5,15 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 
+import 'package:screen_brightness/screen_brightness.dart';
+
 class NavigateMethod {
   void startNavigate(
     mapController,
     LatLng destination,
   ) {
+    setBrightness(0);
+    // resetBrightness();
     mapController.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
@@ -21,6 +25,24 @@ class NavigateMethod {
     );
 
     MapPage.isStartNavigate = true;
+  }
+
+  Future<void> setBrightness(double brightness) async {
+    try {
+      await ScreenBrightness().setScreenBrightness(brightness);
+    } catch (e) {
+      print(e);
+      throw 'Failed to set brightness';
+    }
+  }
+
+  static Future<void> resetBrightness() async {
+    try {
+      await ScreenBrightness().resetScreenBrightness();
+    } catch (e) {
+      print(e);
+      throw 'Failed to reset brightness';
+    }
   }
 
   Future<Map<String, dynamic>> getDirection(
@@ -84,6 +106,38 @@ class NavigateMethod {
       };
     }
     return results;
+  }
+
+  static stopNavigate() {
+    // find the north and south to animate the camera
+    double minLat =
+        MapPage.userLatitude < MapPage.destinationCoordinate.latitude
+            ? MapPage.userLatitude
+            : MapPage.destinationCoordinate.latitude;
+    double minLng =
+        MapPage.userLongitude < MapPage.destinationCoordinate.longitude
+            ? MapPage.userLongitude
+            : MapPage.destinationCoordinate.longitude;
+    double maxLat =
+        MapPage.userLatitude > MapPage.destinationCoordinate.latitude
+            ? MapPage.userLatitude
+            : MapPage.destinationCoordinate.latitude;
+    double maxLng =
+        MapPage.userLongitude > MapPage.destinationCoordinate.longitude
+            ? MapPage.userLongitude
+            : MapPage.destinationCoordinate.longitude;
+
+    MapPage.mapController!.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        ),
+        100, // Padding
+      ),
+    );
+    MapPage.isStartNavigate = false;
+    resetBrightness();
   }
 
   int stepIndex = 0;

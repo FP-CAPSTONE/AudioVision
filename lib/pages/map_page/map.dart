@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
@@ -37,6 +38,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 // ned to change the class name, there are two location service
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:translator/translator.dart';
 import 'package:vibration/vibration.dart';
 import '../setting_page/setting.dart';
 
@@ -49,6 +51,8 @@ class MapPage extends StatefulWidget {
   static LatLng destinationCoordinate = LatLng(0, 0);
 
   static bool isStartNavigate = false;
+
+  static bool isIndonesianSelected = false;
 
   static GoogleMapController? mapController;
 
@@ -146,6 +150,21 @@ class _MapPageState extends State<MapPage> {
       mapTheme = value;
     });
     //_checkDeviceOrientation();
+  }
+
+  Future<void> _loadSelectedLanguage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      MapPage.isIndonesianSelected =
+          prefs.getBool('isIndonesianSelected') ?? false;
+      // _fontSize = prefs.getDouble('fontSize') ?? 16.0;
+    });
+  }
+
+  Future<void> _saveSetting() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isIndonesianSelected', MapPage.isIndonesianSelected);
+    // await prefs.setDouble('fontSize', _fontSize);
   }
 
   // Initialize compass and start listening to updates
@@ -650,7 +669,7 @@ class _MapPageState extends State<MapPage> {
                         },
                         onTap: () async {
                           TextToSpeech.speak(
-                              "Clicking search bar. search where you want to go. and hold the screen to read the search result. otherwise. you can double tap the screen to activate the audio command. say.   'navigate destination' or 'going destination' to set your destination");
+                              "Clicking search bar. search where you want to go. and hold the screen to read the search result. or. you can double tap the screen to activate the audio command. say.   'navigate destination' or 'going destination' to set your destination");
                           searchLogs = await SearchMethod.getSearchLogs();
                           // Iterate through the search logs
                           searchLogs.forEach((log, placeId) {
@@ -918,8 +937,9 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  DetailsResponse details = DetailsResponse();
+  // DetailsResponse details = DetailsResponse();
 
+// add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void addDestination(String placeId) async {
     MapPage.googleMapDetail['photoReference'] =
@@ -927,7 +947,30 @@ class _MapPageState extends State<MapPage> {
     final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
         'assets/markers/destination_fill.png', 100);
 
-    getPlaceDetail(placeId);
+    // getPlaceDetail(placeId);
+
+    final details = await googlePlace.details.get(placeId);
+    MapPage.googleMapDetail['name'] = details!.result!.name.toString();
+    MapPage.googleMapDetail['rating'] = details.result!.rating;
+    MapPage.googleMapDetail['ratingTotal'] = details.result!.userRatingsTotal;
+    MapPage.googleMapDetail['types'] = details.result!.types;
+    // MapPage.googleMapDetail['openingHours'] =
+    //     details.result!.openingHours!.periods;
+    if (details.result?.photos != null) {
+      for (var photo in details.result!.photos!) {
+        String? photoReference = photo.photoReference;
+        // Construct the URL using the photo reference
+        // String url =
+        //     'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=' +
+        //         dotenv.env['GOOGLE_MAPS_API_KEYS'].toString();
+        MapPage.googleMapDetail['photoReference']
+            .add(photoReference); // Add URLs to the 'images' list
+      }
+    }
+    print("kontrol" + details.result!.name.toString());
+    print("kontrol" + details.result!.photos.toString());
+    print("kontrol" + details.result!.rating.toString());
+    print("kontrol" + details.result!.userRatingsTotal.toString());
     if (details != null && details.result != null && mounted) {
       setState(
         () {
@@ -1003,30 +1046,30 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  getPlaceDetail(String placeId) async {
-    details = (await googlePlace.details.get(placeId))!;
-    MapPage.googleMapDetail['name'] = details.result!.name.toString();
-    MapPage.googleMapDetail['rating'] = details.result!.rating;
-    MapPage.googleMapDetail['ratingTotal'] = details.result!.userRatingsTotal;
-    MapPage.googleMapDetail['types'] = details.result!.types;
-    // MapPage.googleMapDetail['openingHours'] =
-    //     details.result!.openingHours!.periods;
-    if (details.result?.photos != null) {
-      for (var photo in details.result!.photos!) {
-        String? photoReference = photo.photoReference;
-        // Construct the URL using the photo reference
-        String url =
-            'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=' +
-                dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
-        MapPage.googleMapDetail['photoReference']
-            .add(photoReference); // Add URLs to the 'images' list
-      }
-    }
-    print("kontrol" + details.result!.name.toString());
-    print("kontrol" + details.result!.photos.toString());
-    print("kontrol" + details.result!.rating.toString());
-    print("kontrol" + details.result!.userRatingsTotal.toString());
-  }
+  // getPlaceDetail(String placeId) async {
+  //   details = (await googlePlace.details.get(placeId))!;
+  //   MapPage.googleMapDetail['name'] = details.result!.name.toString();
+  //   MapPage.googleMapDetail['rating'] = details.result!.rating;
+  //   MapPage.googleMapDetail['ratingTotal'] = details.result!.userRatingsTotal;
+  //   MapPage.googleMapDetail['types'] = details.result!.types;
+  //   // MapPage.googleMapDetail['openingHours'] =
+  //   //     details.result!.openingHours!.periods;
+  //   if (details.result?.photos != null) {
+  //     for (var photo in details.result!.photos!) {
+  //       String? photoReference = photo.photoReference;
+  //       // Construct the URL using the photo reference
+  //       String url =
+  //           'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=' +
+  //               dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
+  //       MapPage.googleMapDetail['photoReference']
+  //           .add(photoReference); // Add URLs to the 'images' list
+  //     }
+  //   }
+  //   print("kontrol" + details.result!.name.toString());
+  //   print("kontrol" + details.result!.photos.toString());
+  //   print("kontrol" + details.result!.rating.toString());
+  //   print("kontrol" + details.result!.userRatingsTotal.toString());
+  // }
 
   // void _checkDeviceOrientation() {
   //   // Store the subscription returned by accelerometerEvents.listen()
@@ -1366,7 +1409,17 @@ class _MapPageState extends State<MapPage> {
 
   void audioCommand() async {
     if (!_isListening) {
-      bool available = await _speech.initialize();
+      bool available = await _speech.initialize(
+        onStatus: (status) {
+          print("Status: $status");
+        },
+        onError: (errorNotification) {
+          print("Error: $errorNotification");
+        },
+
+        // Specify the desired language locale
+        // localeId: 'id-ID', // Bahasa Indonesia locale
+      );
       if (available) {
         setState(() {
           _isListening = true;
@@ -1386,137 +1439,179 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  static Future<String> translateText(
+      String text, String from, String to) async {
+    final translator = GoogleTranslator();
+
+    Translation translation =
+        await translator.translate(text, from: from, to: to);
+
+    return translation.text;
+  }
+
   commandResult() {
-    _speech.listen(onResult: (result) {
-      setState(() {
-        fromAudioCommand = true;
+    _speech.listen(
+        localeId: MapPage.isIndonesianSelected ? "id" : "en",
+        onResult: (result) {
+          setState(() {
+            fromAudioCommand = true;
 
-        _text = result.recognizedWords.toLowerCase();
-        print(_text);
-
-        if (_text.contains("go") ||
-            _text.contains("going") ||
-            _text.contains("navigate")) {
-          print("go");
-
-          print("go");
-          fromAudioCommand = true;
-
-          // Split recognized words by space
-          List<String> words = _text.split(" ");
-          // Find the index of the keyword
-          int keywordIndex = words.indexOf("go");
-          if (keywordIndex == -1) {
-            keywordIndex = words.indexOf("going");
-          }
-          if (keywordIndex == -1) {
-            keywordIndex = words.indexOf("navigate");
-          }
-          // Extract the destination word after the keyword
-          String destination = words.sublist(keywordIndex + 1).join(" ");
-          _endSearchFieldController.text = destination;
-          if (_debounce?.isActive ?? false) _debounce!.cancel();
-          _debounce = Timer(const Duration(milliseconds: 1000), () {
-            if (_endSearchFieldController.text.isNotEmpty) {
-              autoCompleteSearch(_endSearchFieldController.text);
-              print(fromAudioCommand);
-            }
-          });
-        } else if (_text.contains("stop") || _text.contains("exit")) {
-          if (MapPage.isStartNavigate) {
-            TextToSpeech.speak("Exiting navigation");
-            MapPage.isStartNavigate = false;
-            return;
-          }
-          TextToSpeech.speak(
-              "To exit navigate. you have to start navigate first");
-        } else if (_text.contains("start") || _text.contains("navigate")) {
-          if (MapPage.destinationCoordinate.latitude != 0) {
-            if (!MapPage.isStartNavigate) {
-              MapPage.isStartNavigate = true;
-              NavigateMethod().startNavigate(
-                MapPage.mapController,
-                MapPage.destinationCoordinate,
-              );
-              TextToSpeech.speak("Start navigation to " +
-                  MapPage.googleMapDetail['name'].toString());
-              return;
-            } else {
-              TextToSpeech.speak(
-                  "You are already navigating. Your destination is set to " +
-                      MapPage.googleMapDetail['name'].toString());
-            }
-          } else {
-            TextToSpeech.speak(
-                "to start navigate. you have to set your destination first. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
-          }
-        } else if (_text.contains("in front")) {
-          // Iterate through the detection result to count objects in front
-          // int objectsInFront = 0;
-          // for (var detection in detectionResult) {
-          //   // Check if the object's position indicates it's in front
-          //   // You may need to adjust these conditions based on your scenario
-          //   if (detection['box'][1] > SOME_THRESHOLD && detection['box'][2] > SOME_OTHER_THRESHOLD) {
-          //     objectsInFront++;
-          //   }
-          // }
-          TextToSpeech.speak("there are 2 people in front of you");
-        } else if (_text.contains("next") || _text.contains("step")) {
-          if (MapPage.isStartNavigate) {
-            TextToSpeech.speak("your step next step is." +
-                MapPage.distance.toString() +
-                "meters, $instruction");
-          } else {
-            TextToSpeech.speak(
-                "you need to start navigation first. To start navigation, say 'start navigate'.");
-          }
-        } else if (_text.contains("current") ||
-            _text.contains("destination") ||
-            _text.contains("location")) {
-          if (MapPage.destinationLocationName != "") {
-            TextToSpeech.speak("your current destination is set to " +
-                MapPage.destinationLocationName);
-          } else {
-            TextToSpeech.speak(
-                "You do destination is null. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
-          }
-        } else if (_text.contains("share")) {
-          if (MapPage.destinationCoordinate.latitude != 0) {
-            if (MapPage.isStartNavigate) {
-              if (AuthService.isAuthenticate) {
-                final String? userName = AuthService.userName;
-                TextToSpeech.speak(
-                    "Start sharing your location. You need to give your username to other people $userName so they can track your location");
-
-                ShareLocation.shareUserLocation(
-                  LatLng(MapPage.userLatitude, MapPage.userLongitude),
-                  MapPage.destinationCoordinate,
-                  MapPage.destinationLocationName,
-                );
-              } else {
-                TextToSpeech.speak(
-                    "In order to share your location, you need to login first. Navigating to the login page");
-                Get.to(LoginPage());
-              }
-            } else {
-              TextToSpeech.speak(
-                  "In order to share location, you need to start navigation. To start navigation, say 'start navigate'.");
-            }
-          } else {
-            TextToSpeech.speak(
-                "In order to share your location, you need to set your destination. To set the destination, you need to search your destination using the search bar and select where you want to go. Otherwise, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
-          }
-        } else {
-          if (_text != "Listening...") {
+            _text = result.recognizedWords.toLowerCase();
+            print(_text);
             if (_debounce?.isActive ?? false) _debounce!.cancel();
-            _debounce = Timer(const Duration(milliseconds: 1000), () {
-              // stop listening
-              _microphoneTimeout1();
+            _debounce = Timer(const Duration(milliseconds: 500), () async {
+              if (_text.contains("go") ||
+                  _text.contains("going") ||
+                  _text.contains("navigate") ||
+                  _text.contains("pergi")) {
+                print("go");
+
+                print("go");
+                fromAudioCommand = true;
+
+                // Split recognized words by space
+                List<String> words = _text.split(" ");
+                // Find the index of the keyword
+                int keywordIndex = words.indexOf("go");
+                if (keywordIndex == -1) {
+                  keywordIndex = words.indexOf("going");
+                }
+                if (keywordIndex == -1) {
+                  keywordIndex = words.indexOf("navigate");
+                }
+                if (keywordIndex == -1) {
+                  keywordIndex = words.indexOf("pergi");
+                }
+                // Extract the destination word after the keyword
+                String destination = words.sublist(keywordIndex + 1).join(" ");
+                _endSearchFieldController.text = destination;
+                if (_endSearchFieldController.text.isNotEmpty) {
+                  autoCompleteSearch(_endSearchFieldController.text);
+                  print(fromAudioCommand);
+                }
+              } else if (_text.contains("stop") ||
+                  _text.contains("exit") ||
+                  _text.contains("berhenti")) {
+                if (MapPage.isStartNavigate) {
+                  TextToSpeech.speak("Exiting navigation");
+                  MapPage.isStartNavigate = false;
+                  return;
+                }
+                TextToSpeech.speak(
+                    "To exit navigate. you have to start navigate first");
+              } else if (_text.contains("start") ||
+                  _text.contains("navigate") ||
+                  _text.contains("mulai") ||
+                  _text.contains("navigasi")) {
+                if (MapPage.destinationCoordinate.latitude != 0) {
+                  if (!MapPage.isStartNavigate) {
+                    MapPage.isStartNavigate = true;
+                    NavigateMethod().startNavigate(
+                      MapPage.mapController,
+                      MapPage.destinationCoordinate,
+                    );
+                    TextToSpeech.speak("Start navigation to " +
+                        MapPage.googleMapDetail['name'].toString());
+                    return;
+                  } else {
+                    TextToSpeech.speak(
+                        "You are already navigating. Your destination is set to " +
+                            MapPage.googleMapDetail['name'].toString());
+                  }
+                } else {
+                  TextToSpeech.speak(
+                      "to start navigate. you have to set your destination first. To set the destination, you need to search your destination using the search bar and select where you want to go. or, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+                }
+              } else if (_text.contains("in front") ||
+                  _text.contains("depan")) {
+                // Iterate through the detection result to count objects in front
+                // int objectsInFront = 0;
+                // for (var detection in detectionResult) {
+                //   // Check if the object's position indicates it's in front
+                //   // You may need to adjust these conditions based on your scenario
+                //   if (detection['box'][1] > SOME_THRESHOLD && detection['box'][2] > SOME_OTHER_THRESHOLD) {
+                //     objectsInFront++;
+                //   }
+                // }
+                TextToSpeech.speak("there are 2 people in front of you");
+              } else if (_text.contains("next") ||
+                  _text.contains("step") ||
+                  _text.contains("selanjutnya") ||
+                  _text.contains("langkah ")) {
+                if (MapPage.isStartNavigate) {
+                  TextToSpeech.speak("your step next step is." +
+                      MapPage.distance.toString() +
+                      "meters, $instruction");
+                } else {
+                  TextToSpeech.speak(
+                      "you need to start navigation first. To start navigation, say 'start navigate'.");
+                }
+              } else if (_text.contains("current") ||
+                  _text.contains("destination") ||
+                  _text.contains("location") ||
+                  _text.contains("destinasi") ||
+                  _text.contains("saat ini") ||
+                  _text.contains("lokasi")) {
+                if (MapPage.destinationLocationName != "") {
+                  TextToSpeech.speak("your current destination is set to " +
+                      MapPage.destinationLocationName);
+                } else {
+                  TextToSpeech.speak(
+                      "You do destination is null. To set the destination, you need to search your destination using the search bar and select where you want to go. or, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+                }
+              } else if (_text.contains("share") || _text.contains("bagikan")) {
+                if (MapPage.destinationCoordinate.latitude != 0) {
+                  if (MapPage.isStartNavigate) {
+                    if (AuthService.isAuthenticate) {
+                      final String? userName = AuthService.userName;
+                      TextToSpeech.speak(
+                          "Start sharing your location. You need to give your username to other people $userName so they can track your location");
+
+                      ShareLocation.shareUserLocation(
+                        LatLng(MapPage.userLatitude, MapPage.userLongitude),
+                        MapPage.destinationCoordinate,
+                        MapPage.destinationLocationName,
+                      );
+                    } else {
+                      TextToSpeech.speak(
+                          "In order to share your location, you need to login first. Navigating to the login page");
+                      Get.to(LoginPage());
+                    }
+                  } else {
+                    TextToSpeech.speak(
+                        "In order to share location, you need to start navigation. To start navigation, say 'start navigate'.");
+                  }
+                } else {
+                  TextToSpeech.speak(
+                      "In order to share your location, you need to set your destination. To set the destination, you need to search your destination using the search bar and select where you want to go. or, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
+                }
+              } else if (_text.contains("language") ||
+                  _text.contains("indonesia") ||
+                  _text.contains("bahasa") ||
+                  _text.contains("english") ||
+                  _text.contains("switch") ||
+                  _text.contains("ganti")) {
+                MapPage.isIndonesianSelected = !MapPage.isIndonesianSelected;
+                _saveSetting();
+
+                if (MapPage.isIndonesianSelected) {
+                  TextToSpeech.speak(
+                      "mengubah bahasa default Anda, ke bahasa indonesia");
+                } else {
+                  TextToSpeech.speak("change your default language to english");
+                }
+              } else {
+                if (_text != "Listening...") {
+                  if (_debounce?.isActive ?? false) _debounce!.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 1000), () {
+                    // stop listening
+                    _microphoneTimeout1();
+                  });
+                }
+              }
             });
-          }
-        }
-      });
-    });
+          });
+        });
   }
 
   // stop listening after 8 seconds
@@ -1524,14 +1619,6 @@ class _MapPageState extends State<MapPage> {
     Timer(const Duration(seconds: 1), () {
       fromAudioCommand = true;
 
-      _endSearchFieldController.text = _text;
-      if (_debounce?.isActive ?? false) _debounce!.cancel();
-      _debounce = Timer(const Duration(milliseconds: 1000), () {
-        if (_endSearchFieldController.text.isNotEmpty) {
-          autoCompleteSearch(_endSearchFieldController.text);
-          print(fromAudioCommand);
-        }
-      });
       print(fromAudioCommand);
       // Reset _isListening 8 seconds
       setState(() {

@@ -63,7 +63,7 @@ dependencies:
   lottie: 
   sliding_up_panel: ^2.0.0+1
   url_launcher: ^6.2.6
-
+  translator:   
   shared_preferences:
   flutter_compass:
   
@@ -76,6 +76,7 @@ dependencies:
   flutter_rating_bar:
   carousel_slider:
   avatar_glow:
+  screen_brightness:
 
 dev_dependencies:
   flutter_test:
