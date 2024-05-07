@@ -138,7 +138,7 @@ class _MapPageState extends State<MapPage> {
 
     listenToUserLocation(locationService);
     ShareLocation.dbRef = FirebaseDatabase.instance.ref();
-
+    _loadSelectedLanguage();
     isLogin();
     print("init");
     _initCompass();
@@ -196,6 +196,8 @@ class _MapPageState extends State<MapPage> {
     try {
       if (value != "") {
         var result = await googlePlace.autocomplete.get(value,
+            language: MapPage.isIndonesianSelected ? "id" : "en",
+            // language: MapPage.isIndonesianSelected ? "en" : "id",
             origin: LatLon(MapPage.userLatitude, MapPage.userLongitude));
 
         if (result != null && result.predictions != null && mounted) {
@@ -411,7 +413,8 @@ class _MapPageState extends State<MapPage> {
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(8),
-                                          color: Color.fromARGB(255, 0, 0, 0),
+                                          color:
+                                              Color.fromARGB(255, 163, 71, 71),
                                         ),
                                         width:
                                             MediaQuery.of(context).size.width *
@@ -658,6 +661,7 @@ class _MapPageState extends State<MapPage> {
                           _debounce =
                               Timer(const Duration(milliseconds: 1000), () {
                             if (value.isNotEmpty) {
+                              fromAudioCommand = false;
                               autoCompleteSearch(value);
                             } else {
                               setState(() {
@@ -1342,7 +1346,7 @@ class _MapPageState extends State<MapPage> {
   void shareLocation(BuildContext context) {
     String userName = AuthService.userName.toString();
     TextToSpeech.speak(
-        'Do you want to share your location?. To share your location, Share your Email to other people. your username is $userName.split("")');
+        'Do you want to share your location?. To share your location, Share your Email to other people. your username is "$userName.split("")" ');
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1459,7 +1463,7 @@ class _MapPageState extends State<MapPage> {
             _text = result.recognizedWords.toLowerCase();
             print(_text);
             if (_debounce?.isActive ?? false) _debounce!.cancel();
-            _debounce = Timer(const Duration(milliseconds: 500), () async {
+            _debounce = Timer(const Duration(milliseconds: 1000), () async {
               if (_text.contains("go") ||
                   _text.contains("going") ||
                   _text.contains("navigate") ||
@@ -1475,9 +1479,6 @@ class _MapPageState extends State<MapPage> {
                 int keywordIndex = words.indexOf("go");
                 if (keywordIndex == -1) {
                   keywordIndex = words.indexOf("going");
-                }
-                if (keywordIndex == -1) {
-                  keywordIndex = words.indexOf("navigate");
                 }
                 if (keywordIndex == -1) {
                   keywordIndex = words.indexOf("pergi");

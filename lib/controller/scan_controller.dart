@@ -108,13 +108,13 @@ class ScanController extends GetxController {
         detectionResult = [];
         cameraController!.startImageStream((image) {
           // detect an object every 10 framse
-          if (cameraCount % 10 == 10) {
-            cameraCount++;
-            print("cameraCountr" + cameraCount.toString());
+          // if (cameraCount % 10 == 0) {
+          cameraCount++;
+          print("cameraCountr" + cameraCount.toString());
 
-            cameraImage = image;
-            objectDetector(image);
-          }
+          cameraImage = image;
+          objectDetector(image);
+          // }
           update();
         });
       });

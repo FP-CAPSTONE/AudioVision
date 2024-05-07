@@ -35,8 +35,7 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    String titleText =
-        _isIndonesianSelected ? 'Pengaturan Bahasa' : 'Language Settings';
+    String titleText = _isIndonesianSelected ? 'Pengaturan' : 'Settings';
     String fontSizeTitle =
         _isIndonesianSelected ? 'Pilih Besar Huruf' : 'Select Font Size';
     return Scaffold(
@@ -143,7 +142,7 @@ class _SettingPageState extends State<SettingPage> {
               ),
               SizedBox(height: 20),
               Text(
-                'Preview Text',
+                _isIndonesianSelected ? 'Pratinjau Teks' : 'Preview Text',
                 style: TextStyle(fontSize: _fontSize ?? 16.0),
               ),
             ],

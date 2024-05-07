@@ -137,43 +137,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                       MediaQuery.of(context).size.width * 0.15,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      // find the north and south to animate the camera
-                                      double minLat = MapPage.userLatitude <
-                                              MapPage.destinationCoordinate
-                                                  .latitude
-                                          ? MapPage.userLatitude
-                                          : MapPage
-                                              .destinationCoordinate.latitude;
-                                      double minLng = MapPage.userLongitude <
-                                              MapPage.destinationCoordinate
-                                                  .longitude
-                                          ? MapPage.userLongitude
-                                          : MapPage
-                                              .destinationCoordinate.longitude;
-                                      double maxLat = MapPage.userLatitude >
-                                              MapPage.destinationCoordinate
-                                                  .latitude
-                                          ? MapPage.userLatitude
-                                          : MapPage
-                                              .destinationCoordinate.latitude;
-                                      double maxLng = MapPage.userLongitude >
-                                              MapPage.destinationCoordinate
-                                                  .longitude
-                                          ? MapPage.userLongitude
-                                          : MapPage
-                                              .destinationCoordinate.longitude;
-
-                                      MapPage.mapController!.animateCamera(
-                                        CameraUpdate.newLatLngBounds(
-                                          LatLngBounds(
-                                            southwest: LatLng(minLat, minLng),
-                                            northeast: LatLng(maxLat, maxLng),
-                                          ),
-                                          100, // Padding
-                                        ),
-                                      );
-                                      MapPage.isStartNavigate = false;
-                                      NavigateMethod.resetBrightness();
+                                      NavigateMethod.stopNavigate();
                                     },
                                     style: ButtonStyle(
                                       backgroundColor:
@@ -255,14 +219,25 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     int totalDuration = 0;
 
     for (var step in steps) {
-      totalDistance += double.parse(step['distance'].split(' ')[0]);
-      totalDuration += int.parse(step['duration'].split(' ')[0]);
+      // Extract the distance value and unit from step['distance']
+      List<String> distanceParts = step['distance'].split(' ');
+      double distanceValue = double.parse(distanceParts[0]);
+      String distanceUnit = distanceParts[1];
 
-      MapPage.totalDurationToDestination = totalDuration;
+      // Convert distance to kilometers if it's in meters
+      if (distanceUnit == 'm') {
+        distanceValue /= 1000; // Convert meters to kilometers
+      }
+
+      // Add the converted distance to the total distance
+      totalDistance += distanceValue;
+
+      // Add the duration to the total duration
+      totalDuration += int.parse(step['duration'].split(' ')[0]);
     }
 
-    // Convert total distance from meters to kilometers
-    totalDistance /= 1000;
+    // Update total duration outside the loop
+    MapPage.totalDurationToDestination = totalDuration;
 
     return {'totalDistance': totalDistance, 'totalDuration': totalDuration};
   }

@@ -4,6 +4,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:screen_brightness/screen_brightness.dart';
 
@@ -49,11 +50,14 @@ class NavigateMethod {
     LatLng userPosition,
     LatLng destination,
   ) async {
+    String locale = MapPage.isIndonesianSelected ? "id" : "en";
     final String url_using_latlong =
         "https://maps.googleapis.com/maps/api/directions/json?origin=${userPosition.latitude},${userPosition.longitude}&"
-        "destination=${destination.latitude},${destination.longitude}&"
-        "mode=walking&"
-        "key=AIzaSyCgjkSHUOL0bgO4w94tC4Z6je-7303-Jn4"; //WARNINGG !!!
+                "destination=${destination.latitude},${destination.longitude}&"
+                "mode=walking&"
+                "language=${locale}&"
+                "key=" +
+            dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString(); //WARNINGG !!!
 
     var response = await http.get(Uri.parse(url_using_latlong));
     var json = convert.jsonDecode(response.body);
