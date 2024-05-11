@@ -29,6 +29,9 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
         MapPage.mapController!.animateCamera(
           CameraUpdate.newCameraPosition(MapPage.cameraPosition),
         );
+        setState(() {
+          MapPage().findNearbyLocation();
+        });
       },
       markers: MapPage.markers,
     );

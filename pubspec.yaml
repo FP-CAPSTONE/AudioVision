@@ -77,7 +77,8 @@ dependencies:
   carousel_slider:
   avatar_glow:
   screen_brightness:
-
+  flutter_picker:
+  shimmer:
 dev_dependencies:
   flutter_test:
     sdk: flutter

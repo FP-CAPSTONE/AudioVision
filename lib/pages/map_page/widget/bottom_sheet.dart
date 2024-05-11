@@ -217,11 +217,14 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
   Map<String, dynamic> _calculateTotals(List<dynamic> steps) {
     double totalDistance = 0.0;
     int totalDuration = 0;
+    print("object");
 
     for (var step in steps) {
+      print("object");
       // Extract the distance value and unit from step['distance']
       List<String> distanceParts = step['distance'].split(' ');
-      double distanceValue = double.parse(distanceParts[0]);
+      String distanceString = distanceParts[0].toString();
+      double distanceValue = double.parse(distanceString.replaceAll(',', '.'));
       String distanceUnit = distanceParts[1];
 
       // Convert distance to kilometers if it's in meters

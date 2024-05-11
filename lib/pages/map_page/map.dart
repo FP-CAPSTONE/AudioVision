@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
+import 'package:audiovision/pages/map_page/widget/bottom_sheet_near_location.dart';
 import 'package:audiovision/pages/map_page/widget/buttom_sheet_detail_ocation.dart';
 import 'package:audiovision/pages/map_page/method/searching_method.dart';
 import 'package:audiovision/pages/map_page/widget/panel_widget.dart';
@@ -43,6 +44,84 @@ import 'package:vibration/vibration.dart';
 import '../setting_page/setting.dart';
 
 class MapPage extends StatefulWidget {
+  static NearBySearchResponse? nearbyLocationResponse;
+  findNearbyLocation() async {
+    try {
+      String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
+      // String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString(); // udah gabisa
+      GooglePlace googlePlace = GooglePlace(apiKey);
+      var result = await googlePlace.search
+          .getNearBySearch(
+            Location(lat: userLatitude, lng: userLongitude),
+            1500,
+            language: MapPage.isIndonesianSelected ? "id" : "en",
+          )
+          .timeout(Duration(seconds: 50)); // Increase timeout duration
+      if (result != null) {
+        for (var i = 1; i < 5; i++) {
+          String placeId = result!.results![i].placeId ?? "Null";
+
+          final details = await googlePlace.details.get(placeId);
+          if (details?.result != null) {
+            nearbyLocationDetails.add({
+              "lat": details!.result!.geometry!.location!.lat!,
+              "long": details.result!.geometry!.location!.lng!,
+              "placeId": placeId,
+              "placeName": details.result!.name
+            });
+          }
+        }
+      }
+      nearbyLocationResponse = result;
+      Map detailNearby = MapPage.nearbyLocationDetails[1];
+
+      MapPage.markers.removeWhere(
+          (marker) => marker.markerId.value == detailNearby['placeId']);
+      final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
+          'assets/markers/destination_fill.png', 100);
+      MapPage.markers.add(
+        Marker(
+          markerId: const MarkerId("planceName"),
+          position: LatLng(detailNearby['lat'], detailNearby['long']),
+          icon: BitmapDescriptor.fromBytes(markerIcon),
+          infoWindow: InfoWindow(
+            title: detailNearby['placeName'],
+          ),
+        ),
+      );
+
+      // find the north and south to animate the camera
+      double minLat = MapPage.userLatitude < detailNearby['lat']
+          ? MapPage.userLatitude
+          : detailNearby['lat'];
+      double minLng = MapPage.userLongitude < detailNearby['long']
+          ? MapPage.userLongitude
+          : detailNearby['long'];
+      double maxLat = MapPage.userLatitude > detailNearby['lat']
+          ? MapPage.userLatitude
+          : detailNearby['lat'];
+      double maxLng = MapPage.userLongitude > detailNearby['long']
+          ? MapPage.userLongitude
+          : detailNearby['long'];
+
+      MapPage.mapController!.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          LatLngBounds(
+            southwest: LatLng(minLat, minLng),
+            northeast: LatLng(maxLat, maxLng),
+          ),
+          100, // Padding
+        ),
+      );
+      print("nearby location " + result!.results![0].name.toString());
+      return result;
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  static List nearbyLocationDetails = [];
+
   //public variable
   static double userLatitude = 0;
   static double userLongitude = 0;
@@ -61,8 +140,8 @@ class MapPage extends StatefulWidget {
 
   static Map googleMapDetail = {
     "name": "",
-    "rating": 0,
-    "ratingTotal": 0,
+    "rating": 0.0,
+    "ratingTotal": 5,
     "type": [],
     "openingHours": "",
     "photoReference": [],
@@ -149,11 +228,12 @@ class _MapPageState extends State<MapPage> {
         .then((value) {
       mapTheme = value;
     });
-    //_checkDeviceOrientation();
+    //_checkDeviceOrientation();+
   }
 
   Future<void> _loadSelectedLanguage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     setState(() {
       MapPage.isIndonesianSelected =
           prefs.getBool('isIndonesianSelected') ?? false;
@@ -338,11 +418,10 @@ class _MapPageState extends State<MapPage> {
                         ? CustomBottomSheet(
                             callback: shareLocation,
                           )
-                        : Container(),
-                    !MapPage.isStartNavigate &&
-                            MapPage.destinationCoordinate.latitude != 0
-                        ? BottomSheetDetailLocation()
-                        : Container(),
+                        : !MapPage.isStartNavigate &&
+                                MapPage.destinationCoordinate.latitude != 0
+                            ? BottomSheetDetailLocation()
+                            : BottomSheetNearLocation(addDestination),
                     // NavigateBarWidget(
                     //   navigationText: "navigationText",
                     //   distance: "20 m",
@@ -412,7 +491,7 @@ class _MapPageState extends State<MapPage> {
                                             bottom: panelHeightClosed + 2),
                                         decoration: BoxDecoration(
                                           borderRadius:
-                                              BorderRadius.circular(8),
+                                              BorderRadius.circular(200),
                                           color:
                                               Color.fromARGB(255, 163, 71, 71),
                                         ),
@@ -421,11 +500,11 @@ class _MapPageState extends State<MapPage> {
                                                 0.9,
                                         height:
                                             MediaQuery.of(context).size.height *
-                                                0.1,
+                                                0.065,
                                         child: Material(
                                           // Wrap ElevatedButton with Material
                                           borderRadius: BorderRadius.circular(
-                                              8), // Apply the same border radius
+                                              50), // Apply the same border radius
                                           color: Color.fromARGB(255, 0, 0,
                                               0), // Apply the same color
                                           child: InkWell(
@@ -442,7 +521,9 @@ class _MapPageState extends State<MapPage> {
                                                     (BuildContext context) {
                                                   return AlertDialog(
                                                     title: Text(
-                                                      'Tracking Location',
+                                                      MapPage.isIndonesianSelected
+                                                          ? 'Lacak Lokasi'
+                                                          : 'Track Lcation',
                                                       style: TextStyle(
                                                           fontSize: MediaQuery.of(
                                                                       context)
@@ -531,13 +612,15 @@ class _MapPageState extends State<MapPage> {
                                                       10), // Adjust padding to match the original design
                                               child: Center(
                                                 child: Text(
-                                                  'Tracking Location',
+                                                  MapPage.isIndonesianSelected
+                                                      ? 'Lacak Lokasi'
+                                                      : 'Track Lcation',
                                                   style: TextStyle(
                                                     fontSize:
                                                         MediaQuery.of(context)
                                                                 .size
                                                                 .width *
-                                                            0.06,
+                                                            0.05,
                                                     color: Colors
                                                         .white, // Set text color to white
                                                   ),
@@ -631,6 +714,8 @@ class _MapPageState extends State<MapPage> {
                                         0,
                                         0,
                                       );
+                                      PolylineMethod(callbackSetState)
+                                          .clearPolyline();
                                     });
                                   },
                                   icon: Icon(
@@ -1193,7 +1278,7 @@ class _MapPageState extends State<MapPage> {
 
     setState(() {});
     if (MapPage.isStartNavigate) {
-      PolylineMethod(updateUi!).getPolyline(
+      PolylineMethod(updateUi).getPolyline(
         LatLng(MapPage.userLatitude, MapPage.userLongitude),
         MapPage.destinationCoordinate,
       );
@@ -1643,5 +1728,9 @@ class _MapPageState extends State<MapPage> {
       _speech.stop();
       print("Speech recognition timeout");
     });
+  }
+
+  void callbackSetState() {
+    setState(() {});
   }
 }

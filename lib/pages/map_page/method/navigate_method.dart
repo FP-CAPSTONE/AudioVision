@@ -140,6 +140,7 @@ class NavigateMethod {
         100, // Padding
       ),
     );
+
     MapPage.isStartNavigate = false;
     resetBrightness();
   }
