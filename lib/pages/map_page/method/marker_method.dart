@@ -24,7 +24,7 @@ class MarkerMethod {
 
     List<Marker> updatedMarkers = [];
 
-    for (var marker in markersToUpdate) {
+    markersToUpdate.forEach((marker) {
       // Create a new marker with the updated rotation
       Marker updatedMarker = Marker(
         markerId: marker.markerId,
@@ -35,7 +35,7 @@ class MarkerMethod {
         anchor: marker.anchor,
       );
       updatedMarkers.add(updatedMarker);
-    }
+    });
 
 // Remove old markers and add updated markers
     MapPage.markers.removeWhere((marker) => marker.markerId.value == "You");

@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class GoogleMapWidget extends StatefulWidget {
   final String mapstyle;
 
-  const GoogleMapWidget({super.key, required this.mapstyle});
+   GoogleMapWidget({ required this.mapstyle});
   @override
   _GoogleMapWidgetState createState() => _GoogleMapWidgetState();
 }

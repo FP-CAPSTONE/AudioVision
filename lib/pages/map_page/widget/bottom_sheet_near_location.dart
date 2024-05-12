@@ -181,7 +181,7 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                       "this is a nearby location selection. the nearest location chosen is $destinationPlaceName. Scroll down or scroll up to select the closest location ");
                 },
                 child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.12,
+                  height: MediaQuery.of(context).size.height * 0.18,
                   width: double.infinity,
                   child: CupertinoPicker(
                     // squeeze: ,
@@ -197,9 +197,11 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                     ),
 
                     itemExtent: MediaQuery.of(context).size.height * 0.1,
-                    offAxisFraction: 0, // 0
+                    offAxisFraction: 1, // 0
                     magnification: 1, // 1
-                    diameterRatio: 1,
+                    diameterRatio: 0.1,
+                    squeeze: 1,
+
                     useMagnifier: false,
                     scrollController:
                         FixedExtentScrollController(initialItem: 1),

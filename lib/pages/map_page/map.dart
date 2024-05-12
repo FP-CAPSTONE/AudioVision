@@ -55,7 +55,7 @@ class MapPage extends StatefulWidget {
           .timeout(const Duration(seconds: 50)); // Increase timeout duration
       if (result != null) {
         for (var i = 1; i < 5; i++) {
-          String placeId = result.results![i].placeId ?? "Null";
+          String placeId = result!.results![i].placeId ?? "Null";
 
           final details = await googlePlace.details.get(placeId);
           if (details?.result != null) {
@@ -505,7 +505,7 @@ class _MapPageState extends State<MapPage> {
                                                 child: const Text("Cancel"),
                                                 onPressed: () {
                                                   Navigator.of(context)
-                                                      .pop(); // Close the dialog
+                                                      .pop(); // trackClose the dialog
                                                 },
                                               ),
                                               TextButton(

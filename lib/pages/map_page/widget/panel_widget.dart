@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../method/share_location_method.dart';
+
 class PanelWidget extends StatelessWidget {
   final ScrollController controller;
   final PanelController panelController;
@@ -111,7 +113,7 @@ class PanelWidget extends StatelessWidget {
               children: [
                 Expanded(
                   child: ListTile(
-                    title: Text("Monumen Nasional"),
+                    title: Text("Atmi Cikarang"),
                   ),
                 ),
                 Expanded(
@@ -127,8 +129,9 @@ class PanelWidget extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 15),
+
           buildAboutText(context),
-          const SizedBox(height: 24),
         ],
       );
 
@@ -137,28 +140,49 @@ class PanelWidget extends StatelessWidget {
       onTap: () {
         _showBottomSheet(context);
       },
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          MediaQuery.of(context).size.width *
-              0.32, // Padding kiri menjadi 10% dari lebar layar
-          MediaQuery.of(context).size.height *
-              0, // Padding atas menjadi 10% dari tinggi layar
-          MediaQuery.of(context).size.width *
-              0, // Padding kanan menjadi 10% dari lebar layar
-          MediaQuery.of(context).size.height *
-              0, // Padding bawah menjadi 10% dari tinggi layar
-        ),
-        child: const Text(
-          'Show Details',
-          style: TextStyle(
-            color: Colors.blue,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+      child: FractionallySizedBox(
+        widthFactor: 0.8, // Set width to 80%
+        child: ElevatedButton(
+          onPressed: () {
+            // Show confirmation dialog to stop tracking
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Stop Tracking"),
+                  content: const Text("Are you sure you want to stop tracking?"),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text("Cancel"),
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                    ),
+                    TextButton(
+                      child: const Text("Stop"),
+                      onPressed: () {
+                        // stop tracking
+                        ShareLocation.stopTracking();
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: const Text('Stop Tracking', style: TextStyle(color: Colors.white)),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
+            textStyle: MaterialStateProperty.all<TextStyle>(
+              TextStyle(color: Colors.white),
+            ),
           ),
         ),
       ),
     );
   }
+
 
   void _showBottomSheet(BuildContext context) {
     Map<String, dynamic> totals = _calculateTotals(MapPage.allSteps);
