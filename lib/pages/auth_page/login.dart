@@ -4,6 +4,8 @@ import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -13,8 +15,8 @@ class _LoginPageState extends State<LoginPage> {
   //     TextEditingController(text: "kminchelle");
   // TextEditingController _passwordController =
   //     TextEditingController(text: "0lelplR");
-  TextEditingController _emailController = TextEditingController(text: "boben");
-  TextEditingController _passwordController =
+  final TextEditingController _emailController = TextEditingController(text: "boben");
+  final TextEditingController _passwordController =
       TextEditingController(text: "passwordsaya");
 
   bool _isLoading = false;
@@ -40,12 +42,12 @@ class _LoginPageState extends State<LoginPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Login',
+              const Text('Login',
                   style: TextStyle(fontSize: 24, color: Colors.black)),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Username',
                   labelStyle: TextStyle(color: Colors.black),
                   focusedBorder: OutlineInputBorder(
@@ -59,10 +61,10 @@ class _LoginPageState extends State<LoginPage> {
                   TextToSpeech.speak('Username field selected');
                 },
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Password',
                   labelStyle: TextStyle(color: Colors.black),
                   focusedBorder: OutlineInputBorder(
@@ -77,24 +79,24 @@ class _LoginPageState extends State<LoginPage> {
                   TextToSpeech.speak('Password field selected');
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _isLoading
                     ? null
-                    : _login, // Disable button if isLoading is true
-                child: Text('Login'),
+                    : _login,
                 style: ElevatedButton.styleFrom(
-                    primary: Colors.black, onPrimary: Colors.white),
+                    foregroundColor: Colors.white, backgroundColor: Colors.black), // Disable button if isLoading is true
+                child: const Text('Login'),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()),
+                    MaterialPageRoute(builder: (context) => const RegisterPage()),
                   );
                 },
-                child: Text(
+                child: const Text(
                   'Don\'t have an account? Click here to register.',
                   style: TextStyle(
                       color: Colors.black,
@@ -106,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),
-              child: Center(
+              child: const Center(
                 child: CircularProgressIndicator(),
               ),
             ),

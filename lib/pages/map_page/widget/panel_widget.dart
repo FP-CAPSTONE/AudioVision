@@ -1,7 +1,5 @@
 import 'package:audiovision/pages/map_page/map.dart';
-import 'package:audiovision/pages/map_page/method/share_location_method.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,25 +18,25 @@ class PanelWidget extends StatelessWidget {
         padding: EdgeInsets.zero,
         controller: controller,
         children: <Widget>[
-          SizedBox(
+          const SizedBox(
             height: 12,
           ),
           buildDragHandle(),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
+              const Expanded(
                 child: CircleAvatar(
                   radius: 20,
+                  backgroundColor: Colors.black,
                   child: Icon(
                     Icons.account_circle,
                     size: 30,
                     color: Colors.white,
                   ),
-                  backgroundColor: Colors.black,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 flex:
                     2, // Memberikan flex lebih besar agar kolom ini lebih lebar
@@ -62,7 +60,7 @@ class PanelWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   children: [
@@ -87,14 +85,14 @@ class PanelWidget extends StatelessWidget {
                                   0.3), // Warna dan opasitas bayangan
                               spreadRadius: 2, // Penyebaran bayangan
                               blurRadius: 4, // Tingkat keburaman bayangan
-                              offset: Offset(0,
+                              offset: const Offset(0,
                                   2), // Posisi bayangan relatif terhadap kontainer
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.all(
+                        padding: const EdgeInsets.all(
                             8), // Padding untuk jarak antara ikon dan tepi lingkaran
-                        child: Icon(
+                        child: const Icon(
                           Icons.phone, // Menggunakan ikon telepon
                           color: Colors.white, // Warna ikon menjadi putih
                           size: 24, // Ukuran ikon
@@ -106,9 +104,9 @@ class PanelWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          const SizedBox(height: 16),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
@@ -130,7 +128,7 @@ class PanelWidget extends StatelessWidget {
             ),
           ),
           buildAboutText(context),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
         ],
       );
 
@@ -150,7 +148,7 @@ class PanelWidget extends StatelessWidget {
           MediaQuery.of(context).size.height *
               0, // Padding bawah menjadi 10% dari tinggi layar
         ),
-        child: Text(
+        child: const Text(
           'Show Details',
           style: TextStyle(
             color: Colors.blue,
@@ -175,7 +173,7 @@ class PanelWidget extends StatelessWidget {
         now.add(Duration(minutes: totalDurationMinutes));
     showModalBottomSheet(
       elevation: 1,
-      backgroundColor: Color.fromARGB(255, 236, 5, 5),
+      backgroundColor: const Color.fromARGB(255, 236, 5, 5),
       barrierColor: const Color.fromARGB(17, 0, 0, 0),
       isDismissible: false,
       context: context,
@@ -200,10 +198,10 @@ class PanelWidget extends StatelessWidget {
                 }
               },
               child: AnimatedContainer(
-                duration: Duration(milliseconds: 300), // Adjust animation speed
+                duration: const Duration(milliseconds: 300), // Adjust animation speed
                 width: screenWidth * 0.97, // Set width to 95% of screen width
                 height: screenHeight * currentHeight,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
@@ -211,7 +209,7 @@ class PanelWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -220,16 +218,16 @@ class PanelWidget extends StatelessWidget {
                             children: [
                               Text(
                                 '${totals['totalDuration']} mins ',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               RichText(
                                 text: TextSpan(
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
@@ -238,7 +236,7 @@ class PanelWidget extends StatelessWidget {
                                     TextSpan(
                                       text:
                                           '${totals['totalDistance'].toStringAsFixed(2)} km . ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
-                                      style: TextStyle(color: Colors.grey),
+                                      style: const TextStyle(color: Colors.grey),
                                     ),
                                   ],
                                 ),
@@ -261,7 +259,7 @@ class PanelWidget extends StatelessWidget {
                                     Navigator.of(context)
                                         .pop(); // Close the bottom sheet
                                   },
-                                  child: Text("Exit"))
+                                  child: const Text("Exit"))
                             ],
                           )
                         ],
@@ -278,23 +276,23 @@ class PanelWidget extends StatelessWidget {
                         itemBuilder: (context, index) {
                           var step = MapPage.allSteps[index];
                           return ListTile(
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 10,
                             ),
                             title: Text(
                               step['instructions'],
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
                               '${step['distance']} - ${step['duration']}',
-                              style: TextStyle(color: Colors.grey),
+                              style: const TextStyle(color: Colors.grey),
                             ),
                             leading: CircleAvatar(
                               backgroundColor: Colors.blue,
                               child: Text(
                                 '${index + 1}',
-                                style: TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Colors.white),
                               ),
                             ),
                           );
@@ -465,6 +463,7 @@ class PanelWidget extends StatelessWidget {
   // }
 
   Widget buildDragHandle() => GestureDetector(
+        onTap: togglePanel,
         child: Center(
           child: Container(
             width: 30,
@@ -474,7 +473,6 @@ class PanelWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12)),
           ),
         ),
-        onTap: togglePanel,
       );
 
   void togglePanel() => panelController.isPanelOpen

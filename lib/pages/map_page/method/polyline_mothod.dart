@@ -40,7 +40,7 @@ class PolylineMethod {
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,
-      color: Color.fromARGB(255, 73, 73, 73),
+      color: const Color.fromARGB(255, 73, 73, 73),
       points: polylineCoordinates,
       width: 5,
       jointType: JointType.bevel,

@@ -3,21 +3,16 @@ import 'dart:typed_data';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/method/navigate_method.dart';
-import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:get/get.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 
 class BottomSheetNearLocation extends StatefulWidget {
   final Function addDestinationCallback;
-
-  BottomSheetNearLocation(this.addDestinationCallback);
+  static String destinationPlaceId = "";
+  const BottomSheetNearLocation(this.addDestinationCallback, {super.key});
   @override
   _BottomSheetNearLocationState createState() =>
       _BottomSheetNearLocationState();
@@ -29,9 +24,8 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
     super.initState();
   }
 
-  LatLng destinationCoordinate = LatLng(0, 0);
+  LatLng destinationCoordinate = const LatLng(0, 0);
   String destinationPlaceName = "";
-  String destinationPlaceId = "";
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +37,7 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
       maxChildSize: 0.35,
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             color: Colors.white,
           ),
@@ -51,15 +45,15 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
-                padding:
-                    EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
+                padding: const EdgeInsets.only(
+                    left: 20, right: 20, top: 10, bottom: 20),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 0.6,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +61,7 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                               GestureDetector(
                                 onLongPress: () {
                                   TextToSpeech.speak(
-                                      "your destination is ${MapPage.googleMapDetail['name']}");
+                                      "the nearest location chosen is  $destinationPlaceName");
                                 },
                                 child: Text(
                                   MapPage.isIndonesianSelected
@@ -76,13 +70,13 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                                   style: TextStyle(
                                       fontSize:
                                           MediaQuery.of(context).size.width *
-                                              0.042,
+                                              0.045,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black,
                                       overflow: TextOverflow.ellipsis),
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Text(
                                 MapPage.isIndonesianSelected
                                     ? "Pilih lokasi terdekat untuk dikunjungi"
@@ -101,7 +95,7 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                           onLongPress: () {
                             TextToSpeech.speak("Start Button");
                           },
-                          child: Container(
+                          child: SizedBox(
                             height: MediaQuery.of(context).size.height * 0.07,
                             child: ElevatedButton(
                               onPressed: () {
@@ -109,6 +103,9 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                                     destinationCoordinate;
                                 MapPage.destinationLocationName =
                                     destinationPlaceName;
+                                widget.addDestinationCallback(
+                                    BottomSheetNearLocation
+                                        .destinationPlaceId); //     addNearbyMarker did not use here
 
                                 NavigateMethod().startNavigate(
                                   MapPage.mapController,
@@ -125,11 +122,9 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                                   ),
                                 );
 
-                                widget.addDestinationCallback(
-                                    destinationPlaceId); // addNearbyMarker did not use here
-
                                 setState(() {});
-                                TextToSpeech.speak("Start navigation");
+                                TextToSpeech.speak(
+                                    "Start navigation to $destinationPlaceName");
                               },
                               style: ButtonStyle(
                                 backgroundColor:
@@ -180,117 +175,148 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                 color: Colors.grey.withOpacity(0.5),
               ),
 
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.12,
-                width: double.infinity,
-                child: CupertinoPicker(
-                  // squeeze: ,
-                  // key: ,
-                  // diameterRatio: 1,
-                  // backgroundColor: Colors.grey[300],
-                  selectionOverlay: Container(
-                    height: MediaQuery.of(context).size.height * 0.1,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[800]
-                          ?.withOpacity(0.1), // Set color to transparent
+              GestureDetector(
+                onLongPress: () {
+                  TextToSpeech.speak(
+                      "this is a nearby location selection. the nearest location chosen is $destinationPlaceName. Scroll down or scroll up to select the closest location ");
+                },
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.12,
+                  width: double.infinity,
+                  child: CupertinoPicker(
+                    // squeeze: ,
+                    // key: ,
+                    // diameterRatio: 1,
+                    // backgroundColor: Colors.grey[300],
+                    selectionOverlay: Container(
+                      height: MediaQuery.of(context).size.height * 0.1,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[800]
+                            ?.withOpacity(0.1), // Set color to transparent
+                      ),
                     ),
-                  ),
 
-                  itemExtent: MediaQuery.of(context).size.height * 0.1,
-                  offAxisFraction: 0, // 0
-                  magnification: 1, // 1
-                  diameterRatio: 1,
-                  useMagnifier: false,
-                  scrollController: FixedExtentScrollController(initialItem: 1),
-                  onSelectedItemChanged: (int value) {
-                    addNearbyMarker(value);
-                  },
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(15),
-                      width: 2000,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildText(
-                            MapPage.nearbyLocationResponse?.results?[1]?.name,
-                            fontSize: MediaQuery.of(context).size.width * 0.042,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          _buildText(
-                            MapPage
-                                .nearbyLocationResponse?.results?[1]?.vicinity,
-                            fontSize: MediaQuery.of(context).size.width * 0.030,
-                            color: Colors.grey,
-                          ),
-                        ],
+                    itemExtent: MediaQuery.of(context).size.height * 0.1,
+                    offAxisFraction: 0, // 0
+                    magnification: 1, // 1
+                    diameterRatio: 1,
+                    useMagnifier: false,
+                    scrollController:
+                        FixedExtentScrollController(initialItem: 1),
+                    onSelectedItemChanged: (int value) {
+                      addNearbyMarker(value);
+                    },
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(15),
+                        width: 2000,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildText(
+                              MapPage.nearbyLocationResponse?.results?[1].name,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.045,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            _buildText(
+                              MapPage
+                                  .nearbyLocationResponse?.results?[1].vicinity,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.033,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(15),
-                      width: 2000,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildText(
-                            MapPage.nearbyLocationResponse?.results?[2]?.name,
-                            fontSize: MediaQuery.of(context).size.width * 0.042,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          _buildText(
-                            MapPage
-                                .nearbyLocationResponse?.results?[2]?.vicinity,
-                            fontSize: MediaQuery.of(context).size.width * 0.030,
-                            color: Colors.grey,
-                          ),
-                        ],
+                      Container(
+                        padding: const EdgeInsets.all(15),
+                        width: 2000,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildText(
+                              MapPage.nearbyLocationResponse?.results?[2].name,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.045,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            _buildText(
+                              MapPage
+                                  .nearbyLocationResponse?.results?[2].vicinity,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.033,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(15),
-                      width: 2000,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildText(
-                            MapPage.nearbyLocationResponse?.results?[3]?.name,
-                            fontSize: MediaQuery.of(context).size.width * 0.042,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          _buildText(
-                            MapPage
-                                .nearbyLocationResponse?.results?[3]?.vicinity,
-                            fontSize: MediaQuery.of(context).size.width * 0.030,
-                            color: Colors.grey,
-                          ),
-                        ],
+                      Container(
+                        padding: const EdgeInsets.all(15),
+                        width: 2000,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildText(
+                              MapPage.nearbyLocationResponse?.results?[3].name,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.045,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            _buildText(
+                              MapPage
+                                  .nearbyLocationResponse?.results?[3].vicinity,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.033,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(15),
-                      width: 2000,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildText(
-                            MapPage.nearbyLocationResponse?.results?[4]?.name,
-                            fontSize: MediaQuery.of(context).size.width * 0.042,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                          _buildText(
-                            MapPage
-                                .nearbyLocationResponse?.results?[4]?.vicinity,
-                            fontSize: MediaQuery.of(context).size.width * 0.030,
-                            color: Colors.grey,
-                          ),
-                        ],
+                      Container(
+                        padding: const EdgeInsets.all(15),
+                        width: 2000,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildText(
+                              MapPage.nearbyLocationResponse?.results?[4].name,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.045,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            _buildText(
+                              MapPage
+                                  .nearbyLocationResponse?.results?[4].vicinity,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.033,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               )
             ],
@@ -387,7 +413,8 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
 
     destinationCoordinate = LatLng(detailNearby['lat'], detailNearby['long']);
     destinationPlaceName = detailNearby['placeName'];
-    destinationPlaceId = detailNearby['placeId'];
+    BottomSheetNearLocation.destinationPlaceId = detailNearby['placeId'];
     print(destinationPlaceName);
+    TextToSpeech.speak(" the nearest location is set to $destinationPlaceName");
   }
 }

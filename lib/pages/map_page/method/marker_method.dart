@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:flutter/services.dart';
@@ -25,7 +24,7 @@ class MarkerMethod {
 
     List<Marker> updatedMarkers = [];
 
-    markersToUpdate.forEach((marker) {
+    for (var marker in markersToUpdate) {
       // Create a new marker with the updated rotation
       Marker updatedMarker = Marker(
         markerId: marker.markerId,
@@ -36,7 +35,7 @@ class MarkerMethod {
         anchor: marker.anchor,
       );
       updatedMarkers.add(updatedMarker);
-    });
+    }
 
 // Remove old markers and add updated markers
     MapPage.markers.removeWhere((marker) => marker.markerId.value == "You");

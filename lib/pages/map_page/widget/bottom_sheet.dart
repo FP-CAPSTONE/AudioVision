@@ -1,14 +1,13 @@
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/method/navigate_method.dart';
+import 'package:audiovision/pages/map_page/method/share_location_method.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CustomBottomSheet extends StatefulWidget {
-  final Function callback;
-  CustomBottomSheet({
-    required this.callback,
+  final Function shareLocationCallback;
+  const CustomBottomSheet({super.key, 
+    required this.shareLocationCallback,
   });
 
   @override
@@ -37,7 +36,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
       maxChildSize: 0.6,
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             color: Colors.white,
           ),
@@ -46,7 +45,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
                   width: 40,
                   height: 3,
@@ -54,7 +53,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                 ),
                 Padding(
                   padding:
-                      EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 10),
+                      const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 10),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -65,7 +64,9 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${totals['totalDuration']} mins ',
+                                MapPage.isIndonesianSelected
+                                    ? '${totals['totalDuration']} menit '
+                                    : '${totals['totalDuration']} mins ',
                                 style: TextStyle(
                                   fontSize:
                                       MediaQuery.of(context).size.width * 0.05,
@@ -73,7 +74,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                   color: Colors.black,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               RichText(
                                 text: TextSpan(
                                   style: const TextStyle(
@@ -99,32 +100,38 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                           ),
                           Row(
                             children: [
-                              GestureDetector(
-                                onLongPress: () {
-                                  TextToSpeech.speak("Share Button");
-                                },
-                                child: Container(
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.15,
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        widget.callback(context);
+                              ShareLocation.isShared
+                                  ? Container()
+                                  : GestureDetector(
+                                      onLongPress: () {
+                                        TextToSpeech.speak("Share Button");
                                       },
-                                      style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStateProperty.all<Color>(
-                                          Color.fromARGB(255, 36, 36, 36),
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        Icons.share,
-                                        color: Colors.white,
-                                        size:
+                                      child: SizedBox(
+                                        height:
                                             MediaQuery.of(context).size.width *
-                                                0.08,
-                                      )),
-                                ),
-                              ),
+                                                0.15,
+                                        child: ElevatedButton(
+                                            onPressed: () {
+                                              widget.shareLocationCallback(
+                                                  context);
+                                            },
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all<
+                                                      Color>(
+                                                const Color.fromARGB(255, 36, 36, 36),
+                                              ),
+                                            ),
+                                            child: Icon(
+                                              Icons.share,
+                                              color: Colors.white,
+                                              size: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.08,
+                                            )),
+                                      ),
+                                    ),
                               const SizedBox(
                                 width: 5,
                               ),
@@ -132,12 +139,15 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                 onLongPress: () {
                                   TextToSpeech.speak("Exit Button");
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   height:
                                       MediaQuery.of(context).size.width * 0.15,
                                   child: ElevatedButton(
                                     onPressed: () {
+                                      ShareLocation.isShared = false;
                                       NavigateMethod.stopNavigate();
+                                      // PolylineMethod(getDirectionImage)
+                                      //     .clearPolyline(); // getDirectionImage will not use in here
                                     },
                                     style: ButtonStyle(
                                       backgroundColor:
@@ -145,7 +155,9 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                               Colors.red),
                                     ),
                                     child: Text(
-                                      "Exit",
+                                      MapPage.isIndonesianSelected
+                                          ? "Keluar"
+                                          : "Exit",
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontSize: MediaQuery.of(context)
@@ -170,13 +182,11 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                 ),
                 ListView.builder(
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: MapPage.allSteps.length,
                   itemBuilder: (context, index) {
                     var step = MapPage.allSteps[index];
-                    var maneuver = step['maneuver'] != null
-                        ? step['maneuver']
-                        : "continue";
+                    var maneuver = step['maneuver'] ?? "continue";
                     return GestureDetector(
                       onLongPress: () {
                         TextToSpeech.speak(step['instructions']);
@@ -220,7 +230,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     print("object");
 
     for (var step in steps) {
-      print("object");
+      print("object $step");
       // Extract the distance value and unit from step['distance']
       List<String> distanceParts = step['distance'].split(' ');
       String distanceString = distanceParts[0].toString();
@@ -309,7 +319,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     }
 
     return Container(
-      padding: EdgeInsets.only(right: 20),
+      padding: const EdgeInsets.only(right: 20),
       child: Tab(
         icon: Image.asset(
           imagePath,

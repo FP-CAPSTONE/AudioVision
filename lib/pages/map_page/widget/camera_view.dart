@@ -1,5 +1,4 @@
 import 'package:audiovision/controller/scan_controller.dart';
-import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';

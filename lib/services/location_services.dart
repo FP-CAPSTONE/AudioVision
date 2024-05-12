@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:audiovision/services/user_location.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:location/location.dart';
-import 'package:audiovision/services/firebase_realtime.dart';
 
 class LocationService {
   Location location = Location();

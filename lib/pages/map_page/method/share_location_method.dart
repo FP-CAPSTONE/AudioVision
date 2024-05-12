@@ -21,6 +21,7 @@ class ShareLocation {
 
 // update shared data
   static bool isShared = false;
+
   static shareUserLocation(LatLng userLocation, LatLng destinationLocation,
       String destinationLocationName) async {
     isShared = true;
@@ -85,7 +86,7 @@ class ShareLocation {
           'assets/markers/destination-marker.png', 100);
       MapPage.markers.add(
         Marker(
-          markerId: MarkerId("Tracking Destination"), // Assert non-null using !
+          markerId: const MarkerId("Tracking Destination"), // Assert non-null using !
           position: LatLng(ShareLocation.trackDestinationCoordinate!.latitude,
               ShareLocation.trackDestinationCoordinate!.longitude),
           // Custom marker icon

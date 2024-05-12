@@ -158,7 +158,7 @@ class _SelectScreenState extends State<SelectScreen> {
               //     });
               //   },
               // ),
-              Text("YOUR CURRENT LOCATION "),
+              const Text("YOUR CURRENT LOCATION "),
               Text("latitude $latitude"),
               Text("long $longitude"),
               const SizedBox(

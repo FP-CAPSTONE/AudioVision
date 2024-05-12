@@ -1,9 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:async';
-import 'dart:ffi';
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/widget/bottom_sheet_near_location.dart';
@@ -20,7 +17,6 @@ import 'package:audiovision/pages/map_page/method/navigate_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:audiovision/pages/map_page/method/share_location_method.dart';
 import 'package:audiovision/pages/map_page/widget/bottom_sheet.dart';
-import 'package:audiovision/pages/map_page/widget/button_start.dart';
 import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 import 'package:audiovision/pages/map_page/widget/google_map.dart';
 import 'package:audiovision/pages/map_page/widget/navigate_bar.dart';
@@ -56,10 +52,10 @@ class MapPage extends StatefulWidget {
             1500,
             language: MapPage.isIndonesianSelected ? "id" : "en",
           )
-          .timeout(Duration(seconds: 50)); // Increase timeout duration
+          .timeout(const Duration(seconds: 50)); // Increase timeout duration
       if (result != null) {
         for (var i = 1; i < 5; i++) {
-          String placeId = result!.results![i].placeId ?? "Null";
+          String placeId = result.results![i].placeId ?? "Null";
 
           final details = await googlePlace.details.get(placeId);
           if (details?.result != null) {
@@ -113,7 +109,8 @@ class MapPage extends StatefulWidget {
           100, // Padding
         ),
       );
-      print("nearby location " + result!.results![0].name.toString());
+      BottomSheetNearLocation.destinationPlaceId = detailNearby['placeId'];
+      print("nearby location ${result!.results![0].name}");
       return result;
     } catch (e) {
       print("Error: $e");
@@ -125,9 +122,9 @@ class MapPage extends StatefulWidget {
   //public variable
   static double userLatitude = 0;
   static double userLongitude = 0;
-  static LatLng userPreviousCoordinate = LatLng(0, 0);
+  static LatLng userPreviousCoordinate = const LatLng(0, 0);
 
-  static LatLng destinationCoordinate = LatLng(0, 0);
+  static LatLng destinationCoordinate = const LatLng(0, 0);
 
   static bool isStartNavigate = false;
 
@@ -254,15 +251,59 @@ class _MapPageState extends State<MapPage> {
       setState(() {
         double compassHeading = event.heading ?? 0;
 
-        // Check if the difference between the current compass heading and the previous heading is greater than 5 degrees
+        // Check if the difference between the current compass heading and the previous heading is greater than 10 degrees
         if ((compassHeading - MapPage.compassHeading).abs() > 10) {
           MapPage.compassHeading = compassHeading;
 
-          // Update marker and camera rotation only when the rotation of the compass > 5 degrees
+          // Update marker and camera rotation only when the rotation of the compass > 10 degrees
           MarkerMethod.updateMarkerAndCameraRotation();
+          print("compas $compassHeading");
+          // Determine cardinal direction based on compass heading
+          String direction = _getCardinalDirection(compassHeading);
+          print("Current direction: $direction");
+          if (_debounce?.isActive ?? false) _debounce!.cancel();
+          _debounce = Timer(const Duration(milliseconds: 1000), () {
+            // stop listening
+            TextToSpeech.speak("Your current direction is $direction");
+          });
         }
       });
     });
+  }
+
+  String _getCardinalDirection(double compassHeading) {
+    print("compas $compassHeading");
+
+    // Define cardinal directions
+    List<String> directions = MapPage.isIndonesianSelected
+        ? [
+            'Utara',
+            'Timur Laut',
+            'Timur',
+            'Tenggara',
+            'selatan',
+            'barat daya',
+            'Barat',
+            'Barat Laut'
+          ]
+        : [
+            'North',
+            'Northeast',
+            'East',
+            'Southeast',
+            'South',
+            'Southwest',
+            'West',
+            'Northwest'
+          ];
+
+    // Calculate index based on compass heading
+    int index = ((compassHeading % 360) / 45).round();
+
+    // Return the corresponding cardinal direction
+    return directions[index % 8];
+
+    // TODO : comapre the the direction with all steps from directons apiS
   }
 
   @override
@@ -289,9 +330,8 @@ class _MapPageState extends State<MapPage> {
                   predictions[0].description.toString(),
                   predictions[0].placeId.toString());
 
-              TextToSpeech.speak("set destination to " +
-                  predictions[0].description.toString() +
-                  ". double tap the screen. and. say Start navigate. to start navigation");
+              TextToSpeech.speak(
+                  "set destination to ${predictions[0].description}. double tap the screen. and. say Start navigate. to start navigation");
               addDestination(predictions[0].placeId.toString());
               fromAudioCommand = false;
               _endSearchFieldController.text = "";
@@ -330,7 +370,7 @@ class _MapPageState extends State<MapPage> {
             _text = '';
             Vibration.vibrate();
 
-            Timer(Duration(seconds: 3), () {
+            Timer(const Duration(seconds: 3), () {
               audioCommand();
             });
           },
@@ -383,13 +423,13 @@ class _MapPageState extends State<MapPage> {
                                   duration: const Duration(milliseconds: 1000),
                                   glowCount: 2,
                                   // glowRadiusFactor: 0.7,
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.mic,
                                     size: 50,
                                     color: Colors.red,
                                   ),
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                     height:
                                         10), // Add some spacing between the icon and text
                                 Container(
@@ -411,17 +451,18 @@ class _MapPageState extends State<MapPage> {
                                 )
                               ],
                             )
-                          : SizedBox(),
+                          : const SizedBox(),
                     ),
-
-                    MapPage.isStartNavigate
-                        ? CustomBottomSheet(
-                            callback: shareLocation,
-                          )
-                        : !MapPage.isStartNavigate &&
-                                MapPage.destinationCoordinate.latitude != 0
-                            ? BottomSheetDetailLocation()
-                            : BottomSheetNearLocation(addDestination),
+                    ShareLocation.isTracking
+                        ? Container()
+                        : MapPage.isStartNavigate
+                            ? CustomBottomSheet(
+                                shareLocationCallback: shareLocation,
+                              )
+                            : !MapPage.isStartNavigate &&
+                                    MapPage.destinationCoordinate.latitude != 0
+                                ? const BottomSheetDetailLocation()
+                                : BottomSheetNearLocation(addDestination),
                     // NavigateBarWidget(
                     //   navigationText: "navigationText",
                     //   distance: "20 m",
@@ -456,19 +497,19 @@ class _MapPageState extends State<MapPage> {
                                         context: context,
                                         builder: (BuildContext context) {
                                           return AlertDialog(
-                                            title: Text("Stop Tracking"),
-                                            content: Text(
+                                            title: const Text("Stop Tracking"),
+                                            content: const Text(
                                                 "Are you sure you want to stop tracking?"),
                                             actions: <Widget>[
                                               TextButton(
-                                                child: Text("Cancel"),
+                                                child: const Text("Cancel"),
                                                 onPressed: () {
                                                   Navigator.of(context)
                                                       .pop(); // Close the dialog
                                                 },
                                               ),
                                               TextButton(
-                                                child: Text("Stop"),
+                                                child: const Text("Stop"),
                                                 onPressed: () {
                                                   // stop tracking
 
@@ -483,146 +524,160 @@ class _MapPageState extends State<MapPage> {
                                         },
                                       );
                                     },
-                                    child: Text('Stop Tracking'),
+                                    child: const Text('Stop Tracking'),
                                   )
                                 : MapPage.destinationCoordinate.latitude == 0
-                                    ? Container(
-                                        margin: EdgeInsets.only(
-                                            bottom: panelHeightClosed + 2),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(200),
-                                          color:
-                                              Color.fromARGB(255, 163, 71, 71),
-                                        ),
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.9,
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.065,
-                                        child: Material(
-                                          // Wrap ElevatedButton with Material
-                                          borderRadius: BorderRadius.circular(
-                                              50), // Apply the same border radius
-                                          color: Color.fromARGB(255, 0, 0,
-                                              0), // Apply the same color
-                                          child: InkWell(
-                                            // Wrap ElevatedButton with InkWell for ripple effect
+                                    ? GestureDetector(
+                                        onLongPress: () {
+                                          TextToSpeech.speak("Track Button");
+                                        },
+                                        child: Container(
+                                          margin: EdgeInsets.only(
+                                              bottom: panelHeightClosed + 2),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(200),
+                                            color: const Color.fromARGB(
+                                                255, 163, 71, 71),
+                                          ),
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.9,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.065,
+                                          child: Material(
+                                            // Wrap ElevatedButton with Material
                                             borderRadius: BorderRadius.circular(
-                                                8), // Apply the same border radius
-                                            onTap: () {
-                                              TextEditingController
-                                                  _userNameController =
-                                                  TextEditingController();
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: Text(
-                                                      MapPage.isIndonesianSelected
-                                                          ? 'Lacak Lokasi'
-                                                          : 'Track Lcation',
-                                                      style: TextStyle(
-                                                          fontSize: MediaQuery.of(
-                                                                      context)
+                                                50), // Apply the same border radius
+                                            color: const Color.fromARGB(255, 0,
+                                                0, 0), // Apply the same color
+                                            child: InkWell(
+                                              // Wrap ElevatedButton with InkWell for ripple effect
+                                              borderRadius: BorderRadius.circular(
+                                                  8), // Apply the same border radius
+                                              onTap: () {
+                                                TextToSpeech.speak(
+                                                    "clicking track button, enter a username to track other user ");
+                                                TextEditingController
+                                                    userNameController =
+                                                    TextEditingController();
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: Text(
+                                                        MapPage.isIndonesianSelected
+                                                            ? 'Lacak Lokasi'
+                                                            : 'Track Lcation',
+                                                        style: TextStyle(
+                                                            fontSize: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.034),
+                                                      ),
+                                                      content: TextField(
+                                                        controller:
+                                                            userNameController,
+                                                        decoration:
+                                                            const InputDecoration(
+                                                          hintText:
+                                                              'Enter Username',
+                                                        ),
+                                                      ),
+                                                      actions: <Widget>[
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child: const Text(
+                                                              'Cancel'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            String userName =
+                                                                userNameController
+                                                                    .text
+                                                                    .trim();
+                                                            if (userName
+                                                                .isEmpty) {
+                                                              // Handle empty email
+                                                              TextToSpeech.speak(
+                                                                  "Please enter the user name.");
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .showSnackBar(
+                                                                const SnackBar(
+                                                                  content: Text(
+                                                                      'Please enter the Username.'),
+                                                                ),
+                                                              );
+                                                              return;
+                                                            } else {
+                                                              panelHeightClosed =
+                                                                  MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      0.09;
+                                                              panelController
+                                                                  .open();
+                                                            }
+                                                            // Perform actions with the entered user ID
+                                                            print(
+                                                                'User ID entered: $userName');
+                                                            ShareLocation
+                                                                    .trackingUserName =
+                                                                userName;
+                                                            ShareLocation
+                                                                .getOtherUserLocation();
+                                                            // Close the dialog
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+
+                                                            setState(() {
+                                                              panelHeightClosed =
+                                                                  MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      0.09;
+                                                            });
+                                                          },
+                                                          child:
+                                                              const Text('OK'),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              child: Padding(
+                                                padding: const EdgeInsets
+                                                    .symmetric(
+                                                    horizontal:
+                                                        10), // Adjust padding to match the original design
+                                                child: Center(
+                                                  child: Text(
+                                                    MapPage.isIndonesianSelected
+                                                        ? 'Lacak Lokasi'
+                                                        : 'Track Lcation',
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                          MediaQuery.of(context)
                                                                   .size
                                                                   .width *
-                                                              0.034),
+                                                              0.05,
+                                                      color: Colors
+                                                          .white, // Set text color to white
                                                     ),
-                                                    content: TextField(
-                                                      controller:
-                                                          _userNameController,
-                                                      decoration:
-                                                          InputDecoration(
-                                                        hintText:
-                                                            'Enter Username',
-                                                      ),
-                                                    ),
-                                                    actions: <Widget>[
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: Text('Cancel'),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          String userName =
-                                                              _userNameController
-                                                                  .text
-                                                                  .trim();
-                                                          if (userName
-                                                              .isEmpty) {
-                                                            // Handle empty email
-                                                            TextToSpeech.speak(
-                                                                "Please enter the user name.");
-                                                            ScaffoldMessenger
-                                                                    .of(context)
-                                                                .showSnackBar(
-                                                              SnackBar(
-                                                                content: const Text(
-                                                                    'Please enter the Username.'),
-                                                              ),
-                                                            );
-                                                            return;
-                                                          } else {
-                                                            panelHeightClosed =
-                                                                MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .height *
-                                                                    0.09;
-                                                            panelController
-                                                                .open();
-                                                          }
-                                                          // Perform actions with the entered user ID
-                                                          print(
-                                                              'User ID entered: $userName');
-                                                          ShareLocation
-                                                                  .trackingUserName =
-                                                              userName;
-                                                          ShareLocation
-                                                              .getOtherUserLocation();
-                                                          // Close the dialog
-                                                          Navigator.of(context)
-                                                              .pop();
-
-                                                          setState(() {
-                                                            panelHeightClosed =
-                                                                MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .height *
-                                                                    0.09;
-                                                          });
-                                                        },
-                                                        child: Text('OK'),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal:
-                                                      10), // Adjust padding to match the original design
-                                              child: Center(
-                                                child: Text(
-                                                  MapPage.isIndonesianSelected
-                                                      ? 'Lacak Lokasi'
-                                                      : 'Track Lcation',
-                                                  style: TextStyle(
-                                                    fontSize:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.05,
-                                                    color: Colors
-                                                        .white, // Set text color to white
                                                   ),
                                                 ),
                                               ),
@@ -643,7 +698,7 @@ class _MapPageState extends State<MapPage> {
           controller: controller,
           panelController: panelController,
         ),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
       ),
     );
   }
@@ -661,13 +716,13 @@ class _MapPageState extends State<MapPage> {
                 color: Colors.grey.withOpacity(0.5),
                 spreadRadius: 1,
                 blurRadius: 7,
-                offset: Offset(0, 3), // changes position of shadow
+                offset: const Offset(0, 3), // changes position of shadow
               ),
             ],
           ),
         ),
         Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.black,
           ),
           child: Padding(
@@ -693,7 +748,9 @@ class _MapPageState extends State<MapPage> {
                             fontSize:
                                 MediaQuery.of(context).size.width * 0.057),
                         decoration: InputDecoration(
-                          hintText: "Search Here",
+                          hintText: MapPage.isIndonesianSelected
+                              ? "Cari Disini"
+                              : "Search Here",
                           hintStyle: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize:
@@ -710,12 +767,14 @@ class _MapPageState extends State<MapPage> {
                                       predictions = [];
                                       _endSearchFieldController.clear();
                                       searchLogs = {};
-                                      MapPage.destinationCoordinate = LatLng(
+                                      MapPage.destinationCoordinate =
+                                          const LatLng(
                                         0,
                                         0,
                                       );
                                       PolylineMethod(callbackSetState)
                                           .clearPolyline();
+                                      const MapPage().findNearbyLocation();
                                     });
                                   },
                                   icon: Icon(
@@ -779,11 +838,11 @@ class _MapPageState extends State<MapPage> {
                 ),
                 IconButton(
                   onPressed: () {
-                    Get.to(() => SettingPage());
+                    Get.to(() => const SettingPage());
                     // Add your settings icon onPressed logic here
                   },
                   icon: const Icon(Icons.settings),
-                  color: Color.fromARGB(255, 212, 212, 212),
+                  color: const Color.fromARGB(255, 212, 212, 212),
                   iconSize: MediaQuery.of(context).size.width * 0.1,
                 ),
               ],
@@ -798,7 +857,7 @@ class _MapPageState extends State<MapPage> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onLongPress: () {
-                    print("res" + predictions[index].description.toString());
+                    print("res${predictions[index].description}");
                     TextToSpeech.speak(
                         predictions[index].description.toString());
                   },
@@ -866,9 +925,8 @@ class _MapPageState extends State<MapPage> {
                           ),
                           // Call this function where you want to save the search log
                           onTap: () async {
-                            TextToSpeech.speak("set destination to " +
-                                predictions[index].description.toString() +
-                                ". double tap the screen. and. say Start navigate. to start navigation");
+                            TextToSpeech.speak(
+                                "set destination to ${predictions[index].description}. double tap the screen. and. say Start navigate. to start navigation");
                             await SearchMethod.save_search_log(
                               predictions[index].terms!.first.value.toString(),
                               predictions[index].placeId.toString(),
@@ -920,7 +978,7 @@ class _MapPageState extends State<MapPage> {
 
                 return GestureDetector(
                   onLongPress: () {
-                    print("res" + log);
+                    print("res$log");
                     TextToSpeech.speak(log);
                   },
                   child: Column(
@@ -1003,8 +1061,8 @@ class _MapPageState extends State<MapPage> {
     if (distanceMeters < 1000) {
       // Display distance in meters format
       return Text(
-        distanceMeters.toString() + " m",
-        style: TextStyle(
+        "$distanceMeters m",
+        style: const TextStyle(
           fontSize: 10,
           color: Colors.grey,
         ),
@@ -1012,17 +1070,17 @@ class _MapPageState extends State<MapPage> {
     } else if (distanceMeters < 10000) {
       // Convert distance from meters to kilometers and format it as "0.0 km"
       String formattedDistance =
-          (distanceMeters / 1000.0).toStringAsFixed(1) + " km";
+          "${(distanceMeters / 1000.0).toStringAsFixed(1)} km";
       return Text(
         formattedDistance,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 10,
           color: Colors.grey,
         ),
       );
     } else {
       // If it's too far, just show the icon
-      return SizedBox.shrink(); // This returns an empty widget
+      return const SizedBox.shrink(); // This returns an empty widget
     }
   }
 
@@ -1038,7 +1096,9 @@ class _MapPageState extends State<MapPage> {
 
     // getPlaceDetail(placeId);
 
-    final details = await googlePlace.details.get(placeId);
+    final details = await googlePlace.details
+        .get(placeId)
+        .timeout(const Duration(seconds: 50));
     MapPage.googleMapDetail['name'] = details!.result!.name.toString();
     MapPage.googleMapDetail['rating'] = details.result!.rating;
     MapPage.googleMapDetail['ratingTotal'] = details.result!.userRatingsTotal;
@@ -1056,11 +1116,11 @@ class _MapPageState extends State<MapPage> {
             .add(photoReference); // Add URLs to the 'images' list
       }
     }
-    print("kontrol" + details.result!.name.toString());
-    print("kontrol" + details.result!.photos.toString());
-    print("kontrol" + details.result!.rating.toString());
-    print("kontrol" + details.result!.userRatingsTotal.toString());
-    if (details != null && details.result != null && mounted) {
+    print("kontrol${details.result!.name}");
+    print("kontrol${details.result!.photos}");
+    print("kontrol${details.result!.rating}");
+    print("kontrol${details.result!.userRatingsTotal}");
+    if (details.result != null && mounted) {
       setState(
         () {
           destination = details.result;
@@ -1244,8 +1304,10 @@ class _MapPageState extends State<MapPage> {
       //     ),
       //   ],
       // ));
-
-      routeGuidance();
+      Future.delayed(const Duration(seconds: 1), () {
+        canNotify = true;
+        routeGuidance();
+      });
     });
   }
 
@@ -1266,7 +1328,7 @@ class _MapPageState extends State<MapPage> {
         // Custom marker icon
         icon: BitmapDescriptor.fromBytes(
             userMarker), // For example, you can use a blue marker
-        infoWindow: InfoWindow(title: "You"),
+        infoWindow: const InfoWindow(title: "You"),
         rotation: MapPage.compassHeading,
 
         anchor: const Offset(0.5, 0.5),
@@ -1295,7 +1357,7 @@ class _MapPageState extends State<MapPage> {
       // Update marker for user's position or add it if not present
       final markerToRemove = MapPage.markers.firstWhere(
         (marker) => marker.markerId.value == ShareLocation.trackingUserName!,
-        orElse: () => Marker(markerId: MarkerId('default_marker')),
+        orElse: () => const Marker(markerId: MarkerId('default_marker')),
       );
 
       if (markerToRemove.markerId.value == ShareLocation.trackingUserName!) {
@@ -1403,7 +1465,7 @@ class _MapPageState extends State<MapPage> {
         TextToSpeech.speak("In $roundedDistance meters $instruction");
         stepIndex++;
       }
-      Future.delayed(Duration(seconds: 10), () {
+      Future.delayed(const Duration(seconds: 30), () {
         canNotify = true;
       });
     }
@@ -1415,7 +1477,7 @@ class _MapPageState extends State<MapPage> {
     double endLatitude,
     double endLongitude,
   ) async {
-    double distanceInMeters = await Geolocator.distanceBetween(
+    double distanceInMeters = Geolocator.distanceBetween(
       startLatitude,
       startLongitude,
       endLatitude,
@@ -1430,21 +1492,25 @@ class _MapPageState extends State<MapPage> {
 
   void shareLocation(BuildContext context) {
     String userName = AuthService.userName.toString();
+    // TextToSpeech.speak(
+    //     'Do you want to share your location?. To share your location, Share your username to other people. your username is "$userName.split("")" ');
     TextToSpeech.speak(
-        'Do you want to share your location?. To share your location, Share your Email to other people. your username is "$userName.split("")" ');
+        'Do you want to share your location?. To share your location, Share your username to other people. your username is "$userName" ');
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Share Location?'),
+          title: const Text('Share Location?'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Do you want to share your location? To share your location, Share your username to other people. your username is $userName',
+                MapPage.isIndonesianSelected
+                    ? "Apakah Anda ingin membagikan lokasi Anda? Untuk membagikan lokasi Anda, Bagikan nama pengguna Anda kepada orang lain. nama user Anda adalah $userName"
+                    : 'Do you want to share your location? To share your location, Share your username to other people. your username is $userName',
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -1452,7 +1518,7 @@ class _MapPageState extends State<MapPage> {
                     onPressed: () {
                       Navigator.of(context).pop(false);
                     },
-                    child: Text('No'),
+                    child: const Text('No'),
                   ),
                   // ElevatedButton(
                   //   onPressed: () {
@@ -1467,7 +1533,7 @@ class _MapPageState extends State<MapPage> {
                     onPressed: () {
                       Navigator.of(context).pop(true);
                     },
-                    child: Text('Share'),
+                    child: const Text('Share'),
                   ),
                 ],
               ),
@@ -1478,13 +1544,17 @@ class _MapPageState extends State<MapPage> {
     ).then((value) {
       if (value == true) {
         if (AuthService.isAuthenticate) {
+          final String? userName = AuthService.userName;
+
+          TextToSpeech.speak(
+              "Start hsaring your location. share your username to other people, your username is $userName");
           ShareLocation.shareUserLocation(
             LatLng(MapPage.userLatitude, MapPage.userLongitude),
             MapPage.destinationCoordinate,
             MapPage.destinationLocationName,
           );
         } else {
-          Get.to(LoginPage());
+          Get.to(const LoginPage());
           TextToSpeech.speak(
               "You are not logged in. To share your location, you must log in first.");
         }
@@ -1596,13 +1666,12 @@ class _MapPageState extends State<MapPage> {
                       MapPage.mapController,
                       MapPage.destinationCoordinate,
                     );
-                    TextToSpeech.speak("Start navigation to " +
-                        MapPage.googleMapDetail['name'].toString());
+                    TextToSpeech.speak(
+                        "Start navigation to ${MapPage.googleMapDetail['name']}");
                     return;
                   } else {
                     TextToSpeech.speak(
-                        "You are already navigating. Your destination is set to " +
-                            MapPage.googleMapDetail['name'].toString());
+                        "You are already navigating. Your destination is set to ${MapPage.googleMapDetail['name']}");
                   }
                 } else {
                   TextToSpeech.speak(
@@ -1625,9 +1694,8 @@ class _MapPageState extends State<MapPage> {
                   _text.contains("selanjutnya") ||
                   _text.contains("langkah ")) {
                 if (MapPage.isStartNavigate) {
-                  TextToSpeech.speak("your step next step is." +
-                      MapPage.distance.toString() +
-                      "meters, $instruction");
+                  TextToSpeech.speak(
+                      "your step next step is.${MapPage.distance}meters, $instruction");
                 } else {
                   TextToSpeech.speak(
                       "you need to start navigation first. To start navigation, say 'start navigate'.");
@@ -1639,8 +1707,8 @@ class _MapPageState extends State<MapPage> {
                   _text.contains("saat ini") ||
                   _text.contains("lokasi")) {
                 if (MapPage.destinationLocationName != "") {
-                  TextToSpeech.speak("your current destination is set to " +
-                      MapPage.destinationLocationName);
+                  TextToSpeech.speak(
+                      "your current destination is set to ${MapPage.destinationLocationName}");
                 } else {
                   TextToSpeech.speak(
                       "You do destination is null. To set the destination, you need to search your destination using the search bar and select where you want to go. or, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
@@ -1661,7 +1729,7 @@ class _MapPageState extends State<MapPage> {
                     } else {
                       TextToSpeech.speak(
                           "In order to share your location, you need to login first. Navigating to the login page");
-                      Get.to(LoginPage());
+                      Get.to(const LoginPage());
                     }
                   } else {
                     TextToSpeech.speak(

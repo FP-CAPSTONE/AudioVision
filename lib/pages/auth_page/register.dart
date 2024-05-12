@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  TextEditingController _nameController = TextEditingController(text: "boben");
+  final TextEditingController _nameController = TextEditingController(text: "boben");
   // TextEditingController _emailController =
   //     TextEditingController(text: "abdul.saipi@student.president.ac.id");
-  TextEditingController _passwordController =
+  final TextEditingController _passwordController =
       TextEditingController(text: "passwordsaya");
 
   final FlutterTts flutterTts = FlutterTts();
@@ -44,12 +46,12 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Register',
+                const Text('Register',
                     style: TextStyle(fontSize: 24, color: Colors.black)),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Username',
                     labelStyle: TextStyle(color: Colors.black),
                     focusedBorder: OutlineInputBorder(
@@ -60,7 +62,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 //   TextFormField(
                 //     controller: _emailController,
                 //     decoration: InputDecoration(
@@ -74,10 +76,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 //   ),
                 // ),
                 //   ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: Colors.black),
                     focusedBorder: OutlineInputBorder(
@@ -89,19 +91,19 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   obscureText: true,
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
-                  child: Text('Register'),
                   style: ElevatedButton.styleFrom(
-                      primary: Colors.black, onPrimary: Colors.white),
+                      foregroundColor: Colors.white, backgroundColor: Colors.black),
+                  child: const Text('Register'),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  child: Text(
+                  child: const Text(
                     'Already have an account? Click here to Login.',
                     style: TextStyle(
                         color: Colors.black,
@@ -114,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),
-              child: Center(
+              child: const Center(
                 child: CircularProgressIndicator(),
               ),
             ),

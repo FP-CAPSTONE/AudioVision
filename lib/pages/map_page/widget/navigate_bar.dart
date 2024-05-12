@@ -18,11 +18,11 @@ class NavigateBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () {
-        TextToSpeech.speak("in" + distance + ", " + instruction);
+        TextToSpeech.speak("in$distance, $instruction");
       },
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.2,
-        padding: EdgeInsets.only(
+        height: MediaQuery.of(context).size.height * 0.175,
+        padding: const EdgeInsets.only(
             top: 20.0,
             left: 20.0,
             right: 20.0,
@@ -47,7 +47,7 @@ class NavigateBarWidget extends StatelessWidget {
             //   ),
             // ),
             getDirectionImage(manuever),
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.7,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -58,7 +58,7 @@ class NavigateBarWidget extends StatelessWidget {
                       distance,
                       style: TextStyle(
                           color: Colors.white70,
-                          fontSize: MediaQuery.of(context).size.width * 0.04),
+                          fontSize: MediaQuery.of(context).size.width * 0.045),
                       overflow: TextOverflow
                           .ellipsis, // Optional: specify overflow behavior
                     ),
@@ -67,10 +67,11 @@ class NavigateBarWidget extends StatelessWidget {
                     child: Text(
                       instruction,
                       style: TextStyle(
-                          color: Colors.white,
-                          fontSize: MediaQuery.of(context).size.width * 0.048),
-                      overflow: TextOverflow
-                          .ellipsis, // Optional: specify overflow behavior
+                        color: Colors.white,
+                        fontSize: MediaQuery.of(context).size.width * 0.053,
+                        overflow: TextOverflow
+                            .ellipsis, // Optional: specify overflow behavior
+                      ),
                     ),
                   ),
                 ],
@@ -162,7 +163,7 @@ class NavigateBarWidget extends StatelessWidget {
         break;
     }
     return Container(
-      padding: EdgeInsets.only(right: 20),
+      padding: const EdgeInsets.only(right: 20),
       child: Tab(
         icon: Image.asset(
           imagePath,

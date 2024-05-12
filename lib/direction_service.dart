@@ -207,6 +207,6 @@ class DirectionServcie {
     await flutterTts.speak(text);
     await flutterTts.awaitSpeakCompletion(
         true); // Wait for the completion of the current speak operation
-    await Future.delayed(Duration(seconds: 3)); // Add a delay if needed
+    await Future.delayed(const Duration(seconds: 3)); // Add a delay if needed
   }
 }

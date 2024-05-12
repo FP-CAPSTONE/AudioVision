@@ -115,7 +115,7 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Maps Theme"),
+        title: const Text("Maps Theme"),
         backgroundColor: Colors.blue,
         actions: [
           PopupMenuButton(
@@ -130,7 +130,7 @@ class _MapScreenState extends State<MapScreen> {
                             });
                           });
                         },
-                        child: Text("Standard")),
+                        child: const Text("Standard")),
                     PopupMenuItem(
                         onTap: () {
                           _controller.future.then((value) {
@@ -141,7 +141,7 @@ class _MapScreenState extends State<MapScreen> {
                             });
                           });
                         },
-                        child: Text("Retro")),
+                        child: const Text("Retro")),
                     PopupMenuItem(
                         onTap: () {
                           _controller.future.then((value) {
@@ -152,7 +152,7 @@ class _MapScreenState extends State<MapScreen> {
                             });
                           });
                         },
-                        child: Text("Night")),
+                        child: const Text("Night")),
                   ])
         ],
         elevation: 5,

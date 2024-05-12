@@ -51,15 +51,10 @@ class NavigateMethod {
     LatLng destination,
   ) async {
     String locale = MapPage.isIndonesianSelected ? "id" : "en";
-    final String url_using_latlong =
-        "https://maps.googleapis.com/maps/api/directions/json?origin=${userPosition.latitude},${userPosition.longitude}&"
-                "destination=${destination.latitude},${destination.longitude}&"
-                "mode=walking&"
-                "language=${locale}&"
-                "key=" +
-            dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString(); //WARNINGG !!!
+    final String urlUsingLatlong =
+        "https://maps.googleapis.com/maps/api/directions/json?origin=${userPosition.latitude},${userPosition.longitude}&destination=${destination.latitude},${destination.longitude}&mode=walking&language=$locale&key=${dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA']}"; //WARNINGG !!!
 
-    var response = await http.get(Uri.parse(url_using_latlong));
+    var response = await http.get(Uri.parse(urlUsingLatlong));
     var json = convert.jsonDecode(response.body);
     Map<String, dynamic> results;
     List<dynamic> routes = json['routes'];
@@ -73,6 +68,7 @@ class NavigateMethod {
         'polyline_decoded': PolylinePoints()
             .decodePolyline(routes[0]['overview_polyline']['points']),
       };
+      print("routes $routes[0]");
 
       List<dynamic> legs = routes[0]['legs'];
       if (legs.isNotEmpty) {

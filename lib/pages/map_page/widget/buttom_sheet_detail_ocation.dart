@@ -4,10 +4,11 @@ import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:get/get.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class BottomSheetDetailLocation extends StatefulWidget {
+  const BottomSheetDetailLocation({super.key});
+
   @override
   _BottomSheetDetailLocationState createState() =>
       _BottomSheetDetailLocationState();
@@ -27,7 +28,7 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
       maxChildSize: 0.6,
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             color: Colors.white,
           ),
@@ -44,14 +45,14 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                 ),
                 Padding(
                   padding:
-                      EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
+                      const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 20),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
+                          SizedBox(
                             width: MediaQuery.of(context).size.width * 0.6,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +73,7 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                                         overflow: TextOverflow.ellipsis),
                                   ),
                                 ),
-                                SizedBox(height: 5),
+                                const SizedBox(height: 5),
                                 MapPage.googleMapDetail['rating'] != null
                                     ? Container(
                                         child: Row(
@@ -139,9 +140,9 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                           ),
                           GestureDetector(
                             onLongPress: () {
-                              TextToSpeech.speak("Start Button");
+                              TextToSpeech.speak("Start Button ");
                             },
-                            child: Container(
+                            child: SizedBox(
                               height: MediaQuery.of(context).size.height * 0.07,
                               child: ElevatedButton(
                                 onPressed: () {
@@ -149,7 +150,8 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                                     MapPage.mapController,
                                     MapPage.destinationCoordinate,
                                   );
-                                  TextToSpeech.speak("Start navigation");
+                                  TextToSpeech.speak(
+                                      "Start navigation to ${MapPage.googleMapDetail['name']}");
                                 },
                                 style: ButtonStyle(
                                   backgroundColor:
@@ -197,7 +199,7 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                   height: 1,
                   color: Colors.grey.withOpacity(0.5),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
 
@@ -217,7 +219,7 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
                                     200, // Adjust the height according to your design
                                 width: double.infinity,
                                 alignment: Alignment.center,
-                                child: Text(
+                                child: const Text(
                                   "No images available",
                                   style: TextStyle(
                                     fontSize: 16,
@@ -257,13 +259,12 @@ class _BottomSheetDetailLocationState extends State<BottomSheetDetailLocation> {
         borderRadius: BorderRadius.circular(
             10), // Adjust the value for the desired roundness of the container
       ),
-      margin: EdgeInsets.symmetric(horizontal: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 5),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(
             10), // Adjust the value for the desired roundness of the image
         child: Image.network(
-          "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoRef&key=" +
-              dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString(),
+          "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoRef&key=${dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA']}",
           fit: BoxFit.cover,
         ),
       ),

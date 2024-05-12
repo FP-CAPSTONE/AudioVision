@@ -46,7 +46,7 @@ class _OnboardingViewState extends State<OnboardingView> {
         onDoubleTap: () {
           if (currentPageIndex == 2) {
             TextToSpeech.speak("Audio command activated, say something");
-            Timer(Duration(seconds: 3), () {
+            Timer(const Duration(seconds: 3), () {
               _listen();
             });
           }
@@ -83,13 +83,13 @@ class _OnboardingViewState extends State<OnboardingView> {
                           duration: const Duration(milliseconds: 2000),
                           glowCount: 2,
                           // glowRadiusFactor: 0.7,
-                          child: Icon(
+                          child: const Icon(
                             Icons.mic,
                             size: 50,
                             color: Colors.red,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                             height:
                                 10), // Add some spacing between the icon and text
                         Container(
@@ -111,7 +111,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                         )
                       ],
                     )
-                  : SizedBox(),
+                  : const SizedBox(),
             ),
           ],
         ),
@@ -173,7 +173,7 @@ class _OnboardingViewState extends State<OnboardingView> {
             if (!mounted) return;
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => MapPage()),
+              MaterialPageRoute(builder: (context) => const MapPage()),
             );
           },
           child: Text(

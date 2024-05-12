@@ -1,5 +1,4 @@
 import 'package:audiovision/pages/auth_page/login.dart';
-import 'package:audiovision/pages/home_page/home.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:get/get.dart';
@@ -26,7 +25,7 @@ class AuthService {
 
     // Retrieve token from preferences
     final userDataString = prefs.getString('userData');
-    print("userdata" + userDataString.toString());
+    print("userdata$userDataString");
     if (userDataString != null) {
       final userData = json.decode(userDataString);
       final token = userData['token'];
@@ -46,11 +45,11 @@ class AuthService {
   static String apiUrl = "https://audiovision-413417.as.r.appspot.com/";
   static login(String email, password) async {
     try {
-      print("login testt" + email);
+      print("login testt$email");
       var response = await http.post(
         Uri.parse("${apiUrl}auth/login"),
         body:
-            jsonEncode({"email": email + "@example.com", "password": password}),
+            jsonEncode({"email": "$email@example.com", "password": password}),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -126,7 +125,7 @@ class AuthService {
         isAuthenticated();
 
         TextToSpeech.speak('Registration Success, Account create successfuly');
-        Get.to(MapPage());
+        Get.to(const MapPage());
       } else {
         TextToSpeech.speak('Registration Faild');
       }
@@ -138,7 +137,7 @@ class AuthService {
   static Future<void> logOut() async {
     final pref = await SharedPreferences.getInstance();
 
-    Get.to(LoginPage());
+    Get.to(const LoginPage());
     await pref.clear();
   }
 }

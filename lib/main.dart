@@ -1,6 +1,5 @@
 import 'package:audiovision/Onboboarding/onboarding_view.dart';
 import 'package:audiovision/firebase_options.dart';
-import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +36,6 @@ class MyApp extends StatelessWidget {
               seedColor: Colors.black, primary: Colors.black),
         ),
         // home: onboarding ? MapPage() : OnboardingView());
-        home: OnboardingView());
+        home: const OnboardingView());
   }
 }

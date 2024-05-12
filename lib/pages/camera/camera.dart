@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 

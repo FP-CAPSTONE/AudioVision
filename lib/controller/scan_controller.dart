@@ -90,7 +90,7 @@ class ScanController extends GetxController {
       canNotify = false;
 
       // Reset canNotify after a delay
-      Future.delayed(Duration(seconds: 5), () {
+      Future.delayed(const Duration(seconds: 5), () {
         canNotify = true;
       });
     }
@@ -110,7 +110,7 @@ class ScanController extends GetxController {
           // detect an object every 10 framse
           // if (cameraCount % 10 == 0) {
           cameraCount++;
-          print("cameraCountr" + cameraCount.toString());
+          print("cameraCountr$cameraCount");
 
           cameraImage = image;
           objectDetector(image);
@@ -190,13 +190,13 @@ class ScanController extends GetxController {
           Vibration.vibrate();
           print(detectionResult);
           TextToSpeech.speak(
-              "Watch out! there is A ${detectedTag} in front of you. ");
+              "Watch out! there is A $detectedTag in front of you. ");
 
           // Set canNotify to false to prevent further notifications
           canNotify = false;
 
           // Reset canNotify after a delay
-          Future.delayed(Duration(seconds: 5), () {
+          Future.delayed(const Duration(seconds: 5), () {
             canNotify = true;
           });
 

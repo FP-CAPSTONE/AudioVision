@@ -1,10 +1,11 @@
-import 'package:audiovision/pages/home_page/home.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingPage extends StatefulWidget {
+  const SettingPage({super.key});
+
   @override
   _SettingPageState createState() => _SettingPageState();
 }
@@ -44,9 +45,9 @@ class _SettingPageState extends State<SettingPage> {
             style: TextStyle(fontSize: _fontSize * 1.3 ?? 16.0)),
         leading: IconButton(
           onPressed: () {
-            Get.to(() => MapPage());
+            Get.to(() => const MapPage());
           },
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
         ),
       ),
       body: SingleChildScrollView(
@@ -55,13 +56,13 @@ class _SettingPageState extends State<SettingPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
+              const Text(
                 'Select Language:',
                 style: TextStyle(fontSize: 18),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               SwitchListTile(
-                title: Text('Bahasa Indonesia'),
+                title: const Text('Bahasa Indonesia'),
                 value: _isIndonesianSelected,
                 onChanged: (value) {
                   setState(() {
@@ -70,9 +71,9 @@ class _SettingPageState extends State<SettingPage> {
                   _saveSetting();
                 },
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               SwitchListTile(
-                title: Text('English'),
+                title: const Text('English'),
                 value: !_isIndonesianSelected,
                 onChanged: (value) {
                   setState(() {
@@ -81,12 +82,12 @@ class _SettingPageState extends State<SettingPage> {
                   _saveSetting();
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
                 fontSizeTitle,
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -125,7 +126,7 @@ class _SettingPageState extends State<SettingPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Slider(
                 value: _fontSize ?? 16.0,
                 min: 12.0,
@@ -140,7 +141,7 @@ class _SettingPageState extends State<SettingPage> {
                   _saveSetting();
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
                 _isIndonesianSelected ? 'Pratinjau Teks' : 'Preview Text',
                 style: TextStyle(fontSize: _fontSize ?? 16.0),

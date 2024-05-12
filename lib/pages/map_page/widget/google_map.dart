@@ -1,12 +1,11 @@
 import 'package:audiovision/pages/map_page/map.dart';
-import 'package:audiovision/pages/map_page/map_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class GoogleMapWidget extends StatefulWidget {
   final String mapstyle;
 
-  GoogleMapWidget({required this.mapstyle});
+  const GoogleMapWidget({super.key, required this.mapstyle});
   @override
   _GoogleMapWidgetState createState() => _GoogleMapWidgetState();
 }
@@ -30,7 +29,9 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
           CameraUpdate.newCameraPosition(MapPage.cameraPosition),
         );
         setState(() {
-          MapPage().findNearbyLocation();
+          Future.delayed(const Duration(seconds: 1), () {
+            const MapPage().findNearbyLocation();
+          });
         });
       },
       markers: MapPage.markers,
@@ -38,7 +39,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   }
 
   Widget _buildLoadingIndicator() {
-    return Center(child: CircularProgressIndicator());
+    return const Center(child: CircularProgressIndicator());
   }
 
   @override
@@ -50,7 +51,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   Future<void> _waitForCameraPosition() async {
     while (MapPage.cameraPosition.target.latitude == 0 ||
         MapPage.cameraPosition.target.longitude == 0) {
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
     }
     setState(() {
       _isCameraPositionSet = true;

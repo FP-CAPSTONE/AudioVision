@@ -12,10 +12,10 @@ class TestCamera extends StatelessWidget {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
-          title: Text("Camera View TEST"),
+          title: const Text("Camera View TEST"),
           backgroundColor: Colors.blue,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Get.back(); // Navigate back when the back button is pressed
               ScanController().onClose();

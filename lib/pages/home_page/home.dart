@@ -9,7 +9,6 @@ import 'package:audiovision/pages/camera/test_camera.dart';
 import 'package:audiovision/pages/class/language.dart';
 import 'package:audiovision/pages/auth_page/login.dart';
 import 'package:audiovision/pages/map_page/map.dart';
-import 'package:audiovision/pages/map_page/widget/camera_view.dart';
 import 'package:audiovision/pages/setting_page/setting.dart';
 import 'package:audiovision/screens/select_screen.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
@@ -66,10 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
                 onPressed: () {
                   Get.to(
-                    () => SettingPage(),
+                    () => const SettingPage(),
                   );
                 },
-                icon: Icon(Icons.settings))
+                icon: const Icon(Icons.settings))
           ],
           title: Text(_title),
           backgroundColor: const Color.fromARGB(255, 24, 24, 24),
@@ -80,31 +79,31 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  Get.to(() => LoginPage());
+                  Get.to(() => const LoginPage());
                 },
                 child: HomeScreen.isIndonesianSelected
-                    ? Text("PERGI KE LOGIN")
-                    : Text("GO TO LOGIN"),
+                    ? const Text("PERGI KE LOGIN")
+                    : const Text("GO TO LOGIN"),
               ),
               ElevatedButton(
                 onPressed: () {
                   Get.to(const TestCamera());
                 },
-                child: Text("GO TO TEST CAMERA"),
+                child: const Text("GO TO TEST CAMERA"),
               ),
               ElevatedButton(
                 onPressed: () {
                   Get.to(const YoloVideo());
                 },
-                child: Text("GO TO CAMERA"),
+                child: const Text("GO TO CAMERA"),
               ),
               ElevatedButton(
                 onPressed: () {
                   AuthService.logOut();
                 },
-                child: Text("Log Out"),
+                child: const Text("Log Out"),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 100,
               ),
               GestureDetector(
@@ -156,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _text = "";
             } else if (_text.contains("guide")) {
               TextToSpeech.speak("navigate to AUDIO GUIDE SCREEN");
-              Get.to(MyAudioGuide());
+              Get.to(const MyAudioGuide());
               _isListening = false;
               _text = "";
             } else if (_text.contains("map view")) {
