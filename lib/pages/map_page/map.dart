@@ -572,7 +572,7 @@ class _MapPageState extends State<MapPage> {
                                                       title: Text(
                                                         MapPage.isIndonesianSelected
                                                             ? 'Lacak Lokasi'
-                                                            : 'Track Lcation',
+                                                            : 'Track Location',
                                                         style: TextStyle(
                                                             fontSize: MediaQuery.of(
                                                                         context)
