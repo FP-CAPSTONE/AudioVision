@@ -250,9 +250,11 @@ class _MapPageState extends State<MapPage> {
     FlutterCompass.events?.listen((CompassEvent event) {
       setState(() {
         double compassHeading = event.heading ?? 0;
+        double compareCurentRotation =
+            (compassHeading - MapPage.compassHeading).abs();
 
         // Check if the difference between the current compass heading and the previous heading is greater than 10 degrees
-        if ((compassHeading - MapPage.compassHeading).abs() > 10) {
+        if (compareCurentRotation > 15) {
           MapPage.compassHeading = compassHeading;
 
           // Update marker and camera rotation only when the rotation of the compass > 10 degrees
@@ -1304,10 +1306,8 @@ class _MapPageState extends State<MapPage> {
       //     ),
       //   ],
       // ));
-      Future.delayed(const Duration(seconds: 1), () {
-        canNotify = true;
-        routeGuidance();
-      });
+
+      routeGuidance();
     });
   }
 
@@ -1392,7 +1392,7 @@ class _MapPageState extends State<MapPage> {
   String maneuver = "";
   String distance = "";
   String instruction = "";
-  bool canNotify = true;
+  bool canNotify = false;
 
   void routeGuidance() async {
     if (MapPage.isStartNavigate) {
@@ -1442,6 +1442,8 @@ class _MapPageState extends State<MapPage> {
     double thresholdDistance3 = 20; // meters
     double thresholdDistance4 = 10; // meters
     if (canNotify) {
+      print("canNotify $canNotify");
+
       canNotify = false;
       if (distanceToStep <= thresholdDistance) {
         maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
@@ -1695,16 +1697,16 @@ class _MapPageState extends State<MapPage> {
                   _text.contains("langkah ")) {
                 if (MapPage.isStartNavigate) {
                   TextToSpeech.speak(
-                      "your step next step is.${MapPage.distance}meters, $instruction");
+                      "your next step is.${MapPage.distance}meters, $instruction");
                 } else {
                   TextToSpeech.speak(
                       "you need to start navigation first. To start navigation, say 'start navigate'.");
                 }
-              } else if (_text.contains("current") ||
-                  _text.contains("destination") ||
+              } else if (_text.contains("destination") ||
                   _text.contains("location") ||
                   _text.contains("destinasi") ||
                   _text.contains("saat ini") ||
+                  _text.contains("tujuan") ||
                   _text.contains("lokasi")) {
                 if (MapPage.destinationLocationName != "") {
                   TextToSpeech.speak(

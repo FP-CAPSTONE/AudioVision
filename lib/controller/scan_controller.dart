@@ -11,6 +11,9 @@ import 'package:vibration/vibration.dart';
 class ScanController extends GetxController {
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   CameraController? cameraController;
+  double? screenWidth;
+
+  ScanController(this.screenWidth);
   @override
   void onInit() {
     // TODO: implement onInit
@@ -157,6 +160,7 @@ class ScanController extends GetxController {
     'refrigerator',
     'bed',
     'couch',
+    'laptop'
   ];
 
   // do the object detection each frame got from the
@@ -185,10 +189,31 @@ class ScanController extends GetxController {
 
       for (var detectedObject in detectionResult) {
         var detectedTag = detectedObject['tag'];
+
+        var box = detectedObject['box'];
+
+        // Calculate the midpoint of the bounding box
+        double x1 = box[0];
+        double x2 = box[2];
+        double midpoint = (x1 + x2) / 2;
+        print("objectt1 $x1");
+        print("objectt2 $x2");
+        print("objectt3 $midpoint");
+
+        // Determine the position relative to the screen width
+        String position = (midpoint < screenWidth! / 2) ? 'left' : 'right';
+        print("detected $position");
+
         if (canNotify && dangerousObjects.contains(detectedTag)) {
           // Trigger notification only if canNotify is true and the detected object is one of the dangerous objects
           Vibration.vibrate();
           print(detectionResult);
+
+          //x1=  o = left
+          //x1 =500 = right
+
+          // TextToSpeech.speak(
+          //     "Watch out! There is a $detectedTag on $position.");
           TextToSpeech.speak(
               "Watch out! there is A $detectedTag in front of you. ");
 

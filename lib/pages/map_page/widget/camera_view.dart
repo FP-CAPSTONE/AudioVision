@@ -94,7 +94,7 @@ class CameraView {
       height: 200,
       width: 150, // Example width of the camera view
       child: GetBuilder<ScanController>(
-        init: ScanController(),
+        init: ScanController(size.width),
         builder: (controller) {
           return controller.isCameraInitialized.value
               ? LayoutBuilder(
@@ -141,9 +141,8 @@ class CameraView {
     Color colorPick = const Color.fromARGB(255, 50, 233, 30);
 
     return detectionResult.map<Widget>((result) {
-            return Stack(
+      return Stack(
         children: [
-          
           Positioned(
             left: result["box"][0] * factorX,
             top: result["box"][1] * factorY,

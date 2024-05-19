@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 class CustomBottomSheet extends StatefulWidget {
   final Function shareLocationCallback;
-  const CustomBottomSheet({super.key, 
+  const CustomBottomSheet({
+    super.key,
     required this.shareLocationCallback,
   });
 
@@ -52,8 +53,8 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                   color: const Color.fromARGB(255, 221, 221, 221),
                 ),
                 Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 10),
+                  padding: const EdgeInsets.only(
+                      bottom: 20, left: 20, right: 20, top: 10),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -119,7 +120,8 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                               backgroundColor:
                                                   MaterialStateProperty.all<
                                                       Color>(
-                                                const Color.fromARGB(255, 36, 36, 36),
+                                                const Color.fromARGB(
+                                                    255, 36, 36, 36),
                                               ),
                                             ),
                                             child: Icon(

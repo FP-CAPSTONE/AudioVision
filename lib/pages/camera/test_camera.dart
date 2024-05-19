@@ -18,7 +18,7 @@ class TestCamera extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Get.back(); // Navigate back when the back button is pressed
-              ScanController().onClose();
+              ScanController(20).onClose();
             },
           ),
         ),
