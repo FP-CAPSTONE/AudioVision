@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:audiovision/pages/auth_page/services/auth_services.dart';
@@ -6,6 +7,7 @@ import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/method/polyline_mothod.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart'; // Import the services library for clipboard functionality
 
@@ -86,7 +88,8 @@ class ShareLocation {
           'assets/markers/destination-marker.png', 100);
       MapPage.markers.add(
         Marker(
-          markerId: const MarkerId("Tracking Destination"), // Assert non-null using !
+          markerId:
+              const MarkerId("Tracking Destination"), // Assert non-null using !
           position: LatLng(ShareLocation.trackDestinationCoordinate!.latitude,
               ShareLocation.trackDestinationCoordinate!.longitude),
           // Custom marker icon
@@ -95,12 +98,34 @@ class ShareLocation {
               InfoWindow(title: ShareLocation.trackingDestinationLocationName),
         ),
       );
-
+      //  Navigator.of(context).pop();
+      //Navigator.of(context).pop();
       isTracking = true;
+
+      // Close the dialog
+    } else {
+      print('No data available.');
+    }
+  }
+
+  static checkOtherUser(String userName, BuildContext context) async {
+    final snapshot = await dbRef.child(userName).get();
+
+    if (snapshot.exists) {
+      trackingUserName = userName;
+      Navigator.of(context).pop(); // trackClose the dialog
+      MapPage.panelHeightClosed = MediaQuery.of(context).size.height * 0.3;
+      MapPage.panelHeightOpen = MediaQuery.of(context).size.height * 0.3;
+      getOtherUserLocation();
     } else {
       TextToSpeech.speak(
-          'There is no shared data location name with ${ShareLocation.trackingUserName}');
-      print('No data available.');
+          'There is no shared data location name with $userName');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('There is no shared data location name with $userName'),
+        ),
+      );
     }
   }
 

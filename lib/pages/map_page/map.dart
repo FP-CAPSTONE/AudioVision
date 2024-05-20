@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:audiovision/controller/scan_controller.dart';
 import 'package:audiovision/pages/map_page/method/marker_method.dart';
 import 'package:audiovision/pages/map_page/widget/bottom_sheet_near_location.dart';
 import 'package:audiovision/pages/map_page/widget/buttom_sheet_detail_ocation.dart';
@@ -40,6 +41,10 @@ import 'package:vibration/vibration.dart';
 import '../setting_page/setting.dart';
 
 class MapPage extends StatefulWidget {
+  static var panelController = PanelController();
+  static double panelHeightClosed = 0.0;
+  static double panelHeightOpen = 0.0;
+
   static NearBySearchResponse? nearbyLocationResponse;
   findNearbyLocation() async {
     try {
@@ -168,7 +173,6 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   final _endSearchFieldController = TextEditingController();
-  final panelController = PanelController();
 
   DetailsResult? destination;
 
@@ -266,7 +270,9 @@ class _MapPageState extends State<MapPage> {
           if (_debounce?.isActive ?? false) _debounce!.cancel();
           _debounce = Timer(const Duration(milliseconds: 1000), () {
             // stop listening
-            TextToSpeech.speak("Your current direction is $direction");
+            if (MapPage.isStartNavigate) {
+              TextToSpeech.speak("Your current direction is $direction");
+            }
           });
         }
       });
@@ -356,15 +362,12 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    double panelHeightClosed = MediaQuery.of(context).size.height * 0.0;
-    final panelHeightOpen = MediaQuery.of(context).size.height * 0.3;
-
     return Scaffold(
       body: SlidingUpPanel(
         defaultPanelState: PanelState.CLOSED,
-        controller: panelController,
-        minHeight: panelHeightClosed,
-        maxHeight: panelHeightOpen,
+        controller: MapPage.panelController,
+        minHeight: MapPage.panelHeightClosed,
+        maxHeight: MapPage.panelHeightOpen,
         body: GestureDetector(
           onDoubleTap: () {
             TextToSpeech.speak("Audio command activated, say something");
@@ -372,7 +375,7 @@ class _MapPageState extends State<MapPage> {
             _text = '';
             Vibration.vibrate();
 
-            Timer(const Duration(seconds: 3), () {
+            Timer(Duration(seconds: MapPage.isIndonesianSelected ? 4 : 3), () {
               audioCommand();
             });
           },
@@ -514,8 +517,12 @@ class _MapPageState extends State<MapPage> {
                                                 child: const Text("Stop"),
                                                 onPressed: () {
                                                   // stop tracking
-
                                                   ShareLocation.stopTracking();
+                                                  MapPage.panelController
+                                                      .close();
+                                                  MapPage.panelController
+                                                      .hide();
+                                                  print("stop tracking");
 
                                                   Navigator.of(context)
                                                       .pop(); // Close the dialog
@@ -535,7 +542,11 @@ class _MapPageState extends State<MapPage> {
                                         },
                                         child: Container(
                                           margin: EdgeInsets.only(
-                                              bottom: panelHeightClosed + 2),
+                                              bottom: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.0 +
+                                                  2),
                                           decoration: BoxDecoration(
                                             borderRadius:
                                                 BorderRadius.circular(200),
@@ -621,40 +632,25 @@ class _MapPageState extends State<MapPage> {
                                                                 ),
                                                               );
                                                               return;
-                                                            } else {
-                                                              panelHeightClosed =
-                                                                  MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .height *
-                                                                      0.09;
-                                                              panelController
-                                                                  .open();
                                                             }
-                                                            // Perform actions with the entered user ID
+
+                                                            // Perform actions with the entered user ID                                                                .getOtherUserLocation();
+                                                            // Close the dialog
+                                                            MapPage
+                                                                .panelController
+                                                                .open();
+
                                                             print(
                                                                 'User ID entered: $userName');
                                                             ShareLocation
-                                                                    .trackingUserName =
-                                                                userName;
-                                                            ShareLocation
-                                                                .getOtherUserLocation();
-                                                            // Close the dialog
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
+                                                                .checkOtherUser(
+                                                                    userName,
+                                                                    context);
 
-                                                            setState(() {
-                                                              panelHeightClosed =
-                                                                  MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .height *
-                                                                      0.09;
-                                                            });
+                                                            // setState(() {});
                                                           },
-                                                          child:
-                                                              const Text('OK'),
+                                                          child: const Text(
+                                                              'Track'),
                                                         ),
                                                       ],
                                                     );
@@ -698,7 +694,7 @@ class _MapPageState extends State<MapPage> {
         ),
         panelBuilder: (controller) => PanelWidget(
           controller: controller,
-          panelController: panelController,
+          panelController: MapPage.panelController,
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -1681,6 +1677,7 @@ class _MapPageState extends State<MapPage> {
                 }
               } else if (_text.contains("in front") ||
                   _text.contains("depan")) {
+                ObjectDetector().checkInFront();
                 // Iterate through the detection result to count objects in front
                 // int objectsInFront = 0;
                 // for (var detection in detectionResult) {
@@ -1690,7 +1687,6 @@ class _MapPageState extends State<MapPage> {
                 //     objectsInFront++;
                 //   }
                 // }
-                TextToSpeech.speak("there are 2 people in front of you");
               } else if (_text.contains("next") ||
                   _text.contains("step") ||
                   _text.contains("selanjutnya") ||

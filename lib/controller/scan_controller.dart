@@ -183,6 +183,7 @@ class ScanController extends GetxController {
     // print("kont" + image.toString() + result.toString());
     if (result.isNotEmpty) {
       detectionResult = result;
+      ObjectDetector.detectionResult = result;
       // print(result);
       //example result
       // [{box: [0.0, 763.1640625, 357.9225158691406, 1116.581787109375, 0.5627957582473755], tag: Stop}]
@@ -229,6 +230,25 @@ class ScanController extends GetxController {
           break;
         }
       }
+    }
+  }
+}
+
+class ObjectDetector {
+  static var detectionResult = [];
+
+  checkInFront() {
+    // print("kont" + image.toString() + detectionResult.toString());
+    if (detectionResult.isNotEmpty) {
+      for (var detectedObject in detectionResult) {
+        var detectedTag = detectedObject['tag'];
+
+        Vibration.vibrate();
+
+        TextToSpeech.speak("there is A $detectedTag in front of you");
+      }
+    } else {
+      TextToSpeech.speak("there is no object detected in front of you ");
     }
   }
 }

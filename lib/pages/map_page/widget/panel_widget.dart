@@ -70,7 +70,7 @@ class PanelWidget extends StatelessWidget {
                       onTap: () async {
                         // Tambahkan fungsi yang ingin dijalankan ketika tombol ditekan di sini
                         // print('Tombol telepon ditekan');
-                        final call = Uri.parse('tel:+91 9830268966');
+                        final call = Uri.parse('tel:110');
                         if (await canLaunchUrl(call)) {
                           launchUrl(call);
                         } else {
@@ -130,7 +130,6 @@ class PanelWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 15),
-
           buildAboutText(context),
         ],
       );
@@ -150,7 +149,8 @@ class PanelWidget extends StatelessWidget {
               builder: (BuildContext context) {
                 return AlertDialog(
                   title: const Text("Stop Tracking"),
-                  content: const Text("Are you sure you want to stop tracking?"),
+                  content:
+                      const Text("Are you sure you want to stop tracking?"),
                   actions: <Widget>[
                     TextButton(
                       child: const Text("Cancel"),
@@ -163,7 +163,15 @@ class PanelWidget extends StatelessWidget {
                       onPressed: () {
                         // stop tracking
                         ShareLocation.stopTracking();
+
+                        MapPage.panelHeightClosed =
+                            MediaQuery.of(context).size.height * 0.0;
+
+                        MapPage.panelHeightOpen =
+                            MediaQuery.of(context).size.height * 0.0;
                         Navigator.of(context).pop(); // Close the dialog
+
+                        print("stop tracking");
                       },
                     ),
                   ],
@@ -171,7 +179,8 @@ class PanelWidget extends StatelessWidget {
               },
             );
           },
-          child: const Text('Stop Tracking', style: TextStyle(color: Colors.white)),
+          child: const Text('Stop Tracking',
+              style: TextStyle(color: Colors.white)),
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
             textStyle: MaterialStateProperty.all<TextStyle>(
@@ -182,7 +191,6 @@ class PanelWidget extends StatelessWidget {
       ),
     );
   }
-
 
   void _showBottomSheet(BuildContext context) {
     Map<String, dynamic> totals = _calculateTotals(MapPage.allSteps);
@@ -222,7 +230,8 @@ class PanelWidget extends StatelessWidget {
                 }
               },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300), // Adjust animation speed
+                duration:
+                    const Duration(milliseconds: 300), // Adjust animation speed
                 width: screenWidth * 0.97, // Set width to 95% of screen width
                 height: screenHeight * currentHeight,
                 decoration: const BoxDecoration(
@@ -260,7 +269,8 @@ class PanelWidget extends StatelessWidget {
                                     TextSpan(
                                       text:
                                           '${totals['totalDistance'].toStringAsFixed(2)} km . ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
-                                      style: const TextStyle(color: Colors.grey),
+                                      style:
+                                          const TextStyle(color: Colors.grey),
                                     ),
                                   ],
                                 ),
@@ -306,7 +316,8 @@ class PanelWidget extends StatelessWidget {
                             ),
                             title: Text(
                               step['instructions'],
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
                               '${step['distance']} - ${step['duration']}',
