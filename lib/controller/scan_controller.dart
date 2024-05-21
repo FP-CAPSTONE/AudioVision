@@ -113,7 +113,7 @@ class ScanController extends GetxController {
           // detect an object every 10 framse
           // if (cameraCount % 10 == 0) {
           cameraCount++;
-          print("cameraCountr$cameraCount");
+          // print("cameraCountr$cameraCount");
 
           cameraImage = image;
           objectDetector(image);

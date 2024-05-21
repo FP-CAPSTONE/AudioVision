@@ -18,14 +18,23 @@ class ShareLocation {
   static bool isTracking = false;
   static String? trackingUserName;
   static String? trackingDestinationLocationName;
+  static String? nearLocationAddress;
   static LatLng? trackUserCoordinate;
   static LatLng? trackDestinationCoordinate;
+  static double? totalDistance;
+  static int? totalDuration;
 
 // update shared data
   static bool isShared = false;
 
-  static shareUserLocation(LatLng userLocation, LatLng destinationLocation,
-      String destinationLocationName) async {
+  static shareUserLocation(
+    LatLng userLocation,
+    LatLng destinationLocation,
+    double total_distance,
+    int total_duration,
+    String destinationLocationName,
+    String near_location_address,
+  ) async {
     isShared = true;
     final snapshot = await dbRef.child(AuthService.userName.toString()).get();
 
@@ -33,10 +42,13 @@ class ShareLocation {
       // ID does not exist, set the data
       dbRef.child(AuthService.userName.toString()).set({
         'name': AuthService.userName,
+        'totalDistance': total_distance,
+        'totalDuration': total_duration,
         'userLocation': {
           "lat": userLocation.latitude,
           "long": userLocation.longitude
         },
+        'nearLocationAddress': near_location_address,
         'destinationLocationName': destinationLocationName,
         'destinationLocation': {
           "lat": destinationLocation.latitude,
@@ -74,6 +86,9 @@ class ShareLocation {
       dynamic destinationLocationData = userData['destinationLocation'];
 
       trackingUserName = userData['name'];
+      nearLocationAddress = userData['nearLocationAddress'];
+      totalDistance = userData['totalDistance'];
+      totalDuration = userData['totalDuration'];
 
       // Assign the location name and coordinates trackUserCoordinate
       trackingDestinationLocationName = userData['destinationLocationName'];

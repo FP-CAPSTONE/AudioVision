@@ -5,6 +5,8 @@ import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomSheet extends StatefulWidget {
+  static Map<String, dynamic> totals = {};
+
   final Function shareLocationCallback;
   const CustomBottomSheet({
     super.key,
@@ -16,18 +18,17 @@ class CustomBottomSheet extends StatefulWidget {
 }
 
 class _CustomBottomSheetState extends State<CustomBottomSheet> {
-  late Map<String, dynamic> totals;
-
   @override
   void initState() {
     super.initState();
-    totals = _calculateTotals(MapPage.allSteps);
+    CustomBottomSheet.totals =
+        NavigateMethod().calculateTotals(MapPage.allSteps);
   }
 
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
-    int totalDurationMinutes = totals['totalDuration'];
+    int totalDurationMinutes = CustomBottomSheet.totals['totalDuration'];
     DateTime expectedArrivalTime =
         now.add(Duration(minutes: totalDurationMinutes));
 
@@ -66,8 +67,8 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                             children: [
                               Text(
                                 MapPage.isIndonesianSelected
-                                    ? '${totals['totalDuration']} menit '
-                                    : '${totals['totalDuration']} mins ',
+                                    ? '${CustomBottomSheet.totals['totalDuration']} menit '
+                                    : '${CustomBottomSheet.totals['totalDuration']} mins ',
                                 style: TextStyle(
                                   fontSize:
                                       MediaQuery.of(context).size.width * 0.05,
@@ -86,7 +87,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                   children: [
                                     TextSpan(
                                       text:
-                                          '${totals['totalDistance'].toStringAsFixed(2)} km • ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
+                                          '${CustomBottomSheet.totals['totalDistance'].toStringAsFixed(2)} km • ${expectedArrivalTime.hour.toString().padLeft(2, '0')}.${expectedArrivalTime.minute.toString().padLeft(2, '0')} ',
                                       style: TextStyle(
                                           color: Colors.grey,
                                           fontSize: MediaQuery.of(context)
@@ -223,38 +224,6 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
         );
       },
     );
-  }
-
-  // Function to calculate total distance and total duration
-  Map<String, dynamic> _calculateTotals(List<dynamic> steps) {
-    double totalDistance = 0.0;
-    int totalDuration = 0;
-    print("object");
-
-    for (var step in steps) {
-      print("object $step");
-      // Extract the distance value and unit from step['distance']
-      List<String> distanceParts = step['distance'].split(' ');
-      String distanceString = distanceParts[0].toString();
-      double distanceValue = double.parse(distanceString.replaceAll(',', '.'));
-      String distanceUnit = distanceParts[1];
-
-      // Convert distance to kilometers if it's in meters
-      if (distanceUnit == 'm') {
-        distanceValue /= 1000; // Convert meters to kilometers
-      }
-
-      // Add the converted distance to the total distance
-      totalDistance += distanceValue;
-
-      // Add the duration to the total duration
-      totalDuration += int.parse(step['duration'].split(' ')[0]);
-    }
-
-    // Update total duration outside the loop
-    MapPage.totalDurationToDestination = totalDuration;
-
-    return {'totalDistance': totalDistance, 'totalDuration': totalDuration};
   }
 
   Widget getDirectionImage(String maneuver) {

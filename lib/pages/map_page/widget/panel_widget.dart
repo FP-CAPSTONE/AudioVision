@@ -46,14 +46,16 @@ class PanelWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "algi",
+                      ShareLocation.trackingUserName ?? "Null",
                       style: TextStyle(
                         color: Colors.grey[800],
                         fontSize: 16,
                       ),
                     ),
                     Text(
-                      '''860m - 28min''',
+                      MapPage.isIndonesianSelected
+                          ? '''${ShareLocation.totalDistance?.toStringAsFixed(2)} km - ${ShareLocation.totalDuration} menit'''
+                          : '''${ShareLocation.totalDistance?.toStringAsFixed(2)} km - ${ShareLocation.totalDuration} min''',
                       style: TextStyle(
                         color: Colors.grey[400],
                         fontSize: 12,
@@ -107,23 +109,28 @@ class PanelWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
                   child: ListTile(
-                    title: Text("Atmi Cikarang"),
+                    title: Text(
+                      ShareLocation.nearLocationAddress ?? "null",
+                      style: TextStyle(fontSize: 18),
+                    ),
                   ),
                 ),
+                Icon(Icons.double_arrow),
                 Expanded(
                   child: ListTile(
-                    leading: Icon(Icons.double_arrow),
-                  ),
-                ),
-                Expanded(
-                  child: ListTile(
-                    title: Text("President University"),
+                    title: Text(
+                      ShareLocation.trackingDestinationLocationName
+                              ?.split(",")
+                              .first ??
+                          "Null",
+                      style: TextStyle(fontSize: 18),
+                    ),
                   ),
                 ),
               ],

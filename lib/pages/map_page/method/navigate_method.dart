@@ -1,7 +1,9 @@
 import 'package:audiovision/direction_service.dart';
 import 'package:audiovision/pages/map_page/map.dart';
+import 'package:audiovision/pages/map_page/method/share_location_method.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_place/google_place.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -13,7 +15,7 @@ class NavigateMethod {
     mapController,
     LatLng destination,
   ) {
-    setBrightness(0);
+    setBrightness(0.2);
     // resetBrightness();
     mapController.animateCamera(
       CameraUpdate.newCameraPosition(
@@ -139,6 +141,61 @@ class NavigateMethod {
 
     MapPage.isStartNavigate = false;
     resetBrightness();
+  }
+
+  // Function to calculate total distance and total duration
+  Map<String, dynamic> calculateTotals(List<dynamic> steps) {
+    double totalDistance = 0.0;
+    int totalDuration = 0;
+    print("object");
+
+    for (var step in steps) {
+      print("object $step");
+      // Extract the distance value and unit from step['distance']
+      List<String> distanceParts = step['distance'].split(' ');
+      String distanceString = distanceParts[0].toString();
+      double distanceValue = double.parse(distanceString.replaceAll(',', '.'));
+      String distanceUnit = distanceParts[1];
+
+      // Convert distance to kilometers if it's in meters
+      if (distanceUnit == 'm') {
+        distanceValue /= 1000; // Convert meters to kilometers
+      }
+
+      // Add the converted distance to the total distance
+      totalDistance += distanceValue;
+
+      // Add the duration to the total duration
+      totalDuration += int.parse(step['duration'].split(' ')[0]);
+    }
+
+    // Update total duration outside the loop
+    MapPage.totalDurationToDestination = totalDuration;
+
+    MapPage.total_distance = totalDistance;
+    MapPage.total_duration = totalDuration;
+
+    return {'totalDistance': totalDistance, 'totalDuration': totalDuration};
+  }
+
+  getNearLocationAddress() async {
+    String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS_AKHA'].toString();
+    // String apiKey = dotenv.env['GOOGLE_MAPS_API_KEYS'].toString(); // udah gabisa
+    GooglePlace googlePlace = GooglePlace(apiKey);
+
+    var result = await googlePlace.search
+        .getNearBySearch(
+          Location(lat: MapPage.userLatitude, lng: MapPage.userLongitude),
+          30,
+          language: MapPage.isIndonesianSelected ? "id" : "en",
+        )
+        .timeout(const Duration(seconds: 50)); // Increase timeout duration
+
+    if (result != null) {
+      print("near loca ${result.results![1].name}");
+      MapPage.nearLocationAddress = result.results![1].name!;
+    }
+    print("near location add ${MapPage.nearLocationAddress}");
   }
 
   int stepIndex = 0;

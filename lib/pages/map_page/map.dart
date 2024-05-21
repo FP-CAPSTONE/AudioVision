@@ -45,6 +45,8 @@ class MapPage extends StatefulWidget {
   static double panelHeightClosed = 0.0;
   static double panelHeightOpen = 0.0;
 
+  static String nearLocationAddress = '';
+
   static NearBySearchResponse? nearbyLocationResponse;
   findNearbyLocation() async {
     try {
@@ -60,6 +62,7 @@ class MapPage extends StatefulWidget {
           .timeout(const Duration(seconds: 50)); // Increase timeout duration
       if (result != null) {
         for (var i = 1; i < 5; i++) {
+          // result.results[0].formattedAddress; // get place address name
           String placeId = result!.results![i].placeId ?? "Null";
 
           final details = await googlePlace.details.get(placeId);
@@ -160,6 +163,8 @@ class MapPage extends StatefulWidget {
   static Set<Marker> markers = {};
 
   static int totalDurationToDestination = 0;
+  static double total_distance = 0.0;
+  static int total_duration = 0;
   static String destinationLocationName = "";
 
   static double compassHeading = 0;
@@ -1087,6 +1092,8 @@ class _MapPageState extends State<MapPage> {
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void addDestination(String placeId) async {
+    NavigateMethod().getNearLocationAddress();
+
     MapPage.googleMapDetail['photoReference'] =
         []; // remove all photo in here if any
     final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
@@ -1549,7 +1556,10 @@ class _MapPageState extends State<MapPage> {
           ShareLocation.shareUserLocation(
             LatLng(MapPage.userLatitude, MapPage.userLongitude),
             MapPage.destinationCoordinate,
+            MapPage.total_distance,
+            MapPage.total_duration,
             MapPage.destinationLocationName,
+            MapPage.nearLocationAddress,
           );
         } else {
           Get.to(const LoginPage());
@@ -1722,7 +1732,10 @@ class _MapPageState extends State<MapPage> {
                       ShareLocation.shareUserLocation(
                         LatLng(MapPage.userLatitude, MapPage.userLongitude),
                         MapPage.destinationCoordinate,
+                        MapPage.total_distance,
+                        MapPage.total_duration,
                         MapPage.destinationLocationName,
+                        MapPage.nearLocationAddress,
                       );
                     } else {
                       TextToSpeech.speak(
