@@ -31,6 +31,7 @@ class AuthService {
       final token = userData['token'];
       userName = userData['userName'];
       userId = userData['userId'].toString();
+      print("userToken $token");
       // userEmail = userData['userEmail'].toString();
 
       isAuthenticate = token != null;
@@ -48,8 +49,7 @@ class AuthService {
       print("login testt$email");
       var response = await http.post(
         Uri.parse("${apiUrl}auth/login"),
-        body:
-            jsonEncode({"email": "$email@example.com", "password": password}),
+        body: jsonEncode({"email": "$email@example.com", "password": password}),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -71,6 +71,8 @@ class AuthService {
           'userName': name,
           'userEmail': email,
         });
+
+        print("userData $userData");
 
         prefs.setString('userData', userData);
 

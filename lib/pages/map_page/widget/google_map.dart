@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class GoogleMapWidget extends StatefulWidget {
   final String mapstyle;
 
-   GoogleMapWidget({ required this.mapstyle});
+  GoogleMapWidget({required this.mapstyle});
   @override
   _GoogleMapWidgetState createState() => _GoogleMapWidgetState();
 }
@@ -29,7 +29,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
           CameraUpdate.newCameraPosition(MapPage.cameraPosition),
         );
         setState(() {
-          Future.delayed(const Duration(seconds: 1), () {
+          Future.delayed(const Duration(seconds: 2), () {
             const MapPage().findNearbyLocation();
           });
         });

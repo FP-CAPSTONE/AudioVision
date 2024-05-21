@@ -41,6 +41,8 @@ import 'package:vibration/vibration.dart';
 import '../setting_page/setting.dart';
 
 class MapPage extends StatefulWidget {
+  static bool canNotify = true;
+
   static var panelController = PanelController();
   static double panelHeightClosed = 0.0;
   static double panelHeightOpen = 0.0;
@@ -227,6 +229,9 @@ class _MapPageState extends State<MapPage> {
     isLogin();
     print("init");
     _initCompass();
+    // Future.delayed(const Duration(seconds: 2), () {
+    //   const MapPage().findNearbyLocation();
+    // });
 
     DefaultAssetBundle.of(context)
         .loadString("assets/maptheme/custom_map.json")
@@ -1092,8 +1097,6 @@ class _MapPageState extends State<MapPage> {
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
 // add destination when user clck the listview <- SHOULD MOVE TO ANOTHER FILE
   void addDestination(String placeId) async {
-    NavigateMethod().getNearLocationAddress();
-
     MapPage.googleMapDetail['photoReference'] =
         []; // remove all photo in here if any
     final Uint8List markerIcon = await MarkerMethod.getBytesFromAsset(
@@ -1392,10 +1395,9 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  String maneuver = "";
-  String distance = "";
-  String instruction = "";
-  bool canNotify = false;
+  String maneuver = "Loading..";
+  String distance = "Loading..";
+  String instruction = "Loading..";
 
   void routeGuidance() async {
     if (MapPage.isStartNavigate) {
@@ -1423,6 +1425,7 @@ class _MapPageState extends State<MapPage> {
           stepIndex = 0;
           MapPage.markers
               .removeWhere((marker) => marker.markerId.value == "planceName");
+          TextToSpeech.speak("Congratulations you have reach your destination");
         });
       }
     }
@@ -1444,10 +1447,11 @@ class _MapPageState extends State<MapPage> {
     double thresholdDistance2 = 50; // meters
     double thresholdDistance3 = 20; // meters
     double thresholdDistance4 = 10; // meters
-    if (canNotify) {
-      print("canNotify $canNotify");
+    double thresholdDistance5 = 5; // meters
+    if (MapPage.canNotify) {
+      print("canNotify ${MapPage.canNotify}");
 
-      canNotify = false;
+      MapPage.canNotify = false;
       if (distanceToStep <= thresholdDistance) {
         maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
         instruction = MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
@@ -1469,9 +1473,15 @@ class _MapPageState extends State<MapPage> {
         distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
         TextToSpeech.speak("In $roundedDistance meters $instruction");
         stepIndex++;
+      } else if (distanceToStep <= thresholdDistance5) {
+        maneuver = MapPage.allSteps[stepIndex]['maneuver'] ?? 'Continue';
+        instruction = MapPage.allSteps[stepIndex]['instructions'] ?? 'Continue';
+        distance = MapPage.allSteps[stepIndex]['distance'] ?? '0 m';
+        TextToSpeech.speak("$instruction");
+        stepIndex++;
       }
       Future.delayed(const Duration(seconds: 30), () {
-        canNotify = true;
+        MapPage.canNotify = true;
       });
     }
   }
@@ -1501,6 +1511,7 @@ class _MapPageState extends State<MapPage> {
     //     'Do you want to share your location?. To share your location, Share your username to other people. your username is "$userName.split("")" ');
     TextToSpeech.speak(
         'Do you want to share your location?. To share your location, Share your username to other people. your username is "$userName" ');
+
     showDialog(
       context: context,
       builder: (BuildContext context) {

@@ -15,6 +15,10 @@ class NavigateMethod {
     mapController,
     LatLng destination,
   ) {
+    MapPage.canNotify = false;
+    Future.delayed(const Duration(seconds: 5), () {
+      MapPage.canNotify = true;
+    });
     setBrightness(0.2);
     // resetBrightness();
     mapController.animateCamera(
@@ -26,6 +30,9 @@ class NavigateMethod {
         ),
       ),
     );
+    Future.delayed(const Duration(seconds: 3), () {
+      getNearLocationAddress();
+    });
 
     MapPage.isStartNavigate = true;
   }

@@ -107,10 +107,7 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                                     BottomSheetNearLocation
                                         .destinationPlaceId); //     addNearbyMarker did not use here
 
-                                NavigateMethod().startNavigate(
-                                  MapPage.mapController,
-                                  MapPage.destinationCoordinate,
-                                );
+                                // this will fill the steps in mappage
                                 NavigateMethod().getDirection(
                                   LatLng(
                                     MapPage.userLatitude,
@@ -121,8 +118,14 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                                     MapPage.destinationCoordinate.longitude,
                                   ),
                                 );
-
+                                Future.delayed(const Duration(seconds: 3), () {
+                                  NavigateMethod().startNavigate(
+                                    MapPage.mapController,
+                                    MapPage.destinationCoordinate,
+                                  );
+                                });
                                 setState(() {});
+
                                 TextToSpeech.speak(
                                     "Start navigation to $destinationPlaceName");
                               },
@@ -343,7 +346,7 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
     } else {
       // Placeholder for loading skeleton or "Loading..." text
       return Text(
-        "Loading...",
+        "Loading nearby location...",
         style: TextStyle(
           color: color ?? Colors.black, // Use default color if not provided
           fontSize: fontSize ?? 14, // Use default font size if not provided

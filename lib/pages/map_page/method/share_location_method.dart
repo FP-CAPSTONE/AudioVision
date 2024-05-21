@@ -26,7 +26,6 @@ class ShareLocation {
 
 // update shared data
   static bool isShared = false;
-
   static shareUserLocation(
     LatLng userLocation,
     LatLng destinationLocation,
@@ -36,26 +35,33 @@ class ShareLocation {
     String near_location_address,
   ) async {
     isShared = true;
-    final snapshot = await dbRef.child(AuthService.userName.toString()).get();
+    final userRef = dbRef.child(AuthService.userName.toString());
+    final snapshot = await userRef.get();
 
-    if (!snapshot.exists) {
-      // ID does not exist, set the data
-      dbRef.child(AuthService.userName.toString()).set({
-        'name': AuthService.userName,
-        'totalDistance': total_distance,
-        'totalDuration': total_duration,
-        'userLocation': {
-          "lat": userLocation.latitude,
-          "long": userLocation.longitude
-        },
-        'nearLocationAddress': near_location_address,
-        'destinationLocationName': destinationLocationName,
-        'destinationLocation': {
-          "lat": destinationLocation.latitude,
-          "long": destinationLocation.longitude
-        },
-      });
+    if (snapshot.exists) {
+      // ID exists, remove the existing data
+      await userRef.remove();
     }
+
+    // Set the new data
+    await userRef.set({
+      'name': AuthService.userName,
+      'totalDistance': total_distance,
+      'totalDuration': total_duration,
+      'userLocation': {
+        "lat": userLocation.latitude,
+        "long": userLocation.longitude
+      },
+      'nearLocationAddress': near_location_address,
+      'destinationLocationName': destinationLocationName,
+      'destinationLocation': {
+        "lat": destinationLocation.latitude,
+        "long": destinationLocation.longitude
+      },
+    });
+
+    TextToSpeech.speak(
+        "start sharing your location, share your username with other people");
   }
 
   static updateUserLocationToFirebase(LatLng userLocation) {

@@ -1,8 +1,12 @@
+import 'package:audiovision/pages/auth_page/login.dart';
+import 'package:audiovision/pages/auth_page/services/auth_services.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/pages/map_page/method/navigate_method.dart';
 import 'package:audiovision/pages/map_page/method/share_location_method.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class CustomBottomSheet extends StatefulWidget {
   static Map<String, dynamic> totals = {};
@@ -114,8 +118,22 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                                                 0.15,
                                         child: ElevatedButton(
                                             onPressed: () {
-                                              widget.shareLocationCallback(
-                                                  context);
+                                              if (!AuthService.isAuthenticate) {
+                                                Get.to(const LoginPage());
+                                                TextToSpeech.speak(
+                                                    "You are not logged in. To share your location, you must log in first.");
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                        'Please enter the Username.'),
+                                                  ),
+                                                );
+                                                return;
+                                              } else {
+                                                widget.shareLocationCallback(
+                                                    context);
+                                              }
                                             },
                                             style: ButtonStyle(
                                               backgroundColor:
