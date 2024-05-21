@@ -15,7 +15,8 @@ class _LoginPageState extends State<LoginPage> {
   //     TextEditingController(text: "kminchelle");
   // TextEditingController _passwordController =
   //     TextEditingController(text: "0lelplR");
-  final TextEditingController _emailController = TextEditingController(text: "boben");
+  final TextEditingController _emailController =
+      TextEditingController(text: "boben");
   final TextEditingController _passwordController =
       TextEditingController(text: "passwordsaya");
 
@@ -26,8 +27,8 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true; // Show loading indicator
     });
 
-    await AuthService.login(
-        _emailController.text.toString(), _passwordController.text.toString());
+    await AuthService.login(_emailController.text.toString(),
+        _passwordController.text.toString(), context);
 
     setState(() {
       _isLoading = false; // Hide loading indicator
@@ -81,11 +82,11 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _isLoading
-                    ? null
-                    : _login,
+                onPressed: _isLoading ? null : _login,
                 style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Colors.black), // Disable button if isLoading is true
+                    foregroundColor: Colors.white,
+                    backgroundColor:
+                        Colors.black), // Disable button if isLoading is true
                 child: const Text('Login'),
               ),
               const SizedBox(height: 10),
@@ -93,7 +94,8 @@ class _LoginPageState extends State<LoginPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const RegisterPage()),
+                    MaterialPageRoute(
+                        builder: (context) => const RegisterPage()),
                   );
                 },
                 child: const Text(

@@ -1,6 +1,7 @@
 import 'package:audiovision/pages/auth_page/login.dart';
 import 'package:audiovision/pages/map_page/map.dart';
 import 'package:audiovision/utils/text_to_speech.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -44,7 +45,7 @@ class AuthService {
   }
 
   static String apiUrl = "https://audiovision-413417.as.r.appspot.com/";
-  static login(String email, password) async {
+  static login(String email, password, BuildContext context) async {
     try {
       print("login testt$email");
       var response = await http.post(
@@ -81,7 +82,13 @@ class AuthService {
         Get.to(const MapPage());
         print("Login successfuly");
       } else {
-        TextToSpeech.speak('Login Faild');
+        TextToSpeech.speak('Login Failed, incorrect username or passwrod ');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Login Failed, incorrect username or passwrod'),
+          ),
+        );
         print("Failed");
       }
     } catch (e) {
@@ -89,7 +96,7 @@ class AuthService {
     }
   }
 
-  static register(String name, email, password) async {
+  static register(String name, email, password, BuildContext context) async {
     try {
       var response = await http.post(
         Uri.parse("${apiUrl}auth/register"),
@@ -129,7 +136,15 @@ class AuthService {
         TextToSpeech.speak('Registration Success, Account create successfuly');
         Get.to(const MapPage());
       } else {
-        TextToSpeech.speak('Registration Faild');
+        TextToSpeech.speak(
+            'Registration Failed, username is taken. try to use another username ');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+                'Registration Failed, username is taken. try to use another username'),
+          ),
+        );
       }
     } catch (e) {
       print(e.toString());

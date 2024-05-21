@@ -84,7 +84,7 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                                 style: TextStyle(
                                   color: Colors.grey,
                                   fontSize:
-                                      MediaQuery.of(context).size.width * 0.028,
+                                      MediaQuery.of(context).size.width * 0.032,
                                   overflow: TextOverflow.visible,
                                 ),
                               ),
@@ -200,10 +200,10 @@ class _BottomSheetNearLocationState extends State<BottomSheetNearLocation> {
                     ),
 
                     itemExtent: MediaQuery.of(context).size.height * 0.1,
-                    offAxisFraction: 1, // 0
+                    offAxisFraction: 0.5, // 0
                     magnification: 1, // 1
-                    diameterRatio: 0.1,
-                    squeeze: 1,
+                    diameterRatio: 30,
+                    squeeze: 1.4,
 
                     useMagnifier: false,
                     scrollController:

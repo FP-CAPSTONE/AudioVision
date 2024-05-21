@@ -16,7 +16,7 @@ class NavigateMethod {
     LatLng destination,
   ) {
     MapPage.canNotify = false;
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(seconds: 2), () {
       MapPage.canNotify = true;
     });
     setBrightness(0.2);

@@ -10,7 +10,8 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _nameController = TextEditingController(text: "boben");
+  final TextEditingController _nameController =
+      TextEditingController(text: "boben");
   // TextEditingController _emailController =
   //     TextEditingController(text: "abdul.saipi@student.president.ac.id");
   final TextEditingController _passwordController =
@@ -29,6 +30,7 @@ class _RegisterPageState extends State<RegisterPage> {
       _nameController.text.toString(),
       _nameController.text.toString(),
       _passwordController.text.toString(),
+      context,
     );
 
     setState(() {
@@ -95,7 +97,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.black),
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.black),
                   child: const Text('Register'),
                 ),
                 const SizedBox(height: 10),
