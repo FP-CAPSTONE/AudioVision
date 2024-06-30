@@ -380,12 +380,14 @@ class _MapPageState extends State<MapPage> {
         maxHeight: MapPage.panelHeightOpen,
         body: GestureDetector(
           onDoubleTap: () {
+            MapPage.canNotify = false;
+
             TextToSpeech.speak("Audio command activated, say something");
             _isListening = false;
             _text = '';
             Vibration.vibrate();
 
-            Timer(Duration(seconds: MapPage.isIndonesianSelected ? 4 : 3), () {
+            Timer(Duration(seconds: MapPage.isIndonesianSelected ? 5 : 3), () {
               audioCommand();
             });
           },
@@ -1640,7 +1642,6 @@ class _MapPageState extends State<MapPage> {
             _debounce = Timer(const Duration(milliseconds: 1000), () async {
               if (_text.contains("go") ||
                   _text.contains("going") ||
-                  _text.contains("navigate") ||
                   _text.contains("pergi")) {
                 print("go");
 
@@ -1676,6 +1677,7 @@ class _MapPageState extends State<MapPage> {
                     "To exit navigate. you have to start navigate first");
               } else if (_text.contains("start") ||
                   _text.contains("navigate") ||
+                  _text.contains("navigation") ||
                   _text.contains("mulai") ||
                   _text.contains("navigasi")) {
                 if (MapPage.destinationCoordinate.latitude != 0) {
@@ -1697,6 +1699,10 @@ class _MapPageState extends State<MapPage> {
                       "to start navigate. you have to set your destination first. To set the destination, you need to search your destination using the search bar and select where you want to go. or, you can double tap the screen to activate the audio command. Say 'navigate destination' or 'going destination' to set your destination");
                 }
               } else if (_text.contains("in front") ||
+                  _text.contains("ada apa") ||
+                  _text.contains("apa yang") ||
+                  _text.contains("yang ada") ||
+                  _text.contains("rintangan") ||
                   _text.contains("depan")) {
                 ObjectDetector().checkInFront();
                 // Iterate through the detection result to count objects in front
@@ -1802,7 +1808,7 @@ class _MapPageState extends State<MapPage> {
         _text = ""; // Clear the recognized text
       });
       _speech.stop();
-
+      MapPage.canNotify = true;
       print("Speech recognition timeout");
     });
   }
@@ -1817,6 +1823,7 @@ class _MapPageState extends State<MapPage> {
       });
       _speech.stop();
       print("Speech recognition timeout");
+      MapPage.canNotify = true;
     });
   }
 

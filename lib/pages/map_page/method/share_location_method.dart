@@ -135,8 +135,8 @@ class ShareLocation {
     if (snapshot.exists) {
       trackingUserName = userName;
       Navigator.of(context).pop(); // trackClose the dialog
-      MapPage.panelHeightClosed = MediaQuery.of(context).size.height * 0.3;
-      MapPage.panelHeightOpen = MediaQuery.of(context).size.height * 0.3;
+      MapPage.panelHeightClosed = MediaQuery.of(context).size.height * 0.35;
+      MapPage.panelHeightOpen = MediaQuery.of(context).size.height * 0.35;
       getOtherUserLocation();
     } else {
       TextToSpeech.speak(

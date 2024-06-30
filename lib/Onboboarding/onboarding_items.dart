@@ -31,8 +31,7 @@ class OnboardingItems {
         image: "assets/image/vibration1.gif"),
     OnboardingInfo(
         title: "User Guide",
-        descriptions:
-            "- Say going, or go, or navigate to go to your destination \n"
+        descriptions: "- Say going, or go to set to your destination \n"
             "- Say start navigate to start your route \n"
             "- Say stop navigate to stop your route \n"
             "- Say share to share your location\n",

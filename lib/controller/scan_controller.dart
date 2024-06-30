@@ -159,8 +159,7 @@ class ScanController extends GetxController {
     'chair',
     'refrigerator',
     'bed',
-    'couch',
-    'laptop'
+    'couch'
   ];
 
   // do the object detection each frame got from the

@@ -19,7 +19,7 @@ class NavigateMethod {
     Future.delayed(const Duration(seconds: 2), () {
       MapPage.canNotify = true;
     });
-    setBrightness(0.2);
+    setBrightness(0.1);
     // resetBrightness();
     mapController.animateCamera(
       CameraUpdate.newCameraPosition(
@@ -30,7 +30,7 @@ class NavigateMethod {
         ),
       ),
     );
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 5), () {
       getNearLocationAddress();
     });
 
