@@ -1,8 +1,26 @@
-# 🎓 AudioVision – A Voice-Based Navigation App for the Visually Impaired 🗺️🎙️
+<div align="center">
+  <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/remove-bg-logo.png" alt="AudioVision Logo" width="150" />
 
-AudioVision is our **Final Year Capstone Project** developed at **President University**, aimed at enhancing **mobility, safety, and independence** for visually impaired individuals through smart voice-based navigation and real-time object detection.
+  # 🎓 AudioVision
 
-Built using **Flutter**, the application integrates **Google Maps**, **YOLO object detection**, and **speech technologies** to deliver an intuitive and accessible navigation experience.
+  **A Voice-Based Navigation App for the Visually Impaired 🗺️🎙️**
+  
+  [![Website](https://img.shields.io/badge/Website-Live-brightgreen.svg?style=flat-square)](https://FP-CAPSTONE.github.io/audio-vision-web/)
+  [![Flutter](https://img.shields.io/badge/Flutter-Cross--platform-blue.svg?style=flat-square)](https://flutter.dev/)
+  [![YOLO](https://img.shields.io/badge/AI-YOLO-orange.svg?style=flat-square)](https://pjreddie.com/darknet/yolo/)
+
+  <p align="center">
+    AudioVision is our Final Year Capstone Project developed at President University, aimed at enhancing mobility, safety, and independence for visually impaired individuals through smart voice-based navigation and real-time object detection.
+  </p>
+</div>
+
+---
+
+## 🌐 Official Website & Web App
+
+Check out our beautifully designed landing page and web UI showcasing the AudioVision experience:
+
+👉 **[Visit the AudioVision Website](https://FP-CAPSTONE.github.io/audio-vision-web/)**
 
 ---
 
@@ -16,27 +34,34 @@ Whether navigating city streets, identifying nearby landmarks, or avoiding obsta
 
 ## 🔥 Key Features
 
-- ✅ **Voice-Guided Navigation**  
-  Real-time audio directions to guide users safely through their environment.
+- 🚶‍♂️ **Voice-Guided Route Guidance**  
+  Turn-by-turn auditory directions to guide users safely to their destination.
 
-- ✅ **Object & Obstacle Detection**  
-  Uses computer vision (YOLO) to detect obstacles like poles, people, and vehicles and provides immediate audio feedback.
+- 👁️ **Real-Time Object & Obstacle Detection**  
+  Uses advanced computer vision (YOLO) to detect obstacles like poles, people, and vehicles, providing immediate audio feedback to avoid collisions.
 
-- ✅ **Essential Location Recognition**  
+- 📳 **Haptic Feedback & Audio Vibrations**  
+  Multi-sensory vibrations give users physical feedback and spatial awareness during navigation.
+
+- 📍 **Location Tracking & Share Your Journey**  
+  Know exactly where you are and easily share your real-time location with friends and family for added safety and peace of mind.
+
+- 🗣️ **Multi-Language Support & Voice Commands**  
+  Speak your language naturally. AudioVision understands you globally with automated voice commands, eliminating the need for visual interaction.
+
+- 🏢 **Essential Location Recognition**  
   Identifies public facilities such as bus stops, buildings, and other landmarks.
-
-- ✅ **Voice Command Interaction**  
-  Allows users to search for locations and routes using simple voice input, eliminating the need for visual interaction.
 
 ---
 
 ## 🛠️ Technologies Used
 
 - **Flutter** – Cross-platform mobile app development
+- **React & Tailwind CSS** – Stunning, premium landing page and Web UI
 - **Google Maps & Directions API** – Navigation and route guidance
 - **YOLO (You Only Look Once)** – Real-time object detection
 - **Speech-to-Text & Text-to-Speech** – For voice command interaction and audio feedback
-- **Firebase** – (Optional) For user data storage and analytics
+- **Firebase** – User data storage and real-time analytics
 
 ---
 
@@ -48,14 +73,10 @@ To develop an **inclusive, accessible, and intelligent navigation solution** tha
 
 ## 📽️ Demo & Resources
 
-- 📘 **User Guide:**  
-  [AudioVision User Manual (Google Docs)](https://docs.google.com/document/d/1SOcSMDXuP9lyCfzqo7yM3vEEQ1vDpc1XKW4IgGBkk-0/edit?usp=sharing)
-
-- 🎥 **Demo Video:**  
-  [Watch on YouTube](https://youtu.be/WO8DyqMLm74?si=TicyK5jmDLdcjo-M)
-
-- 📢 **Project Introduction:**  
-  [![AudioVision Thumbnail](./assets-readme/audiovision.png)](https://www.linkedin.com/posts/abdulmannansaipi_capstoneproject-presidentuniversity-innovation-activity-7232926344815206400-565k?utm_source=share&utm_medium=member_desktop)
+- 🌐 **Live Website:** [Explore AudioVision Web](https://FP-CAPSTONE.github.io/audio-vision-web/)
+- 📘 **User Guide:** [AudioVision User Manual (Google Docs)](https://docs.google.com/document/d/1SOcSMDXuP9lyCfzqo7yM3vEEQ1vDpc1XKW4IgGBkk-0/edit?usp=sharing)
+- 🎥 **Demo Video:** [Watch on YouTube](https://youtu.be/WO8DyqMLm74?si=TicyK5jmDLdcjo-M)
+- 📢 **Project Introduction:** [Read on LinkedIn](https://www.linkedin.com/posts/abdulmannansaipi_capstoneproject-presidentuniversity-innovation-activity-7232926344815206400-565k)
 
 ---
 
@@ -74,6 +95,3 @@ This project was developed by a passionate team of two students as part of our B
 ## 💬 Feedback & Collaboration
 
 This project is still evolving! We welcome ideas, feedback, or collaboration opportunities from developers, researchers, NGOs, or accessibility advocates. Feel free to reach out!
-
----
-
