@@ -34,16 +34,11 @@ Whether navigating city streets, identifying nearby landmarks, or avoiding obsta
 
 ## 📸 App Screenshots
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/welcome-onboarding-introduction%20screen.webp" width="200" style="border-radius: 10px; margin: 5px;" />
-  <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-route-guidance.jpg" width="200" style="border-radius: 10px; margin: 5px;" />
-  <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-realtime-object-detection.webp" width="200" style="border-radius: 10px; margin: 5px;" />
-</p>
-<p align="center">
-  <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-audio-vibrations-feedbacl.webp" width="200" style="border-radius: 10px; margin: 5px;" />
-  <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-location-tracking.jpg" width="200" style="border-radius: 10px; margin: 5px;" />
-  <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-share-location.jpg" width="200" style="border-radius: 10px; margin: 5px;" />
-</p>
+| Onboarding & Welcome | Route Guidance | Object Detection |
+| :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/welcome-onboarding-introduction%20screen.webp" width="200" style="border-radius: 10px;" /> | <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-route-guidance.jpg" width="200" style="border-radius: 10px;" /> | <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-realtime-object-detection.webp" width="200" style="border-radius: 10px;" /> |
+| **Haptic Feedback** | **Location Tracking** | **Share Journey** |
+| <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-audio-vibrations-feedbacl.webp" width="200" style="border-radius: 10px;" /> | <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-location-tracking.jpg" width="200" style="border-radius: 10px;" /> | <img src="https://raw.githubusercontent.com/FP-CAPSTONE/audio-vision-web/main/public/assets/feat-share-location.jpg" width="200" style="border-radius: 10px;" /> |
 
 ---
 
